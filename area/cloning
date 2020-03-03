@@ -1,0 +1,354 @@
+#AREA   Cloning Station~
+
+
+
+#AUTHOR Durga~
+
+#RANGES
+0 103 0 103
+$
+
+#FLAGS
+0
+
+#ECONOMY 0 130045000
+
+#MOBILES
+#10000
+firstmob~
+a newly created firstmob~
+Some god abandoned a newly created firstmob here.
+~
+~
+1 0 0 Z
+1 0 0 0d0+0 0d0+0
+0 0
+8 8 0
+10 10 10 10 10 10 10
+0 0 0 0 0
+0 0 0 0 1 1 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+#10001
+doctor Bnokkt~
+Doctor Bnokkt~
+Doctor Bnokkt is the head of the cloning facilities.
+~
+~
+33554435 0 0 Z
+50 0 -25 10d10+500 5d4+2
+1000 0
+8 8 1
+13 13 13 13 13 13 13
+0 0 0 0 0
+0 0 0 0 1 1 0
+10 10 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+#10002
+c-7hp64 personal assistant droid~
+a c-7hp64 personal assistant droid~
+A c-7hp64 personal assistant droid is here.
+~
+~
+67108867 0 0 Z
+50 0 -25 10d10+5000 1d4+2
+0 0
+8 8 0
+10 10 10 10 10 10 10
+0 0 0 0 0
+0 0 0 0 1 1 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+> death_prog 100~
+mpoload 10003
+~
+|
+#10003
+facility guard~
+a facility guard~
+A Facility guard stands at attention.
+~
+~
+3 0 0 Z
+100 0 -150 20d10+1000 10d4+2
+0 0
+8 8 0
+13 13 13 13 13 13 13
+0 0 0 0 0
+0 0 0 0 1 1 0
+20 20 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+#10009
+clerk~
+a clerk~
+A clerk is here to take your payment.
+~
+~
+1 0 0 Z
+1 0 0 0d0+0 0d0+0
+0 0
+8 8 0
+10 10 10 10 10 10 10
+0 0 0 0 0
+0 0 0 0 1 1 0
+0 0 0 0 0 0 0 0
+0 0 0 0 0 0 0 0
+#0
+
+
+#OBJECTS
+#10000
+bookend~
+a newly created bookend~
+Some god dropped a newly created bookend here.~
+~
+13 0 0
+0 0 0 0
+1 0 0
+#10001
+sparti cloning cylinder~
+a sparti cloning cylinder~
+A sparti cloning cylinder is here.~
+~
+13 0 0
+0 0 0 0
+1 0 0
+#10002
+desc~
+a newly created desc~
+Some god dropped a newly created desc here.~
+~
+13 0 0
+0 0 0 0
+1 0 0
+#10003
+facility deed ~
+the deed~
+OOooOOoo the deed to the cloning facilities is here.~
+~
+84 0 0
+0 0 0 0
+1 0 0
+#10009
+sparti cloning cylinder~
+a newly created sparti cloning cylinder~
+Some god dropped a newly created sparti cloning cylinder here.~
+~
+13 0 0
+0 0 0 0
+1 0 0
+#0
+
+
+#ROOMS
+#10000
+Inside a Sparti Cloning Cylinder~
+You wake up as if from a long sleep. Slowly your mind begins to fill with
+the memories of a life you never lived. At first they are distant
+memories. Foreign, unattached, but slowly their intensity increases
+overwhelming you with emotions from a life you never lived. Pain. Love.
+Sorrow. Joy. Tears swell up in your eyes as you begin to sob, overwhelemed
+by you existance and saddened by the love of a life you never lived.   
+ 
+Take a few moments to collect your thoughts. Then "leave" the cylinder and
+begin a new life.
+ 
+* Don't forget... the first thing you should do is go clone yourself
+again... you might regret it if you don't...
+ 
+~
+0 8651780 1
+D10
+~
+~
+264192 -1 10009
+S
+#10001
+Pay Counter~
+After the long wait you are finally here. Now all that is left to do is to
+pay the clerk, sign a few papers and give a tissue sample. (To do this
+type "clone")
+~
+0 1036 1
+D3
+~
+~
+0 -1 10007
+R M 0 10009 1 10001
+S
+#10002
+In a Small Sterile Room~
+This small room smells of strongly of antiseptic. There is a large flat
+bench which is covered in removeable tissue. You assume that this is where
+blood and tissues samples are taken as well as where new clones are
+examined. There are several medical insterments lining the walls. Some you
+can't even imagine what the might be used for.
+~
+0 1036 1
+D3
+~
+~
+0 -1 10003
+S
+#10003
+A Clinic Hallway~
+This small hallway leads from the lobby of the facilities to a set of
+locked blastdoors. To the east is a small docters office. To the west is a
+large room with lots of excercise equipment.
+~
+0 1036 1
+D1
+~
+~
+0 -1 10002
+D2
+~
+~
+0 -1 10007
+D3
+~
+~
+0 -1 10004
+S
+#10004
+Excercise Room~
+This room is filled with various excercise equipment used to help young
+clones get into shape as they first begin using their bodies after a long
+gestation and an accelerated growth period. All of the equipment has gages
+to monitor the progress and vital signs of the clones.
+~
+0 1036 1
+D0
+~
+~
+0 -1 10005
+D1
+~
+~
+0 -1 10003
+D2
+~
+~
+0 -1 10009
+S
+#10005
+Rest Area~
+This area of the comlex is set up as a small lounge. There are several
+couches and chairs scattered about the room along with a few low tables. A
+curtain at the back of the room hides a few cots to rest in. 
+ 
+You may quit and reenter the game from here.
+ 
+~
+0 8389644 1
+D2
+~
+~
+0 -1 10004
+S
+#10006
+A Small Landing Area~
+You stand upon a small landing pad on a relatively unknown planet somewhere
+in the core worlds. The planet is mostly covered in jungle. It apears the
+only artificial structure is a small building to the north of here. 
+~
+0 1052 1
+D0
+~
+~
+0 -1 10007
+D1
+~
+~
+0 -1 32297
+S
+#10007
+The cloning Facilities~
+The visible part of this building is small and bunker like but there must
+be much more too it below ground - cloning takes alot of energy. The
+owners of this establishment have salvaged a couple of sparty cloning
+cylinders that were left over from the clone wars and have turned them
+into a small but very profitable business. They make money cloning people
+who believe that if their body lives on after their death than so do they.
+~
+0 1036 1
+D0
+~
+~
+0 -1 10003
+D1
+~
+~
+0 -1 10008
+D2
+~
+~
+0 -1 10006
+D3
+~
+~
+0 -1 10010
+S
+#10008
+Standing in Line~
+You stand in a long line waiting for your turn to be cloned.
+There is nothing to do but stand here and wait.
+~
+0 1036 1
+D3
+~
+~
+0 -1 10007
+> rand_prog 100~
+mpechoat $n You finally make it to the front of the line.
+mpechoaround $n $n Moves to the front of the line.
+mptransfer $n 10001
+~
+|
+S
+#10009
+The Cloning Chamber~
+This large room contains contains the tops of some cloning cylinders but
+from what you have heard there must be more to them bellow this level.
+Aside from the cylinders which have many pipes and wires leading from them
+this room is empty. There seems to be no way into the cylinders other than
+going back and standing in line.
+~
+0 1036 1
+D0
+~
+~
+0 -1 10004
+R O 0 10001 1 10009
+S
+#10010
+The Office~
+This large office contains a very fine wood desk as well as several
+expensive looking paintings. There is a small tree in one corner of the
+room and a large bookcase on one wall.
+~
+0 0 1
+D1
+~
+~
+0 -1 10007
+R M 0 10001 1 10010
+R M 0 10002 1 10010
+R M 0 10003 1 10010
+S
+#0
+
+
+#SHOPS
+0
+
+
+#REPAIRS
+0
+
+
+#SPECIALS
+S
+
+
+#$

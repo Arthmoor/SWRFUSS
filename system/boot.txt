@@ -1,0 +1,12 @@
+[*****] BOOT: ---------------------[ Boot Log ]--------------------
+[*****] BOOT: load_room_reset: limbo.are (1) 'M': mobile 1002 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29068 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29068 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: adari (1) 'M': mobile 29069 doesn't exist.
+[*****] BOOT: load_room_reset: mon_cal.are (1) 'O': object 21500 doesn't exist.
