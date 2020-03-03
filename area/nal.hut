@@ -1,101 +1,102 @@
-#AREA   Nal Hutta~
+#FUSSAREA
+#AREADATA
+Version      1
+Name         Nal Hutta~
+Author       Ackbar~
+Ranges       0 0 0 0
+Economy      0 6250000
+ResetFreq    15
+#ENDAREADATA
 
-
-
-#AUTHOR Ackbar~
-
-#RANGES
-0 0 0 0
-$
-
-#FLAGS
-0
-
-#ECONOMY 0 6250000
-
-#MOBILES
-#21500
-mobhead~
-a newly created mobhead~
-Leave this reset until you make a new one. If you don't have at least one bad things will happen.
+#MOBILE
+Vnum       21500
+Keywords   mobhead~
+Short      a newly created mobhead~
+Long       Leave this reset until you make a new one. If you don't have at least one bad things will happen.
 ~
-~
-1 0 0 Z
-1 0 0 0d0+0 0d0+0
-0 0
-8 8 0
-10 10 10 10 10 10 10
-0 0 0 0 0
-0 0 0 0 1 1 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-#21799
-mobtail~
-a newly created mobtail~
-Some god abandoned a newly created mobtail here.
-~
-~
-1 0 0 Z
-1 0 0 0d0+0 0d0+0
-0 0
-8 8 0
-10 10 10 10 10 10 10
-0 0 0 0 0
-0 0 0 0 1 1 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-#0
+Race       Human~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc~
+Stats1     0 1 0 0 0 0
+Stats2     0 0 0
+Stats3     0 0 0
+Stats4     0 0 0 0 0
+Attribs    10 10 10 10 10 10 10 0
+Saves      0 0 0 0 0
+Speaks     common~
+Speaking   common~
+#ENDMOBILE
 
+#MOBILE
+Vnum       21799
+Keywords   mobtail~
+Short      a newly created mobtail~
+Long       Some god abandoned a newly created mobtail here.
+~
+Race       Human~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc~
+Stats1     0 1 0 0 0 0
+Stats2     0 0 0
+Stats3     0 0 0
+Stats4     0 0 0 0 0
+Attribs    10 10 10 10 10 10 10 0
+Saves      0 0 0 0 0
+Speaks     common~
+Speaking   common~
+#ENDMOBILE
 
-#OBJECTS
-#21500
-board terminal~
-Universe Construction Board~
-Universe Construction Board rests on the wall here.~
-~
-13 0 0
-0 0 0 0
-1 0 0
-#21501
-slot machine ~
-A TK_9U Slot Machine~
-&g A Tk_9U slot machine rest on the wall.~
-~
-37 1 0
-0 0 0 0
-1 0 0
-> pull_prog ~
-mpecho Bing .bang Baong!
-mpecho You see small pictures of rotate in circles showing up in various
-forms.
-~
-> push_prog ~
-mpecho You have just reset the Machine! Pull for Money!
-~
-|
-#21799
-bookend~
-a bookend~
-A bookend is here.~
-~
-13 0 0
-0 0 0 0
-1 0 0
-#0
+#OBJECT
+Vnum     21500
+Keywords board terminal~
+Type     trash~
+Short    Universe Construction Board~
+Long     Universe Construction Board rests on the wall here.~
+Values   0 0 0 0 0 0
+Stats    1 0 0 0 0
+#ENDOBJECT
 
+#OBJECT
+Vnum     21501
+Keywords slot machine ~
+Type     lever~
+Short    A TK_9U Slot Machine~
+Long     &g A Tk_9U slot machine rest on the wall.~
+Flags    glow~
+Values   0 0 0 0 0 0
+Stats    1 0 0 0 0
+#ENDOBJECT
 
-#ROOMS
-#21500
-Begiing of zone Nal HUTTA~
-I will start building with this number ...Durga please separtae the world
+#OBJECT
+Vnum     21799
+Keywords bookend~
+Type     trash~
+Short    a bookend~
+Long     A bookend is here.~
+Values   0 0 0 0 0 0
+Stats    1 0 0 0 0
+#ENDOBJECT
+
+#ROOM
+Vnum     21500
+Name     Begiing of zone Nal HUTTA~
+Sector   city~
+Flags    nomob~
+Desc     I will start building with this number ...Durga please separtae the world
 form this point!
 ~
-0 4 1
-R M 0 21500 1 21500
-S
-#21501
-A Landing Clearing~
-A clearing in the large terrestrial planet of Nal Hutta. There are some
+Reset M 0 21500 1 21500
+#ENDROOM
+
+#ROOM
+Vnum     21501
+Name     A Landing Clearing~
+Sector   city~
+Desc     A clearing in the large terrestrial planet of Nal Hutta. There are some
 burn marks from transport vehicle exahust on the ground. From the tracks
 and burn circles you can tell this area recives alot of trafic. Looking up
 into the sky you can see the nearby moon, Nar Shada and what appears to be
@@ -103,107 +104,122 @@ lights form the eciting citys of above. Looking up to the west you can see
 a red outline of a nearby gas cloud. There is a wide path heading toward
 the east and one to the west from here. 
 ~
-0 0 1
-D1
-~
-~
-0 -1 21502
-S
-#21502
-Floating in a void~
-~
-0 0 1
-D2
-~
-~
-0 -1 21503
-D3
-~
-~
-0 -1 21501
-S
-#21503
-Floating in a void~
-~
-0 0 1
-D0
-~
-~
-0 -1 21502
-S
-#21504
-Floating in a void~
-~
-0 4 1
-S
-#21505
-Floating in a void~
-~
-0 4 1
-S
-#21506
-Floating in a void~
-~
-0 4 1
-S
-#21507
-Floating in a void~
-~
-0 4 1
-S
-#21508
-Floating in a void~
-~
-0 4 1
-S
-#21509
-Floating in a void~
-~
-0 4 1
-S
-#21510
-Floating in a void~
-~
-0 4 1
-S
-#21511
-Floating in a void~
-~
-0 4 1
-S
-#21512
-Floating in a void~
-~
-0 4 1
-S
-#21513
-Floating in a void~
-~
-0 4 1
-S
-#21514
-Floating in a void~
-~
-0 4 1
-S
-#21515
-Floating in a void~
-~
-0 4 1
-S
-#0
+#EXIT
+Direction east~
+ToRoom    21502
+#ENDEXIT
 
+#ENDROOM
 
-#SHOPS
-0
+#ROOM
+Vnum     21502
+Name     Floating in a void~
+Sector   city~
+#EXIT
+Direction south~
+ToRoom    21503
+#ENDEXIT
 
+#EXIT
+Direction west~
+ToRoom    21501
+#ENDEXIT
 
-#REPAIRS
-0
+#ENDROOM
 
+#ROOM
+Vnum     21503
+Name     Floating in a void~
+Sector   city~
+#EXIT
+Direction north~
+ToRoom    21502
+#ENDEXIT
 
-#SPECIALS
-S
+#ENDROOM
 
+#ROOM
+Vnum     21504
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
 
-#$
+#ROOM
+Vnum     21505
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21506
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21507
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21508
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21509
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21510
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21511
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21512
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21513
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21514
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ROOM
+Vnum     21515
+Name     Floating in a void~
+Sector   city~
+Flags    nomob~
+#ENDROOM
+
+#ENDAREA

@@ -64,8 +64,8 @@
 #define MAX_NEST	100
 static OBJ_DATA *rgObjNest[MAX_NEST];
 
-bool write_to_descriptor( DESCRIPTOR_DATA * d, char *txt, int length );
-bool write_to_descriptor_old( int desc, char *txt, int length );
+bool write_to_descriptor( DESCRIPTOR_DATA * d, const char *txt, int length );
+bool write_to_descriptor_old( int desc, const char *txt, int length );
 void update_room_reset( CHAR_DATA *ch, bool setting );
 
 extern ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
@@ -86,7 +86,8 @@ void write_ship( FILE * fp, SHIP_DATA * ship )
     */
    if( ship->shipstate == SHIP_DOCKED )
       return;
-   if( ship->class > SHIP_PLATFORM )
+
+   if( ship->ship_class > SHIP_PLATFORM )
       return;
 
    fprintf( fp, "%s", "#SHIP\n" );
@@ -161,7 +162,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
    if( !str_cmp( word, "SHIPFNAME" ) )
    {
-      char *name = fread_string_nohash( fp );   /* is this right? - Gavin */
+     const char *name = fread_string_nohash( fp ); /* is this right? - Gavin */
       SHIP_DATA *temp_ship = NULL;
 
       for( temp_ship = first_ship; temp_ship; temp_ship = temp_ship->next )
@@ -232,7 +233,7 @@ SHIP_DATA *load_ship( FILE * fp )
             KEY( "Currspeed", ship->currspeed, fread_number( fp ) );
             if( !str_cmp( word, "Currjump" ) )
             {
-               char *temp = fread_string_nohash( fp );
+	      const char *temp = fread_string_nohash( fp );
 
                extract_ship( ship );
                ship->location = 0;
@@ -292,7 +293,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
             if( !str_cmp( word, "Starsystem" ) )
             {
-               char *star_name = fread_string_nohash( fp );
+	      const char *star_name = fread_string_nohash( fp );
                SPACE_DATA *starsystem = starsystem_from_name( star_name );
                DISPOSE( star_name );
                fMatch = TRUE;
@@ -310,7 +311,7 @@ SHIP_DATA *load_ship( FILE * fp )
             KEY( "Torpedos", ship->torpedos, fread_number( fp ) );
             if( !str_cmp( word, "target0" ) )
             {
-               char *temp = fread_string( fp );
+	      const char *temp = fread_string( fp );
                SHIP_DATA *target = get_ship( temp );
 
                ship->target0 = target;
@@ -321,7 +322,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
             if( !str_cmp( word, "target1" ) )
             {
-               char *temp = fread_string( fp );
+	      const char *temp = fread_string( fp );
                SHIP_DATA *target = get_ship( temp );
 
                ship->target1 = target;
@@ -332,7 +333,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
             if( !str_cmp( word, "target2" ) )
             {
-               char *temp = fread_string( fp );
+	      const char *temp = fread_string( fp );
                SHIP_DATA *target = get_ship( temp );
 
                ship->target2 = target;
@@ -516,7 +517,7 @@ void save_world( CHAR_DATA * ch )
 CHAR_DATA *load_mobile( FILE * fp )
 {
    CHAR_DATA *mob = NULL;
-   char *word;
+   const char *word;
    bool fMatch;
    int inroom = 0;
    ROOM_INDEX_DATA *pRoomIndex = NULL;
@@ -598,7 +599,7 @@ CHAR_DATA *load_mobile( FILE * fp )
                else
                {
                   int sn;
-                  char *sname = fread_word( fp );
+                  const char *sname = fread_word( fp );
 
                   if( ( sn = skill_lookup( sname ) ) < 0 )
                   {
@@ -779,7 +780,7 @@ void read_obj_file( char *dirname, char *filename )
       for( ;; )
       {
          char letter;
-         char *word;
+         const char *word;
 
          letter = fread_letter( fp );
          if( letter == '*' )
@@ -872,7 +873,7 @@ void load_world( CHAR_DATA * ch )
    FILE *shipfp;
    char file1[256];
    char file2[256];
-   char *word;
+   const char *word;
    int done = 0;
    bool mobfile = FALSE;
    bool shipfile = FALSE;
@@ -945,7 +946,7 @@ void load_world( CHAR_DATA * ch )
 }
 
 /*  Warm reboot stuff, gotta make sure to thank Erwin for this :) */
-void do_hotboot( CHAR_DATA * ch, char *argument )
+void do_hotboot( CHAR_DATA * ch, const char *argument )
 {
    FILE *fp;
    CHAR_DATA *victim = NULL;
@@ -1153,6 +1154,8 @@ void hotboot_recover( void )
       d->scrlen = 24;
       d->newstate = 0;
       d->prevcolor = 0x08;
+      d->ifd = -1;
+      d->ipid = -1;
 
       CREATE( d->outbuf, char, d->outsize );
 

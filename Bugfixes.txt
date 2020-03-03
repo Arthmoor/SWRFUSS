@@ -20,7 +20,7 @@ Applied all relevent fixes from the MUD Planet bug list posts.
 Applied the updated memory handling macros.
 Backported the pcrename command from Smaug 1.4a.
 Removed vestigial remains of the deity code.
-Added a default Admin player for initial startup. Has no password. DELETE WHEN DONE USING IT.
+Added a default Admin player for initial startup. Password: admin. DELETE WHEN DONE USING IT.
 Moved all help files from help2.are into help.are.
 Crash bugs fixed in do_score.
 Added Samson's color snippet to correct the flaws in the ANSI system.

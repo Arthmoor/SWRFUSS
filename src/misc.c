@@ -30,7 +30,7 @@
 
 extern int top_exit;
 
-void do_buyhome( CHAR_DATA * ch, char *argument )
+void do_buyhome( CHAR_DATA * ch, const char *argument )
 {
    ROOM_INDEX_DATA *room;
    AREA_DATA *pArea;
@@ -92,7 +92,7 @@ void do_buyhome( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_clone( CHAR_DATA * ch, char *argument )
+void do_clone( CHAR_DATA * ch, const char *argument )
 {
    long credits, bank;
    long played;
@@ -106,6 +106,13 @@ void do_clone( CHAR_DATA * ch, char *argument )
       ch_printf( ch, "Yeah right!\r\n" );
       return;
    }
+
+   if( IS_IMMORTAL( ch ) )
+   {
+      send_to_char( "You wish!\r\n", ch );
+      return;
+   }
+
 
    if( ch->in_room->vnum != 10001 )
    {
@@ -171,7 +178,7 @@ void do_clone( CHAR_DATA * ch, char *argument )
    ch->hit--;
 }
 
-void do_arm( CHAR_DATA * ch, char *argument )
+void do_arm( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *obj;
 
@@ -205,7 +212,7 @@ void do_arm( CHAR_DATA * ch, char *argument )
    learn_from_success( ch, gsn_grenades );
 }
 
-void do_ammo( CHAR_DATA * ch, char *argument )
+void do_ammo( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *wield;
    OBJ_DATA *obj;
@@ -403,7 +410,7 @@ void do_ammo( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_setblaster( CHAR_DATA * ch, char *argument )
+void do_setblaster( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *wield;
    OBJ_DATA *wield2;
@@ -522,7 +529,7 @@ void do_setblaster( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_use( CHAR_DATA * ch, char *argument )
+void do_use( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    char argd[MAX_INPUT_LENGTH];
@@ -623,7 +630,7 @@ void do_use( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_takedrug( CHAR_DATA * ch, char *argument )
+void do_takedrug( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *obj;
    AFFECT_DATA af;
@@ -801,7 +808,7 @@ void sith_penalty( CHAR_DATA * ch )
  * Fill a container
  * Many enhancements added by Thoric (ie: filling non-drink containers)
  */
-void do_fill( CHAR_DATA * ch, char *argument )
+void do_fill( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -1013,7 +1020,7 @@ void do_fill( CHAR_DATA * ch, char *argument )
       OBJ_DATA *otmp, *otmp_next;
       char name[MAX_INPUT_LENGTH];
       CHAR_DATA *gch;
-      char *pd;
+      const char *pd;
       bool found = FALSE;
 
       if( source == obj )
@@ -1207,7 +1214,7 @@ void do_fill( CHAR_DATA * ch, char *argument )
    }
 }
 
-void do_drink( CHAR_DATA * ch, char *argument )
+void do_drink( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    OBJ_DATA *obj;
@@ -1362,7 +1369,7 @@ void do_drink( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_eat( CHAR_DATA * ch, char *argument )
+void do_eat( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *obj;
    ch_ret retcode;
@@ -1499,7 +1506,7 @@ void do_eat( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_quaff( CHAR_DATA * ch, char *argument )
+void do_quaff( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *obj;
    ch_ret retcode;
@@ -1573,7 +1580,7 @@ void do_quaff( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_recite( CHAR_DATA * ch, char *argument )
+void do_recite( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -1662,7 +1669,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
    ROOM_INDEX_DATA *room, *to_room = NULL;
    EXIT_DATA *pexit, *pexit_rev;
    int edir;
-   char *txt;
+   const char *txt;
 
    if( IS_SET( obj->value[0], TRIG_UP ) )
       isup = TRUE;
@@ -2036,7 +2043,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
 }
 
 
-void do_pull( CHAR_DATA * ch, char *argument )
+void do_pull( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    OBJ_DATA *obj;
@@ -2060,7 +2067,7 @@ void do_pull( CHAR_DATA * ch, char *argument )
    pullorpush( ch, obj, TRUE );
 }
 
-void do_push( CHAR_DATA * ch, char *argument )
+void do_push( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    OBJ_DATA *obj;
@@ -2085,7 +2092,7 @@ void do_push( CHAR_DATA * ch, char *argument )
 }
 
 /* pipe commands (light, tamp, smoke) by Thoric */
-void do_tamp( CHAR_DATA * ch, char *argument )
+void do_tamp( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *pipe;
    char arg[MAX_INPUT_LENGTH];
@@ -2120,7 +2127,7 @@ void do_tamp( CHAR_DATA * ch, char *argument )
    send_to_char( "It doesn't need tamping.\r\n", ch );
 }
 
-void do_smoke( CHAR_DATA * ch, char *argument )
+void do_smoke( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *pipe;
    char arg[MAX_INPUT_LENGTH];
@@ -2184,7 +2191,7 @@ void do_smoke( CHAR_DATA * ch, char *argument )
    }
 }
 
-void do_light( CHAR_DATA * ch, char *argument )
+void do_light( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *pipe;
    char arg[MAX_INPUT_LENGTH];
@@ -2225,7 +2232,7 @@ void do_light( CHAR_DATA * ch, char *argument )
    send_to_char( "It's already lit.\r\n", ch );
 }
 
-void do_empty( CHAR_DATA * ch, char *argument )
+void do_empty( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *obj;
    char arg1[MAX_INPUT_LENGTH];
@@ -2353,7 +2360,7 @@ void do_empty( CHAR_DATA * ch, char *argument )
 /*
  * Apply a salve/ointment					-Thoric
  */
-void do_apply( CHAR_DATA * ch, char *argument )
+void do_apply( CHAR_DATA * ch, const char *argument )
 {
    OBJ_DATA *obj;
    ch_ret retcode;
@@ -2412,7 +2419,7 @@ void actiondesc( CHAR_DATA * ch, OBJ_DATA * obj, void *vo )
 {
    char charbuf[MAX_STRING_LENGTH];
    char roombuf[MAX_STRING_LENGTH];
-   char *srcptr = obj->action_desc;
+   const char *srcptr = obj->action_desc;
    char *charptr = charbuf;
    char *roomptr = roombuf;
    const char *ichar = NULL;
@@ -2530,7 +2537,7 @@ log_string_plus( buf, LOG_HIGH, LEVEL_LESSER );
    return;
 }
 
-void do_hail( CHAR_DATA * ch, char *argument )
+void do_hail( CHAR_DATA * ch, const char *argument )
 {
    int vnum;
    ROOM_INDEX_DATA *room = NULL;
@@ -2576,7 +2583,7 @@ void do_hail( CHAR_DATA * ch, char *argument )
 
       if( room != NULL )
       {
-         if( IS_SET( room->room_flags, ROOM_HOTEL ) )
+         if( IS_SET( room->room_flags, ROOM_HOTEL ) && !IS_SET( room->room_flags, ROOM_PLR_HOME ) )
             break;
          else
             room = NULL;
@@ -2604,7 +2611,7 @@ void do_hail( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_train( CHAR_DATA * ch, char *argument )
+void do_train( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *mob;
@@ -2724,7 +2731,7 @@ void do_train( CHAR_DATA * ch, char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         strcpy( arg, ch->dest_buf );
+         strcpy( arg, ( const char* ) ch->dest_buf );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -2823,7 +2830,7 @@ void do_train( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_suicide( CHAR_DATA * ch, char *argument )
+void do_suicide( CHAR_DATA * ch, const char *argument )
 {
    char logbuf[MAX_STRING_LENGTH];
 
@@ -2855,7 +2862,7 @@ void do_suicide( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_bank( CHAR_DATA * ch, char *argument )
+void do_bank( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -2875,7 +2882,7 @@ void do_bank( CHAR_DATA * ch, char *argument )
 
    if( arg1[0] == '\0' )
    {
-      send_to_char( "Usage: BANK <deposit|withdraw|ballance> [amount]\r\n", ch );
+      send_to_char( "Usage: BANK <deposit|withdraw|balance> [amount]\r\n", ch );
       return;
    }
 
@@ -2903,7 +2910,7 @@ void do_bank( CHAR_DATA * ch, char *argument )
       ch_printf( ch, "You deposit %ld credits into your account.\r\n", amount );
       return;
    }
-   else if( !str_prefix( arg1, "withdrawl" ) )
+   else if( !str_prefix( arg1, "withdraw" ) )
    {
       if( amount <= 0 )
       {
@@ -2925,7 +2932,7 @@ void do_bank( CHAR_DATA * ch, char *argument )
       return;
 
    }
-   else if( !str_prefix( arg1, "ballance" ) )
+   else if( !str_prefix( arg1, "balance" ) )
    {
       ch_printf( ch, "You have %ld credits in your account.\r\n", ch->pcdata->bank );
       return;
@@ -2935,6 +2942,4 @@ void do_bank( CHAR_DATA * ch, char *argument )
       do_bank( ch, "" );
       return;
    }
-
-
 }

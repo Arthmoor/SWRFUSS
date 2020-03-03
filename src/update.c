@@ -58,7 +58,7 @@ OBJ_DATA *gobj_prev;
 
 CHAR_DATA *timechar;
 
-char *corpse_descs[] = {
+const char * const corpse_descs[] = {
    "The corpse of %s will soon be gone.",
    "The corpse of %s lies here.",
    "The corpse of %s lies here.",
@@ -66,7 +66,7 @@ char *corpse_descs[] = {
    "The corpse of %s lies here."
 };
 
-char *d_corpse_descs[] = {
+const char * const d_corpse_descs[] = {
    "The shattered remains %s will soon be gone.",
    "The shattered remains %s are here.",
    "The shattered remains %s are here.",
@@ -365,7 +365,7 @@ int hit_gain( CHAR_DATA * ch )
          case POS_STUNNED:
             return get_curr_con( ch ) * 2;
          case POS_SLEEPING:
-            gain += get_curr_con( ch ) * 1.5;
+	   gain += ( int )( get_curr_con( ch ) * 1.5 );
             break;
          case POS_RESTING:
             gain += get_curr_con( ch );
@@ -427,7 +427,7 @@ int mana_gain( CHAR_DATA * ch )
             gain += get_curr_int( ch ) * 3;
             break;
          case POS_RESTING:
-            gain += get_curr_int( ch ) * 1.5;
+	   gain += ( int )( get_curr_int( ch ) * 1.5 );
             break;
       }
 
@@ -1522,7 +1522,7 @@ void obj_update( void )
    for( obj = last_object; obj; obj = gobj_prev )
    {
       CHAR_DATA *rch;
-      char *message;
+      const char *message;
 
       if( obj == first_object && obj->prev )
       {
@@ -1605,7 +1605,7 @@ void obj_update( void )
          {
             char buf[MAX_STRING_LENGTH];
             char name[MAX_STRING_LENGTH];
-            char *bufptr;
+            const char *bufptr;
             bufptr = one_argument( obj->short_descr, name );
             bufptr = one_argument( bufptr, name );
             bufptr = one_argument( bufptr, name );
@@ -1904,7 +1904,7 @@ void aggr_update( void )
     */
    while( ( apdtmp = mob_act_list ) != NULL )
    {
-      wch = mob_act_list->vo;
+     wch = ( CHAR_DATA* ) mob_act_list->vo;
       if( !char_died( wch ) && wch->mpactnum > 0 )
       {
          MPROG_ACT_LIST *tmp_act;
@@ -2000,7 +2000,7 @@ void aggr_update( void )
 }
 
 /* From interp.c */
-bool check_social args( ( CHAR_DATA * ch, char *command, char *argument ) );
+bool check_social( CHAR_DATA * ch, const char *command, const char *argument );
 
 /*
  * drunk randoms	- Tricops
@@ -2047,7 +2047,7 @@ void halucinations( CHAR_DATA * ch )
 {
    if( ch->mental_state >= 30 && number_bits( 5 - ( ch->mental_state >= 50 ) - ( ch->mental_state >= 75 ) ) == 0 )
    {
-      char *t;
+     const char *t;
 
       switch ( number_range( 1, UMIN( 20, ( ch->mental_state + 5 ) / 5 ) ) )
       {
@@ -2265,7 +2265,8 @@ void update_handler( void )
 
    if( --pulse_point <= 0 )
    {
-      pulse_point = number_range( PULSE_TICK * 0.75, PULSE_TICK * 1.25 );
+     pulse_point = number_range( ( int )( PULSE_TICK * 0.75 ),
+				 ( int )( PULSE_TICK * 1.25 ) );
 
       auth_update(  );  /* Gorog */
       weather_update(  );
@@ -2278,6 +2279,7 @@ void update_handler( void )
    {
       pulse_second = PULSE_PER_SECOND;
       char_check(  );
+      check_dns(  );
       /*
        * reboot_check( "" ); Disabled to check if its lagging a lot - Scryn
        */
@@ -2390,7 +2392,7 @@ void remove_portal( OBJ_DATA * portal )
 
 void reboot_check( time_t reset )
 {
-   static char *tmsg[] = { "SYSTEM: Reboot in 10 seconds.",
+   static const char * const tmsg[] = { "SYSTEM: Reboot in 10 seconds.",
       "SYSTEM: Reboot in 30 seconds.",
       "SYSTEM: Reboot in 1 minute.",
       "SYSTEM: Reboot in 2 minutes.",
@@ -2719,8 +2721,8 @@ void auction_update( void )
             }
             else
                obj_to_char( auction->item, auction->buyer );
-            pay = ( int )auction->bet * 0.9;
-            tax = ( int )auction->bet * 0.1;
+            pay = ( int )( auction->bet * 0.9 );
+            tax = ( int )( auction->bet * 0.1 );
             boost_economy( auction->seller->in_room->area, tax );
             auction->seller->gold += pay; /* give him the money, tax 10 % */
             sprintf( buf, "The auctioneer pays you %d gold, charging an auction fee of %d.\r\n", pay, tax );
@@ -2751,7 +2753,7 @@ void auction_update( void )
             }
             else
                obj_to_char( auction->item, auction->seller );
-            tax = ( int )auction->item->cost * 0.05;
+            tax = ( int )( auction->item->cost * 0.05 );
             boost_economy( auction->seller->in_room->area, tax );
             sprintf( buf, "The auctioneer charges you an auction fee of %d.\r\n", tax );
             send_to_char( buf, auction->seller );

@@ -31,7 +31,7 @@
  */
 
 void subtract_times( struct timeval *etime, struct timeval *sttime );
-bool check_social args( ( CHAR_DATA * ch, char *command, char *argument ) );
+bool check_social( CHAR_DATA * ch, const char *command, const char *argument );
 
 /*
  * Log-all switch.
@@ -91,7 +91,7 @@ extern char lastplayercmd[MAX_INPUT_LENGTH * 2];
  * The main entry point for executing commands.
  * Can be recursively called from 'at', 'order', 'force'.
  */
-void interpret( CHAR_DATA * ch, char *argument )
+void interpret( CHAR_DATA * ch, const char *argument )
 {
    char command[MAX_INPUT_LENGTH];
    char logline[MAX_INPUT_LENGTH];
@@ -325,7 +325,8 @@ void interpret( CHAR_DATA * ch, char *argument )
                   send_to_char( "You cannot do that here.\r\n", ch );
                return;
             }
-            move_char( ch, pexit, 0 );
+            if( check_pos( ch, POS_STANDING ) )
+               move_char( ch, pexit, 0 );
             return;
          }
          send_to_char( "Huh?\r\n", ch );
@@ -377,7 +378,7 @@ void interpret( CHAR_DATA * ch, char *argument )
    tail_chain(  );
 }
 
-CMDTYPE *find_command( char *command )
+CMDTYPE *find_command( const char *command )
 {
    CMDTYPE *cmd;
    int hash;
@@ -410,7 +411,7 @@ SOCIALTYPE *find_social( const char *command )
    return NULL;
 }
 
-bool check_social( CHAR_DATA * ch, char *command, char *argument )
+bool check_social( CHAR_DATA * ch, const char *command, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -529,7 +530,7 @@ bool check_social( CHAR_DATA * ch, char *command, char *argument )
 /*
  * Return true if an argument is completely numeric.
  */
-bool is_number( char *arg )
+bool is_number( const char *arg )
 {
    if( *arg == '\0' )
       return FALSE;
@@ -548,32 +549,42 @@ bool is_number( char *arg )
 /*
  * Given a string like 14.foo, return 14 and 'foo'
  */
-int number_argument( char *argument, char *arg )
+int number_argument( const char *argument, char *arg )
 {
-   char *pdot;
-   int number;
+  const char *pdot;
+  int number;
 
-   for( pdot = argument; *pdot != '\0'; pdot++ )
-   {
+  for( pdot = argument; *pdot != '\0'; pdot++ )
+    {
       if( *pdot == '.' )
-      {
-         *pdot = '\0';
-         number = atoi( argument );
-         *pdot = '.';
-         strcpy( arg, pdot + 1 );
-         return number;
-      }
-   }
+	{
+	  char* numPortion = (char*) malloc(pdot-argument+1);
+	  memcpy(numPortion, argument, pdot-argument);
+	  numPortion[pdot-argument] = '\0';
 
-   strcpy( arg, argument );
-   return 1;
+	  number = atoi( numPortion );
+
+	  free(numPortion);
+
+	  strcpy( arg, pdot + 1 );
+	  return number;
+	}
+    }
+
+  strcpy( arg, argument );
+  return 1;
+}
+
+char *one_argument( char *argument, char *arg_first )
+{
+  return (char*) one_argument((const char*) argument, arg_first);
 }
 
 /*
  * Pick off one argument from a string and return the rest.
  * Understands quotes. No longer mangles case either. That used to be annoying.
  */
-char *one_argument( char *argument, char *arg_first )
+const char *one_argument( const char *argument, char *arg_first )
 {
    char cEnd;
    int count;
@@ -611,7 +622,7 @@ char *one_argument( char *argument, char *arg_first )
  * Understands quotes.  Delimiters = { ' ', '-' }
  * No longer mangles case either. That used to be annoying.
  */
-char *one_argument2( char *argument, char *arg_first )
+const char *one_argument2( const char *argument, char *arg_first )
 {
    char cEnd;
    short count;
@@ -650,7 +661,7 @@ char *one_argument2( char *argument, char *arg_first )
    return argument;
 }
 
-void do_timecmd( CHAR_DATA * ch, char *argument )
+void do_timecmd( CHAR_DATA * ch, const char *argument )
 {
    struct timeval sttime;
    struct timeval etime;

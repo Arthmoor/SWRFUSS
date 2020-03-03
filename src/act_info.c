@@ -34,7 +34,7 @@
  */
 bool EXA_prog_trigger = TRUE;
 
-char *const where_name[] = {
+const char *const where_name[] = {
    "<used as light>     ",
    "<worn on finger>    ",
    "<worn on finger>    ",
@@ -88,7 +88,7 @@ char *format_obj_to_char( OBJ_DATA * obj, CHAR_DATA * ch, bool fShort )
       strcat( buf, "(Burried) " );
    if( IS_IMMORTAL( ch ) && IS_OBJ_STAT( obj, ITEM_PROTOTYPE ) )
       strcat( buf, "(PROTO) " );
-   if( IS_AFFECTED( ch, AFF_DETECTTRAPS ) && is_trapped( obj ) )
+   if( ( IS_AFFECTED( ch, AFF_DETECTTRAPS ) || IS_SET( ch->act, PLR_HOLYLIGHT ) ) && is_trapped( obj ) )
       strcat( buf, "(Trap) " );
 
    if( fShort )
@@ -107,7 +107,7 @@ char *format_obj_to_char( OBJ_DATA * obj, CHAR_DATA * ch, bool fShort )
 /*
  * Some increasingly freaky halucinated objects		-Thoric
  */
-char *halucinated_object( int ms, bool fShort )
+const char *halucinated_object( int ms, bool fShort )
 {
    int sms = URANGE( 1, ( ms + 10 ) / 5, 20 );
 
@@ -680,6 +680,9 @@ void show_char_to_char_1( CHAR_DATA * victim, CHAR_DATA * ch )
    if( IS_NPC( ch ) || victim == ch )
       return;
 
+   if( IS_IMMORTAL( victim ) && ( victim->top_level > ch->top_level ) )
+        return;
+
    if( number_percent(  ) < ch->pcdata->learned[gsn_peek] )
    {
       send_to_char( "\r\nYou peek at the inventory:\r\n", ch );
@@ -762,7 +765,7 @@ bool check_blind( CHAR_DATA * ch )
 /*
  * Returns classical DIKU door direction based on text in arg	-Thoric
  */
-int get_door( char *arg )
+int get_door( const char *arg )
 {
    int door;
 
@@ -791,14 +794,14 @@ int get_door( char *arg )
    return door;
 }
 
-void do_look( CHAR_DATA * ch, char *argument )
+void do_look( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH], arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH], arg3[MAX_INPUT_LENGTH];
    EXIT_DATA *pexit;
    CHAR_DATA *victim;
    OBJ_DATA *obj;
    ROOM_INDEX_DATA *original;
-   char *pdesc;
+   const char *pdesc;
    short door;
    int number, cnt;
 
@@ -1329,7 +1332,7 @@ the condition of a mob or pc, or if used without an argument, the
 same you would see if you enter the room and have config +brief.
 -- Narn, winter '96
 */
-void do_glance( CHAR_DATA * ch, char *argument )
+void do_glance( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -1385,7 +1388,7 @@ void do_glance( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_examine( CHAR_DATA * ch, char *argument )
+void do_examine( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    char arg[MAX_INPUT_LENGTH];
@@ -1656,7 +1659,7 @@ void do_examine( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_exits( CHAR_DATA * ch, char *argument )
+void do_exits( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    EXIT_DATA *pexit;
@@ -1723,23 +1726,23 @@ void do_exits( CHAR_DATA * ch, char *argument )
    return;
 }
 
-char *const day_name[] = {
+const char *const day_name[] = {
    "the Moon", "the Bull", "Deception", "Thunder", "Freedom",
    "the Great Gods", "the Sun"
 };
 
-char *const month_name[] = {
+const char *const month_name[] = {
    "Winter", "the Winter Wolf", "the Frost Giant", "the Old Forces",
    "the Grand Struggle", "the Spring", "Nature", "Futility", "the Dragon",
    "the Sun", "the Heat", "the Battle", "the Dark Shades", "the Shadows",
    "the Long Shadows", "the Ancient Darkness", "the Great Evil"
 };
 
-void do_time( CHAR_DATA * ch, char *argument )
+void do_time( CHAR_DATA * ch, const char *argument )
 {
    extern char str_boot_time[];
    extern char reboot_time[];
-   char *suf;
+   const char *suf;
    int day;
 
    day = time_info.day + 1;
@@ -1769,11 +1772,9 @@ void do_time( CHAR_DATA * ch, char *argument )
    return;
 }
 
-
-
-void do_weather( CHAR_DATA * ch, char *argument )
+void do_weather( CHAR_DATA * ch, const char *argument )
 {
-   static char *const sky_look[4] = {
+   static const char *const sky_look[4] = {
       "cloudless",
       "cloudy",
       "rainy",
@@ -1798,7 +1799,7 @@ void do_weather( CHAR_DATA * ch, char *argument )
  * Moved into a separate function so it can be used for other things
  * ie: online help editing				-Thoric
  */
-HELP_DATA *get_help( CHAR_DATA * ch, char *argument )
+HELP_DATA *get_help( CHAR_DATA * ch, const char *argument )
 {
    char argall[MAX_INPUT_LENGTH];
    char argone[MAX_INPUT_LENGTH];
@@ -1846,7 +1847,7 @@ HELP_DATA *get_help( CHAR_DATA * ch, char *argument )
 /*
  * Now this is cleaner
  */
-void do_help( CHAR_DATA * ch, char *argument )
+void do_help( CHAR_DATA * ch, const char *argument )
 {
    HELP_DATA *pHelp;
 
@@ -1878,7 +1879,7 @@ void do_help( CHAR_DATA * ch, char *argument )
 /*
  * Help editor							-Thoric
  */
-void do_hedit( CHAR_DATA * ch, char *argument )
+void do_hedit( CHAR_DATA * ch, const char *argument )
 {
    HELP_DATA *pHelp;
 
@@ -1893,7 +1894,7 @@ void do_hedit( CHAR_DATA * ch, char *argument )
       default:
          break;
       case SUB_HELP_EDIT:
-         if( ( pHelp = ch->dest_buf ) == NULL )
+	if( ( pHelp = ( HELP_DATA* ) ch->dest_buf ) == NULL )
          {
             bug( "hedit: sub_help_edit: NULL ch->dest_buf", 0 );
             stop_editing( ch );
@@ -1942,26 +1943,29 @@ void do_hedit( CHAR_DATA * ch, char *argument )
 /*
  * Stupid leading space muncher fix				-Thoric
  */
-char *help_fix( char *text )
+const char *help_fix( const char *text )
 {
-   char *fixed;
+  char *fixed;
 
-   if( !text )
-      return "";
-   fixed = strip_cr( text );
-   if( fixed[0] == ' ' )
-      fixed[0] = '.';
+  if( !text )
+    return "";
+
+  fixed = strip_cr( text );
+
+  if( fixed[0] == ' ' )
+    fixed[0] = '.';
+
    return fixed;
 }
 
-void do_hset( CHAR_DATA * ch, char *argument )
+void do_hset( CHAR_DATA * ch, const char *argument )
 {
    HELP_DATA *pHelp;
-   char arg1[MAX_INPUT_LENGTH];
-   char arg2[MAX_INPUT_LENGTH];
+   char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
 
-   smash_tilde( argument );
+   argument = smash_tilde_copy( argument );
    argument = one_argument( argument, arg1 );
+   
    if( arg1[0] == '\0' )
    {
       send_to_char( "Syntax: hset <field> [value] [help page]\r\n", ch );
@@ -2049,7 +2053,7 @@ void do_hset( CHAR_DATA * ch, char *argument )
  * Show help topics in a level range				-Thoric
  * Idea suggested by Gorog
  */
-void do_hlist( CHAR_DATA * ch, char *argument )
+void do_hlist( CHAR_DATA * ch, const char *argument )
 {
    int min, max, minlimit, maxlimit, cnt;
    char arg[MAX_INPUT_LENGTH];
@@ -2093,7 +2097,7 @@ void do_hlist( CHAR_DATA * ch, char *argument )
  * Shows imms separately, indicates guest and retired immortals.
  * Narn, Oct/96
  */
-void do_who( CHAR_DATA * ch, char *argument )
+void do_who( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    char clan_name[MAX_INPUT_LENGTH];
@@ -2438,7 +2442,7 @@ void do_who( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_compare( CHAR_DATA * ch, char *argument )
+void do_compare( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -2446,7 +2450,7 @@ void do_compare( CHAR_DATA * ch, char *argument )
    OBJ_DATA *obj2;
    int value1;
    int value2;
-   char *msg;
+   const char *msg;
 
    argument = one_argument( argument, arg1 );
    argument = one_argument( argument, arg2 );
@@ -2535,7 +2539,7 @@ void do_compare( CHAR_DATA * ch, char *argument )
 
 
 
-void do_where( CHAR_DATA * ch, char *argument )
+void do_where( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -2592,14 +2596,11 @@ void do_where( CHAR_DATA * ch, char *argument )
    return;
 }
 
-
-
-
-void do_consider( CHAR_DATA * ch, char *argument )
+void do_consider( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
-   char *msg;
+   const char *msg;
    int diff;
 
    one_argument( argument, arg );
@@ -2654,7 +2655,7 @@ void do_consider( CHAR_DATA * ch, char *argument )
  */
 #define CANT_PRAC "Tongue"
 
-void do_practice( CHAR_DATA * ch, char *argument )
+void do_practice( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    int sn;
@@ -2816,7 +2817,7 @@ void do_practice( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_teach( CHAR_DATA * ch, char *argument )
+void do_teach( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    int sn;
@@ -2906,7 +2907,7 @@ void do_teach( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_wimpy( CHAR_DATA * ch, char *argument )
+void do_wimpy( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    int wimpy;
@@ -2935,7 +2936,7 @@ void do_wimpy( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_password( CHAR_DATA * ch, char *argument )
+void do_password( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH], arg2[MAX_INPUT_LENGTH];
    char *pArg, *pwdnew;
@@ -3021,7 +3022,7 @@ void do_password( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_socials( CHAR_DATA * ch, char *argument )
+void do_socials( CHAR_DATA * ch, const char *argument )
 {
    int iHash;
    int col = 0;
@@ -3042,7 +3043,7 @@ void do_socials( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_commands( CHAR_DATA * ch, char *argument )
+void do_commands( CHAR_DATA * ch, const char *argument )
 {
    int col;
    bool found;
@@ -3089,7 +3090,7 @@ void do_commands( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_channels( CHAR_DATA * ch, char *argument )
+void do_channels( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
 
@@ -3303,7 +3304,7 @@ void do_channels( CHAR_DATA * ch, char *argument )
 /*
  * display WIZLIST file						-Thoric
  */
-void do_wizlist( CHAR_DATA * ch, char *argument )
+void do_wizlist( CHAR_DATA * ch, const char *argument )
 {
    set_pager_color( AT_IMMORT, ch );
    show_file( ch, WIZLIST_FILE );
@@ -3312,7 +3313,7 @@ void do_wizlist( CHAR_DATA * ch, char *argument )
 /*
  * Contributed by Grodyn.
  */
-void do_config( CHAR_DATA * ch, char *argument )
+void do_config( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
 
@@ -3511,7 +3512,7 @@ void do_config( CHAR_DATA * ch, char *argument )
 }
 
 
-void do_credits( CHAR_DATA * ch, char *argument )
+void do_credits( CHAR_DATA * ch, const char *argument )
 {
    do_help( ch, "credits" );
 }
@@ -3520,7 +3521,7 @@ void do_credits( CHAR_DATA * ch, char *argument )
 extern int top_area;
 
 /*
-void do_areas( CHAR_DATA *ch, char *argument )
+void do_areas( CHAR_DATA *ch, const char *argument )
 {
     AREA_DATA *pArea1;
     AREA_DATA *pArea2;
@@ -3550,7 +3551,7 @@ void do_areas( CHAR_DATA *ch, char *argument )
  * New do_areas with soft/hard level ranges 
  */
 
-void do_areas( CHAR_DATA * ch, char *argument )
+void do_areas( CHAR_DATA * ch, const char *argument )
 {
    AREA_DATA *pArea;
 
@@ -3565,7 +3566,7 @@ void do_areas( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_afk( CHAR_DATA * ch, char *argument )
+void do_afk( CHAR_DATA * ch, const char *argument )
 {
    if( IS_NPC( ch ) )
       return;
@@ -3586,7 +3587,7 @@ void do_afk( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_slist( CHAR_DATA * ch, char *argument )
+void do_slist( CHAR_DATA * ch, const char *argument )
 {
    int sn, i, lFound;
    char skn[MAX_INPUT_LENGTH];
@@ -3669,7 +3670,7 @@ void do_slist( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_whois( CHAR_DATA * ch, char *argument )
+void do_whois( CHAR_DATA * ch, const char *argument )
 {
    CHAR_DATA *victim;
    char buf[MAX_STRING_LENGTH];
@@ -3789,7 +3790,7 @@ void do_whois( CHAR_DATA * ch, char *argument )
    }
 }
 
-void do_pager( CHAR_DATA * ch, char *argument )
+void do_pager( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
 

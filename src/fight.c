@@ -36,7 +36,7 @@ int ris_save( CHAR_DATA * ch, int schance, int ris );
 /*
  * Local functions.
  */
-void dam_message args( ( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt ) );
+void dam_message( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt );
 void group_gain args( ( CHAR_DATA * ch, CHAR_DATA * victim ) );
 int xp_compute args( ( CHAR_DATA * gch, CHAR_DATA * victim ) );
 int align_compute args( ( CHAR_DATA * gch, CHAR_DATA * victim ) );
@@ -494,7 +494,7 @@ ch_ret multi_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
     */
    if( IS_NPC( ch ) && ch->numattacks > 0 )
    {
-      for( schance = 0; schance <= ch->numattacks; schance++ )
+      for( schance = 0; schance < ch->numattacks; schance++ )
       {
          retcode = one_hit( ch, victim, dt );
          if( retcode != rNONE || who_fighting( ch ) != victim )
@@ -918,13 +918,13 @@ ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
       }
       else if( wield->blaster_setting == BLASTER_FULL && wield->value[4] >= 5 )
       {
-         dam *= 1.5;
-         wield->value[4] -= 5;
+	dam = ( int )( dam * 1.5 );
+	wield->value[4] -= 5;
       }
       else if( wield->blaster_setting == BLASTER_HIGH && wield->value[4] >= 4 )
       {
-         dam *= 1.25;
-         wield->value[4] -= 4;
+	dam = ( int )( dam * 1.25 );
+	wield->value[4] -= 4;
       }
       else if( wield->blaster_setting == BLASTER_NORMAL && wield->value[4] >= 3 )
       {
@@ -994,13 +994,13 @@ ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
       }
       else if( wield->blaster_setting == BLASTER_HALF && wield->value[4] >= 2 )
       {
-         dam *= 0.75;
-         wield->value[4] -= 2;
+	dam = ( int )( dam * 0.75 );
+	wield->value[4] -= 2;
       }
       else
       {
-         dam *= 0.5;
-         wield->value[4] -= 1;
+	dam = ( int )( dam * 0.5 );
+	wield->value[4] -= 1;
       }
 
    }
@@ -2543,18 +2543,21 @@ void dam_message( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
    }
    else if( dt > TYPE_HIT && is_wielding_poisoned( ch ) )
    {
-      if( dt < TYPE_HIT + sizeof( attack_table ) / sizeof( attack_table[0] ) )
+     // Slightly less than beautiful cast here.
+     if( dt < TYPE_HIT + (int)( sizeof( attack_table ) / sizeof( attack_table[0] ) ) )
+       {
          attack = attack_table[dt - TYPE_HIT];
-      else
-      {
-         bug( "Dam_message: bad dt %d.", dt );
-         dt = TYPE_HIT;
-         attack = attack_table[0];
-      }
+       }
+     else
+       {
+	 bug( "Dam_message: bad dt %d.", dt );
+	 dt = TYPE_HIT;
+	 attack = attack_table[0];
+       }
 
-      sprintf( buf1, "$n's poisoned %s %s $N%c", attack, vp, punct );
-      sprintf( buf2, "Your poisoned %s %s $N%c", attack, vp, punct );
-      sprintf( buf3, "$n's poisoned %s %s you%c", attack, vp, punct );
+     sprintf( buf1, "$n's poisoned %s %s $N%c", attack, vp, punct );
+     sprintf( buf2, "Your poisoned %s %s $N%c", attack, vp, punct );
+     sprintf( buf3, "$n's poisoned %s %s you%c", attack, vp, punct );
    }
    else
    {
@@ -2593,7 +2596,9 @@ void dam_message( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
                act( AT_ACTION, skill->hit_room, ch, NULL, victim, TO_NOTVICT );
          }
       }
-      else if( dt >= TYPE_HIT && dt < TYPE_HIT + sizeof( attack_table ) / sizeof( attack_table[0] ) )
+      // Not ideal, this cast. But we assume the attack_table never contains
+      // more than roughly 2 billion elements.
+      else if( dt >= TYPE_HIT && dt < TYPE_HIT + (int)( sizeof( attack_table ) / sizeof( attack_table[0] ) ) )
          attack = attack_table[dt - TYPE_HIT];
       else
       {
@@ -2620,7 +2625,7 @@ void dam_message( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
 }
 
 
-void do_kill( CHAR_DATA * ch, char *argument )
+void do_kill( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -2688,13 +2693,13 @@ void do_kill( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_murde( CHAR_DATA * ch, char *argument )
+void do_murde( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "If you want to MURDER, spell it out.\r\n", ch );
    return;
 }
 
-void do_murder( CHAR_DATA * ch, char *argument )
+void do_murder( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -2763,7 +2768,7 @@ bool in_arena( CHAR_DATA * ch )
 }
 
 
-void do_flee( CHAR_DATA * ch, char *argument )
+void do_flee( CHAR_DATA * ch, const char *argument )
 {
    ROOM_INDEX_DATA *was_in;
    ROOM_INDEX_DATA *now_in;
@@ -2882,7 +2887,7 @@ bool get_cover( CHAR_DATA * ch )
 
 
 
-void do_sla( CHAR_DATA * ch, char *argument )
+void do_sla( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "If you want to SLAY, spell it out.\r\n", ch );
    return;
@@ -2890,7 +2895,7 @@ void do_sla( CHAR_DATA * ch, char *argument )
 
 
 
-void do_slay( CHAR_DATA * ch, char *argument )
+void do_slay( CHAR_DATA * ch, const char *argument )
 {
    CHAR_DATA *victim;
    char arg[MAX_INPUT_LENGTH];

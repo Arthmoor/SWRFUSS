@@ -72,7 +72,7 @@ bool is_disintigration( CHAR_DATA * victim )
    return FALSE;
 }
 
-BOUNTY_DATA *get_disintigration( char *target )
+BOUNTY_DATA *get_disintigration( const char *target )
 {
    BOUNTY_DATA *bounty;
 
@@ -85,7 +85,7 @@ BOUNTY_DATA *get_disintigration( char *target )
 void load_bounties(  )
 {
    FILE *fpList;
-   char *target;
+   const char *target;
    char bountylist[256];
    BOUNTY_DATA *bounty;
    long int amount;
@@ -118,7 +118,7 @@ void load_bounties(  )
    return;
 }
 
-void do_bounties( CHAR_DATA * ch, char *argument )
+void do_bounties( CHAR_DATA * ch, const char *argument )
 {
    BOUNTY_DATA *bounty;
    int count = 0;
@@ -174,7 +174,7 @@ void disintigration( CHAR_DATA * ch, CHAR_DATA * victim, long amount )
 
 }
 
-void do_addbounty( CHAR_DATA * ch, char *argument )
+void do_addbounty( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_STRING_LENGTH];
    long int amount;

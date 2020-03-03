@@ -90,7 +90,7 @@ void comment_remove( CHAR_DATA * ch, CHAR_DATA * victim, NOTE_DATA * pnote )
    return;
 }
 
-void do_comment( CHAR_DATA * ch, char *argument )
+void do_comment( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    char arg[MAX_INPUT_LENGTH];
@@ -144,7 +144,7 @@ void do_comment( CHAR_DATA * ch, char *argument )
 
    set_char_color( AT_NOTE, ch );
    argument = one_argument( argument, arg );
-   smash_tilde( argument );
+   argument = smash_tilde_static( argument );
 
    if( !str_cmp( arg, "about" ) )
    {

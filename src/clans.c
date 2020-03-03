@@ -41,17 +41,17 @@ GUARD_DATA *first_guard;
 GUARD_DATA *last_guard;
 
 /* local routines */
-void fread_clan args( ( CLAN_DATA * clan, FILE * fp ) );
-bool load_clan_file args( ( char *clanfile ) );
-void write_clan_list args( ( void ) );
-void fread_planet args( ( PLANET_DATA * planet, FILE * fp ) );
-bool load_planet_file args( ( char *planetfile ) );
-void write_planet_list args( ( void ) );
+void fread_clan( CLAN_DATA * clan, FILE * fp );
+bool load_clan_file( const char *clanfile );
+void write_clan_list( void );
+void fread_planet( PLANET_DATA * planet, FILE * fp );
+bool load_planet_file( const char *planetfile );
+void write_planet_list( void );
 
 /*
  * Get pointer to clan structure from clan name.
  */
-CLAN_DATA *get_clan( char *name )
+CLAN_DATA *get_clan( const char *name )
 {
    CLAN_DATA *clan;
 
@@ -61,7 +61,7 @@ CLAN_DATA *get_clan( char *name )
    return NULL;
 }
 
-PLANET_DATA *get_planet( char *name )
+PLANET_DATA *get_planet( const char *name )
 {
    PLANET_DATA *planet;
 
@@ -226,7 +226,7 @@ void save_planet( PLANET_DATA * planet )
 void fread_clan( CLAN_DATA * clan, FILE * fp )
 {
    char buf[MAX_STRING_LENGTH];
-   char *word;
+   const char *word;
    bool fMatch;
 
    for( ;; )
@@ -329,7 +329,7 @@ void fread_clan( CLAN_DATA * clan, FILE * fp )
 void fread_planet( PLANET_DATA * planet, FILE * fp )
 {
    char buf[MAX_STRING_LENGTH];
-   char *word;
+   const char *word;
    bool fMatch;
 
    for( ;; )
@@ -347,7 +347,7 @@ void fread_planet( PLANET_DATA * planet, FILE * fp )
          case 'A':
             if( !str_cmp( word, "Area" ) )
             {
-               char *aName;
+	      const char *aName;
                AREA_DATA *pArea;
 
                aName = fread_string( fp );
@@ -383,10 +383,13 @@ void fread_planet( PLANET_DATA * planet, FILE * fp )
          case 'G':
             if( !str_cmp( word, "GovernedBy" ) )
             {
-               planet->governed_by = get_clan( fread_string( fp ) );
+               const char *clan_name = fread_string( fp );
+               planet->governed_by = get_clan( clan_name );
                fMatch = TRUE;
+               STRFREE( clan_name );
             }
             break;
+
 
          case 'N':
             KEY( "Name", planet->name, fread_string( fp ) );
@@ -399,7 +402,8 @@ void fread_planet( PLANET_DATA * planet, FILE * fp )
          case 'S':
             if( !str_cmp( word, "Starsystem" ) )
             {
-               planet->starsystem = starsystem_from_name( fread_string( fp ) );
+               const char *starsystem_name = fread_string( fp );
+               planet->starsystem = starsystem_from_name( starsystem_name );
                if( planet->starsystem )
                {
                   SPACE_DATA *starsystem = planet->starsystem;
@@ -407,6 +411,7 @@ void fread_planet( PLANET_DATA * planet, FILE * fp )
                   LINK( planet, starsystem->first_planet, starsystem->last_planet, next_in_system, prev_in_system );
                }
                fMatch = TRUE;
+               STRFREE( starsystem_name );
             }
             break;
 
@@ -427,7 +432,7 @@ void fread_planet( PLANET_DATA * planet, FILE * fp )
 /*
  * Load a clan file
  */
-bool load_clan_file( char *clanfile )
+bool load_clan_file( const char *clanfile )
 {
    char filename[256];
    CLAN_DATA *clan;
@@ -450,7 +455,7 @@ bool load_clan_file( char *clanfile )
       for( ;; )
       {
          char letter;
-         char *word;
+         const char *word;
 
          letter = fread_letter( fp );
          if( letter == '*' )
@@ -511,7 +516,7 @@ bool load_clan_file( char *clanfile )
          for( ;; )
          {
             char letter;
-            char *word;
+            const char *word;
 
             letter = fread_letter( fp );
             if( letter == '*' )
@@ -557,7 +562,7 @@ bool load_clan_file( char *clanfile )
    return found;
 }
 
-bool load_planet_file( char *planetfile )
+bool load_planet_file( const char *planetfile )
 {
    char filename[256];
    PLANET_DATA *planet;
@@ -585,7 +590,7 @@ bool load_planet_file( char *planetfile )
       for( ;; )
       {
          char letter;
-         char *word;
+         const char *word;
 
          letter = fread_letter( fp );
          if( letter == '*' )
@@ -631,10 +636,10 @@ bool load_planet_file( char *planetfile )
 /*
  * Load in all the clan files.
  */
-void load_clans(  )
+void load_clans()
 {
    FILE *fpList;
-   char *filename;
+   const char *filename;
    char clanlist[256];
    char buf[MAX_STRING_LENGTH];
    CLAN_DATA *clan;
@@ -685,10 +690,10 @@ void load_clans(  )
    return;
 }
 
-void load_planets(  )
+void load_planets()
 {
    FILE *fpList;
-   char *filename;
+   const char *filename;
    char planetlist[256];
    char buf[MAX_STRING_LENGTH];
 
@@ -722,13 +727,13 @@ void load_planets(  )
    return;
 }
 
-void do_make( CHAR_DATA * ch, char *argument )
+void do_make( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "Huh?\r\n", ch );
    return;
 }
 
-void do_induct( CHAR_DATA * ch, char *argument )
+void do_induct( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -833,7 +838,7 @@ bool can_outcast( CLAN_DATA *clan, CHAR_DATA *ch, CHAR_DATA *victim )
    return TRUE;
 }
 
-void do_outcast( CHAR_DATA * ch, char *argument )
+void do_outcast( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    CHAR_DATA *victim;
@@ -928,7 +933,7 @@ void do_outcast( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_setclan( CHAR_DATA * ch, char *argument )
+void do_setclan( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -1185,7 +1190,7 @@ void do_setclan( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_setplanet( CHAR_DATA * ch, char *argument )
+void do_setplanet( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -1216,9 +1221,20 @@ void do_setplanet( CHAR_DATA * ch, char *argument )
       return;
    }
 
-
    if( !strcmp( arg2, "name" ) )
    {
+      PLANET_DATA *tplanet;
+      if( !argument || argument[0] == '\0' )
+      {
+         send_to_char( "You must choose a name.\r\n", ch );
+         return;
+      }
+      if( ( tplanet = get_planet( argument ) ) != NULL )
+      {
+         send_to_char( "A planet with that name already Exists!\r\n", ch );
+         return;
+      }
+
       STRFREE( planet->name );
       planet->name = STRALLOC( argument );
       send_to_char( "Done.\r\n", ch );
@@ -1261,6 +1277,22 @@ void do_setplanet( CHAR_DATA * ch, char *argument )
 
    if( !strcmp( arg2, "filename" ) )
    {
+      PLANET_DATA *tplanet;
+
+      if( !argument || argument[0] == '\0' )
+      {
+         send_to_char( "You must choose a file name.\r\n", ch );
+         return;
+      }
+      for( tplanet = first_planet; tplanet; tplanet = tplanet->next )
+      {
+          if( !str_cmp( tplanet->filename, argument ) )
+          {
+              send_to_char( "A planet with that filename already exists!\r\n", ch );
+              return;
+          }
+      }
+
       DISPOSE( planet->filename );
       planet->filename = str_dup( argument );
       send_to_char( "Done.\r\n", ch );
@@ -1268,6 +1300,7 @@ void do_setplanet( CHAR_DATA * ch, char *argument )
       write_planet_list(  );
       return;
    }
+
 
    if( !strcmp( arg2, "base_value" ) )
    {
@@ -1305,7 +1338,7 @@ void do_setplanet( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_showclan( CHAR_DATA * ch, char *argument )
+void do_showclan( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
 
@@ -1345,7 +1378,7 @@ void do_showclan( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_showplanet( CHAR_DATA * ch, char *argument )
+void do_showplanet( CHAR_DATA * ch, const char *argument )
 {
    PLANET_DATA *planet;
 
@@ -1372,7 +1405,7 @@ void do_showplanet( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_makeclan( CHAR_DATA * ch, char *argument )
+void do_makeclan( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
 
@@ -1408,7 +1441,7 @@ void do_makeclan( CHAR_DATA * ch, char *argument )
    clan->tmpstr = STRALLOC( "" );
 }
 
-void do_makeplanet( CHAR_DATA * ch, char *argument )
+void do_makeplanet( CHAR_DATA * ch, const char *argument )
 {
    PLANET_DATA *planet;
 
@@ -1443,7 +1476,7 @@ void do_makeplanet( CHAR_DATA * ch, char *argument )
    planet->flags = 0;
 }
 
-void do_clans( CHAR_DATA * ch, char *argument )
+void do_clans( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
    PLANET_DATA *planet;
@@ -1464,7 +1497,7 @@ void do_clans( CHAR_DATA * ch, char *argument )
       for( planet = first_planet; planet; planet = planet->next )
          if( clan == planet->governed_by )
          {
-            support += planet->pop_support;
+	   support += ( int ) planet->pop_support;
             pCount++;
             revenue += get_taxes( planet );
          }
@@ -1515,7 +1548,7 @@ void do_clans( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_planets( CHAR_DATA * ch, char *argument )
+void do_planets( CHAR_DATA * ch, const char *argument )
 {
    PLANET_DATA *planet;
    int count = 0;
@@ -1550,15 +1583,15 @@ void do_planets( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_orders( CHAR_DATA * ch, char *argument )
+void do_orders( CHAR_DATA * ch, const char *argument )
 {
 }
 
-void do_guilds( CHAR_DATA * ch, char *argument )
+void do_guilds( CHAR_DATA * ch, const char *argument )
 {
 }
 
-void do_shove( CHAR_DATA * ch, char *argument )
+void do_shove( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -1671,7 +1704,7 @@ act( AT_ACTION, buf, ch, NULL, NULL, TO_ROOM );
       add_timer( ch, TIMER_SHOVEDRAG, 10, NULL, 0 );
 }
 
-void do_drag( CHAR_DATA * ch, char *argument )
+void do_drag( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -1784,7 +1817,7 @@ act( AT_ACTION, buf, ch, NULL, NULL, TO_ROOM );
    return;
 }
 
-void do_enlist( CHAR_DATA * ch, char *argument )
+void do_enlist( CHAR_DATA * ch, const char *argument )
 {
 
    CLAN_DATA *clan;
@@ -1830,7 +1863,7 @@ void do_enlist( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_resign( CHAR_DATA * ch, char *argument )
+void do_resign( CHAR_DATA * ch, const char *argument )
 {
 
    CLAN_DATA *clan;
@@ -1891,7 +1924,7 @@ void do_resign( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_clan_withdraw( CHAR_DATA * ch, char *argument )
+void do_clan_withdraw( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
    long amount;
@@ -1943,12 +1976,11 @@ void do_clan_withdraw( CHAR_DATA * ch, char *argument )
 
    clan->funds -= amount;
    ch->gold += amount;
-   save_clan( clan );
-
+   save_char_obj( ch );
 }
 
 
-void do_clan_donate( CHAR_DATA * ch, char *argument )
+void do_clan_donate( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
    long amount;
@@ -1991,17 +2023,16 @@ void do_clan_donate( CHAR_DATA * ch, char *argument )
 
    clan->funds += amount;
    ch->gold -= amount;
-   save_clan( clan );
-
+   save_char_obj( ch );
 }
 
-void do_newclan( CHAR_DATA * ch, char *argument )
+void do_newclan( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "This command is being recycled to conserve thought.\r\n", ch );
    return;
 }
 
-void do_appoint( CHAR_DATA * ch, char *argument )
+void do_appoint( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_STRING_LENGTH];
 
@@ -2056,7 +2087,7 @@ void do_appoint( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_demote( CHAR_DATA * ch, char *argument )
+void do_demote( CHAR_DATA * ch, const char *argument )
 {
 
    if( IS_NPC( ch ) || !ch->pcdata )
@@ -2103,7 +2134,7 @@ void do_demote( CHAR_DATA * ch, char *argument )
 
 }
 
-void do_capture( CHAR_DATA * ch, char *argument )
+void do_capture( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
    PLANET_DATA *planet;
@@ -2214,7 +2245,7 @@ void do_capture( CHAR_DATA * ch, char *argument )
    return;
 }
 
-void do_empower( CHAR_DATA * ch, char *argument )
+void do_empower( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -2411,7 +2442,7 @@ void load_senate(  )
 */
 }
 
-void do_senate( CHAR_DATA * ch, char *argument )
+void do_senate( CHAR_DATA * ch, const char *argument )
 {
 /*
     GOV_DATA *gov;
@@ -2435,7 +2466,7 @@ void do_senate( CHAR_DATA * ch, char *argument )
 */
 }
 
-void do_addsenator( CHAR_DATA * ch, char *argument )
+void do_addsenator( CHAR_DATA * ch, const char *argument )
 {
 /*
     GOVE_DATA *gov;
@@ -2453,7 +2484,7 @@ void do_addsenator( CHAR_DATA * ch, char *argument )
 */
 }
 
-void do_remsenator( CHAR_DATA * ch, char *argument )
+void do_remsenator( CHAR_DATA * ch, const char *argument )
 {
 /*
 	UNLINK( bounty, first_bounty, last_bounty, next, prev );
@@ -2469,8 +2500,8 @@ long get_taxes( PLANET_DATA * planet )
    long gain;
 
    gain = planet->base_value;
-   gain += planet->base_value * planet->pop_support / 100;
-   gain += UMAX( 0, planet->pop_support / 10 * planet->population );
+   gain += ( long )( planet->base_value * planet->pop_support / 100 );
+   gain += UMAX( 0, ( int )( planet->pop_support / 10 * planet->population ) );
 
    return gain;
 }

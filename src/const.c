@@ -78,7 +78,7 @@ const struct race_type race_table[MAX_RACE] = {
 };
 
 
-char *const npc_race[MAX_NPC_RACE] = {
+const char *const npc_race[MAX_NPC_RACE] = {
    "Human", "Wookiee", "Twi'lek", "Rodian", "Hutt", "Mon Calamari", "Noghri",
    "Gamorrean", "Jawa", "Adarian", "Ewok", "Verpine", "Defel", "Trandoshan", "Chadra-Fan", "Quarren",
    "Duinuogwuin", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24", "r25",
@@ -94,7 +94,7 @@ char *const npc_race[MAX_NPC_RACE] = {
 };
 
 
-char *const ability_name[MAX_ABILITY] = {
+const char *const ability_name[MAX_ABILITY] = {
    "combat", "piloting", "engineering", "bounty hunting", "smuggling", "diplomacy",
    "leadership", "force"
 };
@@ -376,7 +376,7 @@ const struct liq_type liq_table[LIQ_MAX] = {
    {"milkshake", "creamy", {0, 8, 5}}  /* 18 */
 };
 
-char *const attack_table[13] = {
+const char *const attack_table[13] = {
    "hit",
    "slice", "stab", "slash", "whip", "claw",
    "blast", "pound", "crush", "shot", "bite",

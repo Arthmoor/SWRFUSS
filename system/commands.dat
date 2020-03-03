@@ -2759,6 +2759,14 @@ Log         1
 End
 
 #COMMAND
+Name        setmssp~
+Code        do_setmssp
+Position    100
+Level       103
+Log         1
+End
+
+#COMMAND
 Name        setstarsystem~
 Code        do_setstarsystem
 Position    0

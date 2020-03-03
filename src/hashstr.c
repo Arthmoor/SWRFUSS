@@ -43,8 +43,6 @@
 #define TRUE 1
 #endif
 
-typedef unsigned char bool;
-
 #define STR_HASH_SIZE	1024
 
 struct hashstr_data
@@ -54,9 +52,13 @@ struct hashstr_data
    unsigned short int length; /* length of string */
 };
 
-char *str_alloc( char *str );
-char *quick_link( char *str );
-int str_free( char *str );
+#ifndef __cplusplus
+typedef unsigned char bool;
+#endif
+
+const char *str_alloc( const char *str );
+const char *quick_link( const char *str );
+int str_free( const char *str );
 void show_hash( int count );
 char *hash_stats( void );
 
@@ -67,7 +69,7 @@ struct hashstr_data *string_hash[STR_HASH_SIZE];
  * If found, increase link count, and return pointer,
  * otherwise add new string to hash table, and return pointer.
  */
-char *str_alloc( char *str )
+const char *str_alloc( const char *str )
 {
    register int len, hash, psize;
    register struct hashstr_data *ptr;
@@ -100,7 +102,7 @@ char *str_alloc( char *str )
  * in the hash table.  Function increments the link count and returns the
  * same pointer passed.
  */
-char *quick_link( char *str )
+const char *quick_link( const char *str )
 {
    register struct hashstr_data *ptr;
 
@@ -121,7 +123,7 @@ char *quick_link( char *str )
  * hash table and disposed of.
  * returns how many links are left, or -1 if an error occurred.
  */
-int str_free( char *str )
+int str_free( const char *str )
 {
    register int len, hash;
    register struct hashstr_data *ptr, *ptr2, *ptr2_next;
@@ -193,7 +195,7 @@ void hash_dump( int hash )
    fprintf( stderr, "Total strings in hash %d: %d\r\n", hash, c );
 }
 
-char *check_hash( char *str )
+char *check_hash( const char *str )
 {
    static char buf[1024];
    int len, hash, psize, p = 0, c;
@@ -260,7 +262,7 @@ void show_high_hash( int top )
          }
 }
 
-bool in_hash_table( char *str )
+bool in_hash_table( const char *str )
 {
    register int len, hash, psize;
    register struct hashstr_data *ptr;

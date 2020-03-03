@@ -30,6 +30,7 @@
 #include <math.h>
 #include <dlfcn.h>
 #include "mud.h"
+#include "mssp.h"
 
 void init_supermob( void );
 
@@ -58,7 +59,7 @@ EXTRACT_CHAR_DATA *extracted_char_queue;
 
 CHAR_DATA *first_char;
 CHAR_DATA *last_char;
-char *help_greeting;
+const char *help_greeting;
 char log_buf[2 * MAX_INPUT_LENGTH];
 
 OBJ_DATA *first_object;
@@ -71,6 +72,7 @@ int cur_qchars;
 int nummobsloaded;
 int numobjsloaded;
 int physicalobjects;
+time_t mud_start_time;
 
 AUCTION_DATA *auction;  /* auctions */
 OBJ_DATA *supermob_obj;
@@ -241,6 +243,8 @@ ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
 
 AREA_DATA *first_area;
 AREA_DATA *last_area;
+AREA_DATA *first_area_name;   /*Used for alphanum. sort */
+AREA_DATA *last_area_name;
 AREA_DATA *first_build;
 AREA_DATA *last_build;
 AREA_DATA *first_asort;
@@ -267,6 +271,7 @@ int top_vroom;
  * Semi-locals.
  */
 bool fBootDb;
+bool DONT_UPPER;
 FILE *fpArea;
 char strArea[MAX_INPUT_LENGTH];
 
@@ -276,19 +281,19 @@ char strArea[MAX_INPUT_LENGTH];
 void init_mm args( ( void ) );
 void load_specfuns( void );
 void boot_log args( ( const char *str, ... ) );
-void load_area args( ( FILE * fp ) );
+AREA_DATA *load_area args( ( FILE * fp, int aversion ) );
 void load_author args( ( AREA_DATA * tarea, FILE * fp ) );
 void load_economy args( ( AREA_DATA * tarea, FILE * fp ) );
 void load_resetmsg args( ( AREA_DATA * tarea, FILE * fp ) );   /* Rennard */
 void load_flags args( ( AREA_DATA * tarea, FILE * fp ) );
-void load_helps args( ( AREA_DATA * tarea, FILE * fp ) );
+void load_helps args( ( FILE * fp ) );
 void load_mobiles args( ( AREA_DATA * tarea, FILE * fp ) );
 void load_objects args( ( AREA_DATA * tarea, FILE * fp ) );
 void load_resets args( ( AREA_DATA * tarea, FILE * fp ) );
 void load_rooms args( ( AREA_DATA * tarea, FILE * fp ) );
-void load_shops args( ( AREA_DATA * tarea, FILE * fp ) );
-void load_repairs args( ( AREA_DATA * tarea, FILE * fp ) );
-void load_specials args( ( AREA_DATA * tarea, FILE * fp ) );
+void load_shops args( ( FILE * fp ) );
+void load_repairs args( ( FILE * fp ) );
+void load_specials args( ( FILE * fp ) );
 void load_ranges args( ( AREA_DATA * tarea, FILE * fp ) );
 void load_buildlist args( ( void ) );
 bool load_systemdata args( ( SYSTEM_DATA * sys ) );
@@ -306,7 +311,7 @@ void mprog_read_programs args( ( FILE * fp, MOB_INDEX_DATA * pMobIndex ) );
 void oprog_read_programs args( ( FILE * fp, OBJ_INDEX_DATA * pObjIndex ) );
 void rprog_read_programs args( ( FILE * fp, ROOM_INDEX_DATA * pRoomIndex ) );
 
-void shutdown_mud( char *reason )
+void shutdown_mud( const char *reason )
 {
    FILE *fp;
 
@@ -343,6 +348,8 @@ void boot_db( bool fCopyOver )
 
    log_string( "Loading commands..." );
    load_commands();
+
+   mud_start_time = current_time;
 
    log_string( "Loading spec_funs..." );
    load_specfuns();
@@ -407,6 +414,9 @@ void boot_db( bool fCopyOver )
    log_string( "Making wizlist" );
    make_wizlist(  );
 
+   log_string( "Loading MSSP Data..." );
+   load_mssp_data( );
+
    fBootDb = TRUE;
 
    nummobsloaded = 0;
@@ -419,6 +429,8 @@ void boot_db( bool fCopyOver )
    last_char = NULL;
    first_area = NULL;
    last_area = NULL;
+   first_area_name = NULL;
+   last_area_name = NULL;
    first_build = NULL;
    last_area = NULL;
    first_shop = NULL;
@@ -499,6 +511,8 @@ void boot_db( bool fCopyOver )
 
    }
 
+   log_string( "Loading DNS cache..." ); /* Samson 1-30-02 */
+   load_dns();
 
    /*
     * Assign gsn's for skills which need them.
@@ -630,22 +644,28 @@ void boot_db( bool fCopyOver )
       FILE *fpList;
 
       log_string( "Reading in area files..." );
-      if( ( fpList = fopen( AREA_LIST, "r" ) ) == NULL )
+      if( !( fpList = fopen( AREA_LIST, "r" ) ) )
       {
+         perror( AREA_LIST );
          shutdown_mud( "Unable to open area list" );
          exit( 1 );
       }
 
       for( ;; )
       {
-         strcpy( strArea, fread_word( fpList ) );
+         if( feof( fpList ) )
+         {
+            bug( "%s: EOF encountered reading area list - no $ found at end of file.", __FUNCTION__ );
+            break;
+         }
+         mudstrlcpy( strArea, fread_word( fpList ), MAX_INPUT_LENGTH );
          if( strArea[0] == '$' )
             break;
 
-         load_area_file( last_area, strArea );
-
+         load_area_file( NULL, strArea );
       }
       fclose( fpList );
+      fpList = NULL;
    }
 
    /*
@@ -701,20 +721,16 @@ void boot_db( bool fCopyOver )
    return;
 }
 
-
-
 /*
  * Load an 'area' header line.
  */
-void load_area( FILE * fp )
+AREA_DATA *load_area( FILE * fp, int aversion )
 {
    AREA_DATA *pArea;
 
    CREATE( pArea, AREA_DATA, 1 );
+   pArea->version = aversion;
    pArea->first_room = pArea->last_room = NULL;
-   pArea->next_on_planet = NULL;
-   pArea->prev_on_planet = NULL;
-   pArea->planet = NULL;
    pArea->name = fread_string_nohash( fp );
    pArea->author = STRALLOC( "unknown" );
    pArea->filename = str_dup( strArea );
@@ -733,9 +749,17 @@ void load_area( FILE * fp )
 
    LINK( pArea, first_area, last_area, next, prev );
    top_area++;
-   return;
+   return pArea;
 }
 
+/* Load the version number of the area file if none exists, then it
+ * is set to version 0 when #AREA is read in which is why we check for
+ * the #AREA here.  --Shaddai
+ */
+void load_version( AREA_DATA * tarea, FILE * fp )
+{
+   tarea->version = fread_number( fp );
+}
 
 /*
  * Load an author section. Scryn 2/1/96
@@ -808,7 +832,7 @@ void load_resetmsg( AREA_DATA * tarea, FILE * fp )
  */
 void load_flags( AREA_DATA * tarea, FILE * fp )
 {
-   char *ln;
+  const char *ln;
    int x1, x2;
 
    if( !tarea )
@@ -875,7 +899,7 @@ void add_help( HELP_DATA * pHelp )
 /*
  * Load a help section.
  */
-void load_helps( AREA_DATA * tarea, FILE * fp )
+void load_helps( FILE * fp )
 {
    HELP_DATA *pHelp;
 
@@ -922,7 +946,7 @@ void add_char( CHAR_DATA * ch )
 void load_mobiles( AREA_DATA * tarea, FILE * fp )
 {
    MOB_INDEX_DATA *pMobIndex;
-   char *ln;
+   const char *ln;
    int x1, x2, x3, x4, x5, x6, x7, x8;
 
    if( !tarea )
@@ -1002,8 +1026,10 @@ void load_mobiles( AREA_DATA * tarea, FILE * fp )
       pMobIndex->long_descr = fread_string( fp );
       pMobIndex->description = fread_string( fp );
 
-      pMobIndex->long_descr[0] = UPPER( pMobIndex->long_descr[0] );
-      pMobIndex->description[0] = UPPER( pMobIndex->description[0] );
+      // well, it's pretty nasty to cast, but we know that we own this
+      // memory because we just created it.
+      ((char*)pMobIndex->long_descr)[0] = UPPER( pMobIndex->long_descr[0] );
+      ((char*)pMobIndex->description)[0] = UPPER( pMobIndex->description[0] );
 
       pMobIndex->act = fread_number( fp ) | ACT_IS_NPC;
       pMobIndex->affected_by = fread_number( fp );
@@ -1145,7 +1171,7 @@ void load_objects( AREA_DATA * tarea, FILE * fp )
 {
    OBJ_INDEX_DATA *pObjIndex;
    char letter;
-   char *ln;
+   const char *ln;
    int x1, x2, x3, x4, x5, x6;
 
    if( !tarea )
@@ -1231,7 +1257,7 @@ void load_objects( AREA_DATA * tarea, FILE * fp )
       /*
        * pObjIndex->short_descr[0]  = LOWER(pObjIndex->short_descr[0]);
        */
-      pObjIndex->description[0] = UPPER( pObjIndex->description[0] );
+      ((char*)pObjIndex->description)[0] = UPPER( pObjIndex->description[0] );
 
       ln = fread_line( fp );
       x1 = x2 = x3 = x4 = 0;
@@ -1630,7 +1656,7 @@ void load_rooms( AREA_DATA * tarea, FILE * fp )
 {
    ROOM_INDEX_DATA *pRoomIndex;
    char buf[MAX_STRING_LENGTH];
-   char *ln;
+   const char *ln;
 
    if( !tarea )
    {
@@ -1827,7 +1853,7 @@ void load_rooms( AREA_DATA * tarea, FILE * fp )
 /*
  * Load a shop section.
  */
-void load_shops( AREA_DATA * tarea, FILE * fp )
+void load_shops( FILE * fp )
 {
    SHOP_DATA *pShop;
 
@@ -1870,7 +1896,7 @@ void load_shops( AREA_DATA * tarea, FILE * fp )
 /*
  * Load a repair shop section.					-Thoric
  */
-void load_repairs( AREA_DATA * tarea, FILE * fp )
+void load_repairs( FILE * fp )
 {
    REPAIR_DATA *rShop;
 
@@ -1908,10 +1934,11 @@ void load_repairs( AREA_DATA * tarea, FILE * fp )
    return;
 }
 
+
 /*
  * Load spec proc declarations.
  */
-void load_specials( AREA_DATA * tarea, FILE * fp )
+void load_specials( FILE * fp )
 {
    for( ;; )
    {
@@ -1933,7 +1960,7 @@ void load_specials( AREA_DATA * tarea, FILE * fp )
          case 'M':
          {
             char *temp;
-            pMobIndex = get_mob_index( fread_number ( fp ) );
+            pMobIndex = get_mob_index( fread_number( fp ) );
             temp = fread_word( fp );
             if( !pMobIndex )
             {
@@ -1964,11 +1991,12 @@ void load_specials( AREA_DATA * tarea, FILE * fp )
                   pMobIndex->spec_funname2 = STRALLOC( temp );
             }
          }
-         break;
+            break;
       }
       fread_to_eol( fp );
    }
 }
+
 
 /*
  * Load soft / hard area ranges.
@@ -1976,7 +2004,7 @@ void load_specials( AREA_DATA * tarea, FILE * fp )
 void load_ranges( AREA_DATA * tarea, FILE * fp )
 {
    int x1, x2, x3, x4;
-   char *ln;
+   const char *ln;
 
    if( !tarea )
    {
@@ -2309,7 +2337,7 @@ CHAR_DATA *create_mobile( MOB_INDEX_DATA * pMobIndex )
    if( pMobIndex->ac )
       mob->armor = pMobIndex->ac;
    else
-      mob->armor = LEVEL_HERO - mob->top_level * 2.5;
+     mob->armor = ( short )( LEVEL_HERO - mob->top_level * 2.5 );
 
    if( !pMobIndex->hitnodice )
       mob->max_hit = mob->top_level * 10 + number_range( mob->top_level, mob->top_level * 10 );
@@ -2722,7 +2750,7 @@ void free_char( CHAR_DATA * ch )
 /*
  * Get an extra description from a list.
  */
-char *get_extra_descr( const char *name, EXTRA_DESCR_DATA * ed )
+const char *get_extra_descr( const char *name, EXTRA_DESCR_DATA * ed )
 {
    for( ; ed; ed = ed->next )
       if( is_name( name, ed->keyword ) )
@@ -3047,7 +3075,7 @@ bool is_valid_filename( CHAR_DATA *ch, const char *direct, const char *filename 
 /*
  * Read a string from file fp
  */
-char *fread_string( FILE * fp )
+const char *fread_string( FILE * fp )
 {
    char buf[MAX_STRING_LENGTH];
    char *plast;
@@ -3227,6 +3255,7 @@ void fread_to_eol( FILE * fp )
 /*
  * Read to end of line into static buffer			-Thoric
  */
+
 char *fread_line( FILE * fp )
 {
    static char line[MAX_STRING_LENGTH];
@@ -3294,6 +3323,7 @@ char *fread_line( FILE * fp )
 /*
  * Read one word (into static buffer).
  */
+
 char *fread_word( FILE * fp )
 {
    static char word[MAX_INPUT_LENGTH];
@@ -3351,7 +3381,7 @@ char *fread_word( FILE * fp )
 }
 
 
-void do_memory( CHAR_DATA * ch, char *argument )
+void do_memory( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    int hash;
@@ -3571,6 +3601,25 @@ void smash_tilde( char *str )
 }
 
 /*
+ * From SmaugFUSS
+ */
+
+const char* smash_tilde_static( const char *str )
+{
+  static char buf[MAX_STRING_LENGTH];
+  mudstrlcpy( buf, str, MAX_STRING_LENGTH );
+  smash_tilde( buf );
+  return buf;
+}
+
+char* smash_tilde_copy( const char *str )
+{
+  char* result = strdup(str);
+  smash_tilde(result);
+  return result;
+}
+
+/*
  * Encodes the tildes in a string.				-Thoric
  * Used for player-entered strings that go into disk files.
  */
@@ -3583,22 +3632,22 @@ void hide_tilde( char *str )
    return;
 }
 
-char *show_tilde( char *str )
+const char *show_tilde( const char *str )
 {
-   static char buf[MAX_STRING_LENGTH];
-   char *bufptr;
+  static char buf[MAX_STRING_LENGTH];
+  char *bufptr = buf;
 
-   bufptr = buf;
-   for( ; *str != '\0'; str++, bufptr++ )
-   {
+  for( ; *str != '\0'; str++, bufptr++ )
+    {
       if( *str == HIDDEN_TILDE )
-         *bufptr = '~';
+	*bufptr = '~';
       else
-         *bufptr = *str;
-   }
-   *bufptr = '\0';
+	*bufptr = *str;
+    }
 
-   return buf;
+  *bufptr = '\0';
+
+  return buf;
 }
 
 
@@ -3794,7 +3843,7 @@ bool isavowel( char letter )
 /*
  * Shove either "a " or "an " onto the beginning of a string	-Thoric
  */
-char *aoran( const char *str )
+const char *aoran( const char *str )
 {
    static char temp[MAX_STRING_LENGTH];
 
@@ -3816,7 +3865,7 @@ char *aoran( const char *str )
 /*
  * Append a string to a file.
  */
-void append_file( CHAR_DATA * ch, char *file, char *str )
+void append_file( CHAR_DATA * ch, const char *file, const char *str )
 {
    FILE *fp;
 
@@ -3838,7 +3887,7 @@ void append_file( CHAR_DATA * ch, char *file, char *str )
 /*
  * Append a string to a file.
  */
-void append_to_file( char *file, char *str )
+void append_to_file( const char *file, const char *str )
 {
    FILE *fp;
 
@@ -3938,7 +3987,7 @@ void boot_log( const char *str, ... )
 /*
  * Dump a text file to a player, a line at a time		-Thoric
  */
-void show_file( CHAR_DATA * ch, char *filename )
+void show_file( CHAR_DATA * ch, const char *filename )
 {
    FILE *fp;
    char buf[MAX_STRING_LENGTH];
@@ -3968,7 +4017,7 @@ void show_file( CHAR_DATA * ch, char *filename )
 /*
  * Show the boot log file					-Thoric
  */
-void do_dmesg( CHAR_DATA * ch, char *argument )
+void do_dmesg( CHAR_DATA * ch, const char *argument )
 {
    set_pager_color( AT_LOG, ch );
    show_file( ch, BOOTLOG_FILE );
@@ -4004,6 +4053,30 @@ void log_string_plus( const char *str, short log_type, short level )
          break;
    }
    return;
+}
+
+void log_printf_plus( short log_type, short level, const char *fmt, ... )
+{
+   char buf[MAX_STRING_LENGTH * 2];
+   va_list args;
+
+   va_start( args, fmt );
+   vsnprintf( buf, MAX_STRING_LENGTH * 2, fmt, args );
+   va_end( args );
+
+   log_string_plus( buf, log_type, level );
+}
+
+void log_printf( const char *fmt, ... )
+{
+   char buf[MAX_STRING_LENGTH * 2];
+   va_list args;
+
+   va_start( args, fmt );
+   vsnprintf( buf, MAX_STRING_LENGTH * 2, fmt, args );
+   va_end( args );
+
+   log_string_plus( buf, LOG_NORMAL, LEVEL_LOG );
 }
 
 /*
@@ -4089,7 +4162,7 @@ void make_wizlist(  )
    DIR *dp;
    struct dirent *dentry;
    FILE *gfp;
-   char *word;
+   const char *word;
    int ilevel, iflags;
    WIZENT *wiz, *wiznext;
    char buf[MAX_STRING_LENGTH];
@@ -4195,7 +4268,7 @@ void make_wizlist(  )
 }
 
 
-void do_makewizlist( CHAR_DATA * ch, char *argument )
+void do_makewizlist( CHAR_DATA * ch, const char *argument )
 {
    make_wizlist(  );
 }
@@ -4205,7 +4278,7 @@ void do_makewizlist( CHAR_DATA * ch, char *argument )
 
 /* This routine reads in scripts of MUDprograms from a file */
 
-int mprog_name_to_type( char *name )
+int mprog_name_to_type( const char *name )
 {
    if( !str_cmp( name, "in_file_prog" ) )
       return IN_FILE_PROG;
@@ -4284,7 +4357,7 @@ int mprog_name_to_type( char *name )
    return ( ERROR_PROG );
 }
 
-void mobprog_file_read( MOB_INDEX_DATA *mob, char *f )
+void mobprog_file_read( MOB_INDEX_DATA *mob, const char *f )
 {
    MPROG_DATA *mprg = NULL;
    char MUDProgfile[256];
@@ -4347,7 +4420,7 @@ void mprog_read_programs( FILE *fp, MOB_INDEX_DATA *mob )
 {
    MPROG_DATA *mprg;
    char letter;
-   char *word;
+   const char *word;
 
    for( ;; )
    {
@@ -4399,7 +4472,7 @@ void mprog_read_programs( FILE *fp, MOB_INDEX_DATA *mob )
  */
 
 /* This routine reads in scripts of OBJprograms from a file */
-void objprog_file_read( OBJ_INDEX_DATA *obj, char *f )
+void objprog_file_read( OBJ_INDEX_DATA *obj, const char *f )
 {
    MPROG_DATA *mprg = NULL;
    char MUDProgfile[256];
@@ -4462,7 +4535,7 @@ void oprog_read_programs( FILE *fp, OBJ_INDEX_DATA *obj )
 {
    MPROG_DATA *mprg;
    char letter;
-   char *word;
+   const char *word;
 
    for(;; )
    {
@@ -4514,7 +4587,7 @@ void oprog_read_programs( FILE *fp, OBJ_INDEX_DATA *obj )
  */
 
 /* This routine reads in scripts of OBJprograms from a file */
-void roomprog_file_read( ROOM_INDEX_DATA *room, char *f )
+void roomprog_file_read( ROOM_INDEX_DATA *room, const char *f )
 {
    MPROG_DATA *mprg = NULL;
    char MUDProgfile[256];
@@ -4577,7 +4650,7 @@ void rprog_read_programs( FILE *fp, ROOM_INDEX_DATA *room )
 {
    MPROG_DATA *mprg;
    char letter;
-   char *word;
+   const char *word;
 
    for( ;; )
    {
@@ -4948,7 +5021,7 @@ ROOM_INDEX_DATA *make_room( int vnum, AREA_DATA *area )
  * Create a new INDEX object (for online building)		-Thoric
  * Option to clone an existing index object.
  */
-OBJ_INDEX_DATA *make_object( int vnum, int cvnum, char *name )
+OBJ_INDEX_DATA *make_object( int vnum, int cvnum, const char *name )
 {
    OBJ_INDEX_DATA *pObjIndex, *cObjIndex;
    char buf[MAX_STRING_LENGTH];
@@ -4972,8 +5045,9 @@ OBJ_INDEX_DATA *make_object( int vnum, int cvnum, char *name )
       sprintf( buf, "A %s is here.", name );
       pObjIndex->description = STRALLOC( buf );
       pObjIndex->action_desc = STRALLOC( "" );
-      pObjIndex->short_descr[0] = LOWER( pObjIndex->short_descr[0] );
-      pObjIndex->description[0] = UPPER( pObjIndex->description[0] );
+      // it's safe to cast these because we just created the object
+      ((char*)pObjIndex->short_descr)[0] = LOWER( pObjIndex->short_descr[0] );
+      ((char*)pObjIndex->description)[0] = UPPER( pObjIndex->description[0] );
       pObjIndex->item_type = ITEM_TRASH;
       pObjIndex->extra_flags = ITEM_PROTOTYPE;
       pObjIndex->wear_flags = 0;
@@ -5038,7 +5112,7 @@ OBJ_INDEX_DATA *make_object( int vnum, int cvnum, char *name )
  * Create a new INDEX mobile (for online building)		-Thoric
  * Option to clone an existing index mobile.
  */
-MOB_INDEX_DATA *make_mobile( int vnum, int cvnum, char *name )
+MOB_INDEX_DATA *make_mobile( int vnum, int cvnum, const char *name )
 {
    MOB_INDEX_DATA *pMobIndex, *cMobIndex;
    char buf[MAX_STRING_LENGTH];
@@ -5060,9 +5134,10 @@ MOB_INDEX_DATA *make_mobile( int vnum, int cvnum, char *name )
       sprintf( buf, "Some god abandoned a newly created %s here.\r\n", name );
       pMobIndex->long_descr = STRALLOC( buf );
       pMobIndex->description = STRALLOC( "" );
-      pMobIndex->short_descr[0] = LOWER( pMobIndex->short_descr[0] );
-      pMobIndex->long_descr[0] = UPPER( pMobIndex->long_descr[0] );
-      pMobIndex->description[0] = UPPER( pMobIndex->description[0] );
+      // it's safe to cast these because we just created the object
+      ((char*)pMobIndex->short_descr)[0] = LOWER( pMobIndex->short_descr[0] );
+      ((char*)pMobIndex->long_descr)[0] = UPPER( pMobIndex->long_descr[0] );
+      ((char*)pMobIndex->description)[0] = UPPER( pMobIndex->description[0] );
       pMobIndex->act = ACT_IS_NPC | ACT_PROTOTYPE;
       pMobIndex->affected_by = 0;
       pMobIndex->pShop = NULL;
@@ -5098,7 +5173,7 @@ MOB_INDEX_DATA *make_mobile( int vnum, int cvnum, char *name )
       pMobIndex->resistant = 0;
       pMobIndex->immune = 0;
       pMobIndex->susceptible = 0;
-      pMobIndex->numattacks = 0;
+      pMobIndex->numattacks = 1;
       pMobIndex->attacks = 0;
       pMobIndex->defenses = 0;
    }
@@ -5261,38 +5336,1951 @@ void fix_area_exits( AREA_DATA * tarea )
    }
 }
 
-void load_area_file( AREA_DATA * tarea, char *filename )
+void process_sorting( AREA_DATA * tarea )
 {
-/*    FILE *fpin;
-    what intelligent person stopped using fpArea?????
-    if fpArea isn't being used, then no filename or linenumber
-    is printed when an error occurs during loading the area..
-    (bug uses fpArea)
-      --TRI  */
-
    if( fBootDb )
-      tarea = last_area;
-   if( !fBootDb && !tarea )
    {
-      bug( "Load_area: null area!" );
-      return;
+      sort_area_by_name( tarea );   /* 4/27/97 */
+      sort_area( tarea, FALSE );
+   }
+   fprintf( stderr, "%-14s: Rooms: %5d - %-5d Objs: %5d - %-5d Mobs: %5d - %d\n",
+            tarea->filename,
+            tarea->low_r_vnum, tarea->hi_r_vnum, tarea->low_o_vnum, tarea->hi_o_vnum, tarea->low_m_vnum, tarea->hi_m_vnum );
+   if( !tarea->author )
+      tarea->author = STRALLOC( "" );
+   SET_BIT( tarea->status, AREA_LOADED );
+}
+
+EXTRA_DESCR_DATA *fread_fuss_exdesc( FILE * fp )
+{
+   EXTRA_DESCR_DATA *ed;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   CREATE( ed, EXTRA_DESCR_DATA, 1 );
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDEXDESC" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDEXDESC";
+      }
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case '#':
+            if( !str_cmp( word, "#ENDEXDESC" ) )
+            {
+               if( !ed->keyword )
+               {
+                  bug( "%s: Missing ExDesc keyword. Returning NULL.", __FUNCTION__ );
+                  STRFREE( ed->description );
+                  DISPOSE( ed );
+                  return NULL;
+               }
+
+               if( !ed->description )
+                  ed->description = STRALLOC( "" );
+
+               return ed;
+            }
+            break;
+
+         case 'E':
+            KEY( "ExDescKey", ed->keyword, fread_string( fp ) );
+            KEY( "ExDesc", ed->description, fread_string( fp ) );
+            break;
+      }
    }
 
-   if( ( fpArea = fopen( filename, "r" ) ) == NULL )
+   // Reach this point, you fell through somehow. The data is no longer valid.
+   bug( "%s: Reached fallout point! ExtraDesc data invalid.", __FUNCTION__ );
+   DISPOSE( ed );
+   return NULL;
+}
+
+AFFECT_DATA *fread_fuss_affect( FILE * fp, const char *word )
+{
+   AFFECT_DATA *paf;
+   int pafmod;
+
+   CREATE( paf, AFFECT_DATA, 1 );
+   if( !strcmp( word, "Affect" ) )
    {
-      bug( "load_area: error loading file (can't open)" );
-      bug( filename );
+      paf->type = fread_number( fp );
+   }
+   else
+   {
+      int sn;
+
+      sn = skill_lookup( fread_word( fp ) );
+      if( sn < 0 )
+         bug( "%s: unknown skill.", __FUNCTION__ );
+      else
+         paf->type = sn;
+   }
+   paf->duration = fread_number( fp );
+   pafmod = fread_number( fp );
+   paf->location = fread_number( fp );
+   paf->bitvector = fread_number( fp );
+
+   if( paf->location == APPLY_WEAPONSPELL
+       || paf->location == APPLY_WEARSPELL
+       || paf->location == APPLY_STRIPSN || paf->location == APPLY_REMOVESPELL )
+      paf->modifier = slot_lookup( pafmod );
+   else
+      paf->modifier = pafmod;
+
+   ++top_affect;
+   return paf;
+}
+
+void fread_fuss_exit( FILE * fp, ROOM_INDEX_DATA * pRoomIndex )
+{
+   EXIT_DATA *pexit = NULL;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDEXIT" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDEXIT";
+      }
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case '#':
+            if( !str_cmp( word, "#ENDEXIT" ) )
+            {
+               if( !pexit->description )
+                  pexit->description = STRALLOC( "" );
+               if( !pexit->keyword )
+                  pexit->keyword = STRALLOC( "" );
+
+               return;
+            }
+            break;
+
+         case 'D':
+            KEY( "Desc", pexit->description, fread_string( fp ) );
+            KEY( "Distance", pexit->distance, fread_number( fp ) );
+            if( !str_cmp( word, "Direction" ) )
+            {
+               int door = get_dir( fread_flagstring( fp ) );
+
+               if( door < 0 || door > DIR_SOMEWHERE )
+               {
+                  bug( "%s: vnum %d has bad door number %d.", __FUNCTION__, pRoomIndex->vnum, door );
+                  if( fBootDb )
+                     return;
+               }
+               pexit = make_exit( pRoomIndex, NULL, door );
+            }
+            break;
+
+         case 'F':
+            if( !str_cmp( word, "Flags" ) )
+            {
+               const char *exitflags = NULL;
+               char flag[MAX_INPUT_LENGTH];
+               int value;
+
+               exitflags = fread_flagstring( fp );
+
+               while( exitflags[0] != '\0' )
+               {
+                  exitflags = one_argument( exitflags, flag );
+                  value = get_exflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown exitflag: %s", flag );
+                  else
+                     SET_BIT( pexit->exit_info, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'K':
+            KEY( "Key", pexit->key, fread_number( fp ) );
+            KEY( "Keywords", pexit->keyword, fread_string( fp ) );
+            break;
+
+         case 'T':
+            KEY( "ToRoom", pexit->vnum, fread_number( fp ) );
+            break;
+      }
+   }
+
+   // Reach this point, you fell through somehow. The data is no longer valid.
+   bug( "%s: Reached fallout point! Exit data invalid.", __FUNCTION__ );
+   if( pexit )
+      extract_exit( pRoomIndex, pexit );
+   return;
+}
+
+void rprog_file_read( ROOM_INDEX_DATA * prog_target, const char *f )
+{
+   MPROG_DATA *mprg = NULL;
+   char MUDProgfile[256];
+   FILE *progfile;
+   char letter;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   snprintf( MUDProgfile, 256, "%s%s", PROG_DIR, f );
+
+   if( !( progfile = fopen( MUDProgfile, "r" ) ) )
+   {
+      bug( "%s: couldn't open mudprog file", __FUNCTION__ );
       return;
    }
 
    for( ;; )
    {
-      char *word;
+      letter = fread_letter( progfile );
 
+      if( letter != '#' )
+      {
+         bug( "%s: MUDPROG char", __FUNCTION__ );
+         break;
+      }
+
+      const char *word = ( feof( progfile ) ? "ENDFILE" : fread_word( progfile ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "ENDFILE";
+      }
+
+      if( !str_cmp( word, "ENDFILE" ) )
+         break;
+
+      if( !str_cmp( word, "MUDPROG" ) )
+      {
+         CREATE( mprg, MPROG_DATA, 1 );
+
+         for( ;; )
+         {
+            word = ( feof( progfile ) ? "#ENDPROG" : fread_word( progfile ) );
+
+            if( word[0] == '\0' )
+            {
+               log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+               word = "#ENDPROG";
+            }
+
+            if( !str_cmp( word, "#ENDPROG" ) )
+            {
+               mprg->next = prog_target->mudprogs;
+               prog_target->mudprogs = mprg;
+               break;
+            }
+
+            switch ( word[0] )
+            {
+               default:
+                  log_printf( "%s: no match: %s", __FUNCTION__, word );
+                  fread_to_eol( progfile );
+                  break;
+
+               case 'A':
+                  if( !str_cmp( word, "Arglist" ) )
+                  {
+                     mprg->arglist = fread_string( progfile );
+                     mprg->fileprog = true;
+
+                     switch ( mprg->type )
+                     {
+                        case IN_FILE_PROG:
+                           bug( "%s: Nested file programs are not allowed.", __FUNCTION__ );
+                           DISPOSE( mprg );
+                           break;
+
+                        default:
+                           break;
+                     }
+                     break;
+                  }
+                  break;
+
+               case 'C':
+                  KEY( "Comlist", mprg->comlist, fread_string( progfile ) );
+                  break;
+
+               case 'P':
+                  if( !str_cmp( word, "Progtype" ) )
+                  {
+                     mprg->type = mprog_name_to_type( fread_flagstring( progfile ) );
+                     break;
+                  }
+                  break;
+            }
+         }
+      }
+   }
+   fclose( progfile );
+   progfile = NULL;
+   return;
+}
+
+void fread_fuss_roomprog( FILE * fp, MPROG_DATA * mprg, ROOM_INDEX_DATA * prog_target )
+{
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDPROG" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDPROG";
+      }
+
+      if( !str_cmp( word, "#ENDPROG" ) )
+         return;
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case 'A':
+            if( !str_cmp( word, "Arglist" ) )
+            {
+               mprg->arglist = fread_string( fp );
+               mprg->fileprog = false;
+
+               switch ( mprg->type )
+               {
+                  case IN_FILE_PROG:
+                     rprog_file_read( prog_target, mprg->arglist );
+                     break;
+                  default:
+                     break;
+               }
+               break;
+            }
+            break;
+
+         case 'C':
+            KEY( "Comlist", mprg->comlist, fread_string( fp ) );
+            break;
+
+         case 'P':
+            if( !str_cmp( word, "Progtype" ) )
+            {
+               mprg->type = mprog_name_to_type( fread_flagstring( fp ) );
+               SET_BIT( prog_target->progtypes, mprg->type );
+               break;
+            }
+            break;
+      }
+   }
+}
+
+void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
+{
+   ROOM_INDEX_DATA *pRoomIndex = NULL;
+   bool oldroom = false;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDROOM" : fread_word( fp ) );
+      char flag[MAX_INPUT_LENGTH];
+      int value = 0;
+
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDROOM";
+      }
+
+      switch ( word[0] )
+      {
+         default:
+            bug( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case '#':
+            if( !str_cmp( word, "#ENDROOM" ) )
+            {
+               if( !pRoomIndex->description )
+                  pRoomIndex->description = STRALLOC( "" );
+
+               if( !oldroom )
+               {
+                  int iHash = pRoomIndex->vnum % MAX_KEY_HASH;
+                  pRoomIndex->next = room_index_hash[iHash];
+                  room_index_hash[iHash] = pRoomIndex;
+                  LINK( pRoomIndex, tarea->first_room, tarea->last_room, next_aroom, prev_aroom );
+                  ++top_room;
+               }
+               return;
+            }
+
+            if( !str_cmp( word, "#EXIT" ) )
+            {
+               fread_fuss_exit( fp, pRoomIndex );
+               break;
+            }
+
+            if( !str_cmp( word, "#EXDESC" ) )
+            {
+               EXTRA_DESCR_DATA *ed = fread_fuss_exdesc( fp );
+
+               if( ed )
+                  LINK( ed, pRoomIndex->first_extradesc, pRoomIndex->last_extradesc, next, prev );
+               break;
+            }
+
+            if( !str_cmp( word, "#MUDPROG" ) )
+            {
+               MPROG_DATA *mprg;
+
+               CREATE( mprg, MPROG_DATA, 1 );
+               fread_fuss_roomprog( fp, mprg, pRoomIndex );
+               mprg->next = pRoomIndex->mudprogs;
+               pRoomIndex->mudprogs = mprg;
+               break;
+            }
+            break;
+
+         /*case 'A':
+            if( !str_cmp( word, "Affect" ) || !str_cmp( word, "AffectData" ) )
+            {
+               AFFECT_DATA *af = fread_fuss_affect( fp, word );
+
+               if( af )
+                  LINK( af, pRoomIndex->first_permaffect, pRoomIndex->last_permaffect, next, prev );
+               break;
+            }
+            break; */
+
+         case 'D':
+            KEY( "Desc", pRoomIndex->description, fread_string( fp ) );
+            break;
+
+         case 'F':
+            if( !str_cmp( word, "Flags" ) )
+            {
+               const char *rflags = fread_flagstring( fp );
+
+               while( rflags[0] != '\0' )
+               {
+                  rflags = one_argument( rflags, flag );
+                  value = get_rflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown room flag: %s", flag );
+                  else
+                     SET_BIT( pRoomIndex->room_flags, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'N':
+            KEY( "Name", pRoomIndex->name, fread_string( fp ) );
+            break;
+
+         case 'R':
+            if( !str_cmp( word, "Reset" ) )
+            {
+               load_room_reset( pRoomIndex, fp );
+               break;
+            }
+            break;
+
+         case 'S':
+            if( !str_cmp( word, "Sector" ) )
+            {
+               int sector = get_secflag( fread_flagstring( fp ) );
+
+               if( sector < 0 || sector >= SECT_MAX )
+               {
+                  bug( "%s: Room #%d has bad sector type.", __FUNCTION__, pRoomIndex->vnum );
+                  sector = 1;
+               }
+
+               pRoomIndex->sector_type = sector;
+               break;
+            }
+
+            if( !str_cmp( word, "Stats" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3;
+
+               x1 = x2 = x3 = 0;
+               sscanf( ln, "%d %d %d", &x1, &x2, &x3 );
+
+               pRoomIndex->tele_delay = x1;
+               pRoomIndex->tele_vnum = x2;
+               pRoomIndex->tunnel = x3;
+
+               break;
+            }
+            break;
+
+         case 'V':
+            if( !str_cmp( word, "Vnum" ) )
+            {
+               bool tmpBootDb = fBootDb;
+               fBootDb = false;
+
+               int vnum = fread_number( fp );
+
+               if( get_room_index( vnum ) )
+               {
+                  if( tmpBootDb )
+                  {
+                     fBootDb = tmpBootDb;
+                     bug( "%s: vnum %d duplicated.", __FUNCTION__, vnum );
+
+                     // Try to recover, read to end of duplicated room and then bail out
+                     for( ;; )
+                     {
+                        word = feof( fp ) ? "#ENDROOM" : fread_word( fp );
+
+                        if( !str_cmp( word, "#ENDROOM" ) )
+                           return;
+                     }
+                  }
+                  else
+                  {
+                     pRoomIndex = get_room_index( vnum );
+                     log_printf_plus( LOG_BUILD, sysdata.build_level, "Cleaning room: %d", vnum );
+                     clean_room( pRoomIndex );
+                     oldroom = true;
+                  }
+               }
+               else
+               {
+                  CREATE( pRoomIndex, ROOM_INDEX_DATA, 1 );
+                  oldroom = false;
+               }
+               pRoomIndex->vnum = vnum;
+               pRoomIndex->area = tarea;
+               fBootDb = tmpBootDb;
+
+               if( fBootDb )
+               {
+                  if( !tarea->low_r_vnum )
+                     tarea->low_r_vnum = vnum;
+                  if( vnum > tarea->hi_r_vnum )
+                     tarea->hi_r_vnum = vnum;
+               }
+               break;
+            }
+            break;
+      }
+   }
+}
+
+void oprog_file_read( OBJ_INDEX_DATA * prog_target, const char *f )
+{
+   MPROG_DATA *mprg = NULL;
+   char MUDProgfile[256];
+   FILE *progfile;
+   char letter;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   snprintf( MUDProgfile, 256, "%s%s", PROG_DIR, f );
+
+   if( !( progfile = fopen( MUDProgfile, "r" ) ) )
+   {
+      bug( "%s: couldn't open mudprog file", __FUNCTION__ );
+      return;
+   }
+
+   for( ;; )
+   {
+      letter = fread_letter( progfile );
+
+      if( letter != '#' )
+      {
+         bug( "%s: MUDPROG char", __FUNCTION__ );
+         break;
+      }
+
+      const char *word = ( feof( progfile ) ? "ENDFILE" : fread_word( progfile ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "ENDFILE";
+      }
+
+      if( !str_cmp( word, "ENDFILE" ) )
+         break;
+
+      if( !str_cmp( word, "MUDPROG" ) )
+      {
+         CREATE( mprg, MPROG_DATA, 1 );
+
+         for( ;; )
+         {
+            word = ( feof( progfile ) ? "#ENDPROG" : fread_word( progfile ) );
+
+            if( word[0] == '\0' )
+            {
+               log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+               word = "#ENDPROG";
+            }
+
+            if( !str_cmp( word, "#ENDPROG" ) )
+            {
+               mprg->next = prog_target->mudprogs;
+               prog_target->mudprogs = mprg;
+               break;
+            }
+
+            switch ( word[0] )
+            {
+               default:
+                  log_printf( "%s: no match: %s", __FUNCTION__, word );
+                  fread_to_eol( progfile );
+                  break;
+
+               case 'A':
+                  if( !str_cmp( word, "Arglist" ) )
+                  {
+                     mprg->arglist = fread_string( progfile );
+                     mprg->fileprog = true;
+
+                     switch ( mprg->type )
+                     {
+                        case IN_FILE_PROG:
+                           bug( "%s: Nested file programs are not allowed.", __FUNCTION__ );
+                           DISPOSE( mprg );
+                           break;
+
+                        default:
+                           break;
+                     }
+                     break;
+                  }
+                  break;
+
+               case 'C':
+                  KEY( "Comlist", mprg->comlist, fread_string( progfile ) );
+                  break;
+
+               case 'P':
+                  if( !str_cmp( word, "Progtype" ) )
+                  {
+                     mprg->type = mprog_name_to_type( fread_flagstring( progfile ) );
+                     break;
+                  }
+                  break;
+            }
+         }
+      }
+   }
+   fclose( progfile );
+   progfile = NULL;
+   return;
+}
+
+void fread_fuss_objprog( FILE * fp, MPROG_DATA * mprg, OBJ_INDEX_DATA * prog_target )
+{
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDPROG" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDPROG";
+      }
+
+      if( !str_cmp( word, "#ENDPROG" ) )
+         return;
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case 'A':
+            if( !str_cmp( word, "Arglist" ) )
+            {
+               mprg->arglist = fread_string( fp );
+               mprg->fileprog = false;
+
+               switch ( mprg->type )
+               {
+                  case IN_FILE_PROG:
+                     oprog_file_read( prog_target, mprg->arglist );
+                     break;
+                  default:
+                     break;
+               }
+               break;
+            }
+            break;
+
+         case 'C':
+            KEY( "Comlist", mprg->comlist, fread_string( fp ) );
+            break;
+
+         case 'P':
+            if( !str_cmp( word, "Progtype" ) )
+            {
+               mprg->type = mprog_name_to_type( fread_flagstring( fp ) );
+               SET_BIT( prog_target->progtypes, mprg->type );
+               break;
+            }
+            break;
+      }
+   }
+}
+
+void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
+{
+   OBJ_INDEX_DATA *pObjIndex = NULL;
+   bool oldobj = false;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDOBJECT" : fread_word( fp ) );
+      char flag[MAX_INPUT_LENGTH];
+      int value = 0;
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDOBJECT";
+      }
+
+      switch ( word[0] )
+      {
+         default:
+            bug( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case '#':
+            if( !str_cmp( word, "#ENDOBJECT" ) )
+            {
+               if( !pObjIndex->description )
+                  pObjIndex->description = STRALLOC( "" );
+               if( !pObjIndex->action_desc )
+                  pObjIndex->action_desc = STRALLOC( "" );
+
+               if( !oldobj )
+               {
+                  int iHash = pObjIndex->vnum % MAX_KEY_HASH;
+                  pObjIndex->next = obj_index_hash[iHash];
+                  obj_index_hash[iHash] = pObjIndex;
+                  ++top_obj_index;
+               }
+               return;
+            }
+
+            if( !str_cmp( word, "#EXDESC" ) )
+            {
+               EXTRA_DESCR_DATA *ed = fread_fuss_exdesc( fp );
+               if( ed )
+                  LINK( ed, pObjIndex->first_extradesc, pObjIndex->last_extradesc, next, prev );
+               break;
+            }
+
+            if( !str_cmp( word, "#MUDPROG" ) )
+            {
+               MPROG_DATA *mprg;
+
+               CREATE( mprg, MPROG_DATA, 1 );
+               fread_fuss_objprog( fp, mprg, pObjIndex );
+               mprg->next = pObjIndex->mudprogs;
+               pObjIndex->mudprogs = mprg;
+               break;
+            }
+            break;
+
+         case 'A':
+            KEY( "Action", pObjIndex->action_desc, fread_string( fp ) );
+
+            if( !str_cmp( word, "Affect" ) || !str_cmp( word, "AffectData" ) )
+            {
+               AFFECT_DATA *af = fread_fuss_affect( fp, word );
+
+               if( af )
+                  LINK( af, pObjIndex->first_affect, pObjIndex->last_affect, next, prev );
+               break;
+            }
+            break;
+
+         case 'F':
+            if( !str_cmp( word, "Flags" ) )
+            {
+               const char *eflags = fread_flagstring( fp );
+
+               while( eflags[0] != '\0' )
+               {
+                  eflags = one_argument( eflags, flag );
+                  value = get_oflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown object extraflag: %s", flag );
+                  else
+                     SET_BIT( pObjIndex->extra_flags, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'K':
+            KEY( "Keywords", pObjIndex->name, fread_string( fp ) );
+            break;
+
+         case 'L':
+            KEY( "Long", pObjIndex->description, fread_string( fp ) );
+            break;
+
+         case 'S':
+            KEY( "Short", pObjIndex->short_descr, fread_string( fp ) );
+            if( !str_cmp( word, "Spells" ) )
+            {
+               switch ( pObjIndex->item_type )
+               {
+                  default:
+                     break;
+
+                  case ITEM_PILL:
+                  case ITEM_POTION:
+                  case ITEM_SCROLL:
+                     pObjIndex->value[1] = skill_lookup( fread_word( fp ) );
+                     pObjIndex->value[2] = skill_lookup( fread_word( fp ) );
+                     pObjIndex->value[3] = skill_lookup( fread_word( fp ) );
+                     break;
+
+                  case ITEM_STAFF:
+                  case ITEM_WAND:
+                     pObjIndex->value[3] = skill_lookup( fread_word( fp ) );
+                     break;
+
+                  case ITEM_SALVE:
+                     pObjIndex->value[4] = skill_lookup( fread_word( fp ) );
+                     pObjIndex->value[5] = skill_lookup( fread_word( fp ) );
+                     break;
+               }
+               break;
+            }
+
+            if( !str_cmp( word, "Stats" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3, x4, x5;
+
+               x1 = x2 = x3 = x4 = x5 = 0;
+               sscanf( ln, "%d %d %d %d %d", &x1, &x2, &x3, &x4, &x5 );
+
+               pObjIndex->weight = x1;
+               pObjIndex->cost = x2;
+               pObjIndex->rent = x3;
+               pObjIndex->level = x4;
+               pObjIndex->layers = x5;
+
+               break;
+            }
+            break;
+
+         case 'T':
+            if( !str_cmp( word, "Type" ) )
+            {
+               value = get_otype( fread_flagstring( fp ) );
+
+               if( value < 0 )
+               {
+                  bug( "%s: vnum %d: Object has invalid type! Defaulting to trash.", __FUNCTION__, pObjIndex->vnum );
+                  value = get_otype( "trash" );
+               }
+               pObjIndex->item_type = value;
+               break;
+            }
+            break;
+
+         case 'V':
+            if( !str_cmp( word, "Values" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3, x4, x5, x6;
+               x1 = x2 = x3 = x4 = x5 = x6 = 0;
+
+               sscanf( ln, "%d %d %d %d %d %d", &x1, &x2, &x3, &x4, &x5, &x6 );
+
+               pObjIndex->value[0] = x1;
+               pObjIndex->value[1] = x2;
+               pObjIndex->value[2] = x3;
+               pObjIndex->value[3] = x4;
+               pObjIndex->value[4] = x5;
+               pObjIndex->value[5] = x6;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Vnum" ) )
+            {
+               bool tmpBootDb = fBootDb;
+               fBootDb = false;
+
+               int vnum = fread_number( fp );
+
+               if( get_obj_index( vnum ) )
+               {
+                  if( tmpBootDb )
+                  {
+                     fBootDb = tmpBootDb;
+                     bug( "%s: vnum %d duplicated.", __FUNCTION__, vnum );
+
+                     // Try to recover, read to end of duplicated object and then bail out
+                     for( ;; )
+                     {
+                        word = feof( fp ) ? "#ENDOBJECT" : fread_word( fp );
+
+                        if( !str_cmp( word, "#ENDOBJECT" ) )
+                           return;
+                     }
+                  }
+                  else
+                  {
+                     pObjIndex = get_obj_index( vnum );
+                     log_printf_plus( LOG_BUILD, sysdata.build_level, "Cleaning object: %d", vnum );
+                     clean_obj( pObjIndex );
+                     oldobj = true;
+                  }
+               }
+               else
+               {
+                  CREATE( pObjIndex, OBJ_INDEX_DATA, 1 );
+                  oldobj = false;
+               }
+               pObjIndex->vnum = vnum;
+               fBootDb = tmpBootDb;
+
+               if( fBootDb )
+               {
+                  if( !tarea->low_o_vnum )
+                     tarea->low_o_vnum = vnum;
+                  if( vnum > tarea->hi_o_vnum )
+                     tarea->hi_o_vnum = vnum;
+               }
+               break;
+            }
+            break;
+
+         case 'W':
+            if( !str_cmp( word, "WFlags" ) )
+            {
+               const char *wflags = fread_flagstring( fp );
+
+               while( wflags[0] != '\0' )
+               {
+                  wflags = one_argument( wflags, flag );
+                  value = get_wflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown wear flag: %s", flag );
+                  else
+                     SET_BIT( pObjIndex->wear_flags, 1 << value );
+               }
+               break;
+            }
+            break;
+      }
+   }
+}
+
+void mprog_file_read( MOB_INDEX_DATA * prog_target, const char *f )
+{
+   MPROG_DATA *mprg = NULL;
+   char MUDProgfile[256];
+   FILE *progfile;
+   char letter;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   snprintf( MUDProgfile, 256, "%s%s", PROG_DIR, f );
+
+   if( !( progfile = fopen( MUDProgfile, "r" ) ) )
+   {
+      bug( "%s: couldn't open mudprog file", __FUNCTION__ );
+      return;
+   }
+
+   for( ;; )
+   {
+      letter = fread_letter( progfile );
+
+      if( letter != '#' )
+      {
+         bug( "%s: MUDPROG char", __FUNCTION__ );
+         break;
+      }
+
+      const char *word = ( feof( progfile ) ? "ENDFILE" : fread_word( progfile ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "ENDFILE";
+      }
+
+      if( !str_cmp( word, "ENDFILE" ) )
+         break;
+
+      if( !str_cmp( word, "MUDPROG" ) )
+      {
+         CREATE( mprg, MPROG_DATA, 1 );
+
+         for( ;; )
+         {
+            word = ( feof( progfile ) ? "#ENDPROG" : fread_word( progfile ) );
+
+            if( word[0] == '\0' )
+            {
+               log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+               word = "#ENDPROG";
+            }
+
+            if( !str_cmp( word, "#ENDPROG" ) )
+            {
+               mprg->next = prog_target->mudprogs;
+               prog_target->mudprogs = mprg;
+               break;
+            }
+
+            switch ( word[0] )
+            {
+               default:
+                  log_printf( "%s: no match: %s", __FUNCTION__, word );
+                  fread_to_eol( progfile );
+                  break;
+
+               case 'A':
+                  if( !str_cmp( word, "Arglist" ) )
+                  {
+                     mprg->arglist = fread_string( progfile );
+                     mprg->fileprog = true;
+
+                     switch ( mprg->type )
+                     {
+                        case IN_FILE_PROG:
+                           bug( "%s: Nested file programs are not allowed.", __FUNCTION__ );
+                           DISPOSE( mprg );
+                           break;
+
+                        default:
+                           break;
+                     }
+                     break;
+                  }
+                  break;
+
+               case 'C':
+                  KEY( "Comlist", mprg->comlist, fread_string( progfile ) );
+                  break;
+
+               case 'P':
+                  if( !str_cmp( word, "Progtype" ) )
+                  {
+                     mprg->type = mprog_name_to_type( fread_flagstring( progfile ) );
+                     break;
+                  }
+                  break;
+            }
+         }
+      }
+   }
+   fclose( progfile );
+   progfile = NULL;
+   return;
+}
+
+void fread_fuss_mobprog( FILE * fp, MPROG_DATA * mprg, MOB_INDEX_DATA * prog_target )
+{
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDPROG" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDPROG";
+      }
+
+      if( !str_cmp( word, "#ENDPROG" ) )
+         return;
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case 'A':
+            if( !str_cmp( word, "Arglist" ) )
+            {
+               mprg->arglist = fread_string( fp );
+               mprg->fileprog = false;
+
+               switch ( mprg->type )
+               {
+                  case IN_FILE_PROG:
+                     mprog_file_read( prog_target, mprg->arglist );
+                     break;
+                  default:
+                     break;
+               }
+               break;
+            }
+            break;
+
+         case 'C':
+            KEY( "Comlist", mprg->comlist, fread_string( fp ) );
+            break;
+
+         case 'P':
+            if( !str_cmp( word, "Progtype" ) )
+            {
+               mprg->type = mprog_name_to_type( fread_flagstring( fp ) );
+               SET_BIT( prog_target->progtypes, mprg->type );
+               break;
+            }
+            break;
+      }
+   }
+}
+
+void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
+{
+   MOB_INDEX_DATA *pMobIndex = NULL;
+   bool oldmob = false;
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDMOBILE" : fread_word( fp ) );
+      char flag[MAX_INPUT_LENGTH];
+      int value = 0;
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDMOBILE";
+      }
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case '#':
+            if( !str_cmp( word, "#MUDPROG" ) )
+            {
+               MPROG_DATA *mprg;
+               CREATE( mprg, MPROG_DATA, 1 );
+               fread_fuss_mobprog( fp, mprg, pMobIndex );
+               mprg->next = pMobIndex->mudprogs;
+               pMobIndex->mudprogs = mprg;
+               break;
+            }
+
+            if( !str_cmp( word, "#ENDMOBILE" ) )
+            {
+               if( !pMobIndex->long_descr )
+                  pMobIndex->long_descr = STRALLOC( "" );
+               if( !pMobIndex->description )
+                  pMobIndex->description = STRALLOC( "" );
+
+               if( !oldmob )
+               {
+                  int iHash = pMobIndex->vnum % MAX_KEY_HASH;
+                  pMobIndex->next = mob_index_hash[iHash];
+                  mob_index_hash[iHash] = pMobIndex;
+                  ++top_mob_index;
+               }
+               return;
+            }
+            break;
+
+         case 'A':
+            if( !str_cmp( word, "Actflags" ) )
+            {
+               const char *actflags = NULL;
+
+               actflags = fread_flagstring( fp );
+
+               while( actflags[0] != '\0' )
+               {
+                  actflags = one_argument( actflags, flag );
+                  value = get_actflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown actflag: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->act, 1 << value );
+               }
+               break;
+            }
+
+            if( !str_cmp( word, "Affected" ) )
+            {
+               const char *affectflags = NULL;
+
+               affectflags = fread_flagstring( fp );
+
+               while( affectflags[0] != '\0' )
+               {
+                  affectflags = one_argument( affectflags, flag );
+                  value = get_aflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown affectflag: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->affected_by, 1 << value );
+               }
+               break;
+            }
+
+            if( !str_cmp( word, "Attacks" ) )
+            {
+               const char *attacks = fread_flagstring( fp );
+
+               while( attacks[0] != '\0' )
+               {
+                  attacks = one_argument( attacks, flag );
+                  value = get_attackflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown attackflag: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->attacks, 1 << value );
+               }
+               break;
+            }
+
+            if( !str_cmp( word, "Attribs" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3, x4, x5, x6, x7, x8;
+
+               x1 = x2 = x3 = x4 = x5 = x6 = x7 = x8 = 0;
+               sscanf( ln, "%d %d %d %d %d %d %d %d", &x1, &x2, &x3, &x4, &x5, &x6, &x7, &x8 );
+
+               pMobIndex->perm_str = x1;
+               pMobIndex->perm_int = x2;
+               pMobIndex->perm_wis = x3;
+               pMobIndex->perm_dex = x4;
+               pMobIndex->perm_con = x5;
+               pMobIndex->perm_cha = x6;
+               pMobIndex->perm_lck = x7;
+               pMobIndex->perm_frc = x8;
+
+               break;
+            }
+            break;
+
+         case 'B':
+            if( !str_cmp( word, "Bodyparts" ) )
+            {
+               const char *bodyparts = fread_flagstring( fp );
+
+               while( bodyparts[0] != '\0' )
+               {
+                  bodyparts = one_argument( bodyparts, flag );
+                  value = get_partflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown bodypart: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->xflags, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'D':
+            if( !str_cmp( word, "Defenses" ) )
+            {
+               const char *defenses = fread_flagstring( fp );
+
+               while( defenses[0] != '\0' )
+               {
+                  defenses = one_argument( defenses, flag );
+                  value = get_defenseflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown defenseflag: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->defenses, 1 << value );
+               }
+               break;
+            }
+
+            if( !str_cmp( word, "DefPos" ) )
+            {
+               short position = get_npc_position( fread_flagstring( fp ) );
+
+               if( position < 0 || position > POS_DRAG )
+               {
+                  bug( "%s: vnum %d: Mobile in invalid default position! Defaulting to standing.", __FUNCTION__,
+                       pMobIndex->vnum );
+                  position = POS_STANDING;
+               }
+               pMobIndex->defposition = position;
+               break;
+            }
+
+            KEY( "Desc", pMobIndex->description, fread_string( fp ) );
+            break;
+
+         case 'G':
+            if( !str_cmp( word, "Gender" ) )
+            {
+               short sex = get_npc_sex( fread_flagstring( fp ) );
+
+               if( sex < 0 || sex > SEX_FEMALE )
+               {
+                  bug( "%s: vnum %d: Mobile has invalid sex! Defaulting to neuter.", __FUNCTION__, pMobIndex->vnum );
+                  sex = SEX_NEUTRAL;
+               }
+               pMobIndex->sex = sex;
+               break;
+            }
+            break;
+
+         case 'I':
+            if( !str_cmp( word, "Immune" ) )
+            {
+               const char *immune = fread_flagstring( fp );
+
+               while( immune[0] != '\0' )
+               {
+                  immune = one_argument( immune, flag );
+                  value = get_risflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown RIS flag (I): %s", flag );
+                  else
+                     SET_BIT( pMobIndex->immune, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'K':
+            KEY( "Keywords", pMobIndex->player_name, fread_string( fp ) );
+            break;
+
+         case 'L':
+            KEY( "Long", pMobIndex->long_descr, fread_string( fp ) );
+            break;
+
+         case 'P':
+            if( !str_cmp( word, "Position" ) )
+            {
+               short position = get_npc_position( fread_flagstring( fp ) );
+
+               if( position < 0 || position > POS_DRAG )
+               {
+                  bug( "%s: vnum %d: Mobile in invalid position! Defaulting to standing.", __FUNCTION__, pMobIndex->vnum );
+                  position = POS_STANDING;
+               }
+               pMobIndex->position = position;
+               break;
+            }
+            break;
+
+         case 'R':
+            if( !str_cmp( word, "Race" ) )
+            {
+               short race = get_npc_race( fread_flagstring( fp ) );
+
+               if( race < 0 || race >= MAX_NPC_RACE )
+               {
+                  bug( "%s: vnum %d: Mob has invalid race! Defaulting to human.", __FUNCTION__, pMobIndex->vnum );
+                  race = get_npc_race( "human" );
+               }
+
+               pMobIndex->race = race;
+               break;
+            }
+
+            if( !str_cmp( word, "RepairData" ) )
+            {
+               int iFix;
+               REPAIR_DATA *rShop;
+
+               CREATE( rShop, REPAIR_DATA, 1 );
+               rShop->keeper = pMobIndex->vnum;
+               for( iFix = 0; iFix < MAX_FIX; ++iFix )
+                  rShop->fix_type[iFix] = fread_number( fp );
+               rShop->profit_fix = fread_number( fp );
+               rShop->shop_type = fread_number( fp );
+               rShop->open_hour = fread_number( fp );
+               rShop->close_hour = fread_number( fp );
+
+               pMobIndex->rShop = rShop;
+               LINK( rShop, first_repair, last_repair, next, prev );
+               ++top_repair;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Resist" ) )
+            {
+               const char *resist = fread_flagstring( fp );
+
+               while( resist[0] != '\0' )
+               {
+                  resist = one_argument( resist, flag );
+                  value = get_risflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown RIS flag (R): %s", flag );
+                  else
+                     SET_BIT( pMobIndex->resistant, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'S':
+            if( !str_cmp( word, "Saves" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3, x4, x5;
+
+               x1 = x2 = x3 = x4 = x5 = 0;
+               sscanf( ln, "%d %d %d %d %d", &x1, &x2, &x3, &x4, &x5 );
+
+               pMobIndex->saving_poison_death = x1;
+               pMobIndex->saving_wand = x2;
+               pMobIndex->saving_para_petri = x3;
+               pMobIndex->saving_breath = x4;
+               pMobIndex->saving_spell_staff = x5;
+
+               break;
+            }
+
+            KEY( "Short", pMobIndex->short_descr, fread_string( fp ) );
+
+            if( !str_cmp( word, "ShopData" ) )
+            {
+               int iTrade;
+               SHOP_DATA *pShop;
+
+               CREATE( pShop, SHOP_DATA, 1 );
+               pShop->keeper = pMobIndex->vnum;
+               for( iTrade = 0; iTrade < MAX_TRADE; ++iTrade )
+                  pShop->buy_type[iTrade] = fread_number( fp );
+               pShop->profit_buy = fread_number( fp );
+               pShop->profit_sell = fread_number( fp );
+               pShop->profit_buy = URANGE( pShop->profit_sell + 5, pShop->profit_buy, 1000 );
+               pShop->profit_sell = URANGE( 0, pShop->profit_sell, pShop->profit_buy - 5 );
+               pShop->open_hour = fread_number( fp );
+               pShop->close_hour = fread_number( fp );
+
+               pMobIndex->pShop = pShop;
+               LINK( pShop, first_shop, last_shop, next, prev );
+               ++top_shop;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Speaks" ) )
+            {
+               const char *speaks = fread_flagstring( fp );
+
+               while( speaks[0] != '\0' )
+               {
+                  speaks = one_argument( speaks, flag );
+                  value = get_langnum_save( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown speaks language: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->speaks, 1 << value );
+               }
+
+               if( !pMobIndex->speaks )
+                  pMobIndex->speaks = LANG_COMMON;
+               break;
+            }
+
+            if( !str_cmp( word, "Speaking" ) )
+            {
+               const char *speaking = fread_flagstring( fp );
+
+               while( speaking[0] != '\0' )
+               {
+                  speaking = one_argument( speaking, flag );
+                  value = get_langnum_save( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown speaking language: %s", flag );
+          	      else
+                     SET_BIT( pMobIndex->speaking, 1 << value );
+               }
+
+               if( !pMobIndex->speaking )
+                  pMobIndex->speaking = LANG_COMMON;
+               break;
+            }
+
+            if( !str_cmp( word, "Specfun" ) )
+            {
+               const char *temp = fread_flagstring( fp );
+               if( !pMobIndex )
+               {
+                  bug( "%s: Specfun: Invalid mob vnum!", __FUNCTION__ );
+                  break;
+               }
+               if( !( pMobIndex->spec_fun = spec_lookup( temp ) ) )
+               {
+                  bug( "%s: Specfun: vnum %d, no spec_fun called %s.", __FUNCTION__, pMobIndex->vnum, temp );
+                  pMobIndex->spec_funname = NULL;
+               }
+               else
+                  pMobIndex->spec_funname = STRALLOC( temp );
+               break;
+            }
+
+            if( !str_cmp( word, "Specfun2" ) )
+            {
+               const char *temp = fread_flagstring( fp );
+               if( !pMobIndex )
+               {
+                  bug( "%s: Specfun: Invalid mob vnum!", __FUNCTION__ );
+                  break;
+               }
+               if( !( pMobIndex->spec_2 = spec_lookup( temp ) ) )
+               {
+                  bug( "%s: Specfun: vnum %d, no spec_fun called %s.", __FUNCTION__, pMobIndex->vnum, temp );
+                  pMobIndex->spec_funname2 = NULL;
+               }
+               else
+                  pMobIndex->spec_funname2 = STRALLOC( temp );
+               break;
+            }
+            
+            if( !str_cmp( word, "Stats1" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3, x4, x5, x6;
+
+               x1 = x2 = x3 = x4 = x5 = x6 = 0;
+               sscanf( ln, "%d %d %d %d %d %d", &x1, &x2, &x3, &x4, &x5, &x6 );
+
+               pMobIndex->alignment = x1;
+               pMobIndex->level = x2;
+               pMobIndex->mobthac0 = x3;
+               pMobIndex->ac = x4;
+               pMobIndex->gold = x5;
+               pMobIndex->exp = x6;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Stats2" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3;
+               x1 = x2 = x3 = 0;
+               sscanf( ln, "%d %d %d", &x1, &x2, &x3 );
+
+               pMobIndex->hitnodice = x1;
+               pMobIndex->hitsizedice = x2;
+               pMobIndex->hitplus = x3;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Stats3" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3;
+               x1 = x2 = x3 = 0;
+               sscanf( ln, "%d %d %d", &x1, &x2, &x3 );
+
+               pMobIndex->damnodice = x1;
+               pMobIndex->damsizedice = x2;
+               pMobIndex->damplus = x3;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Stats4" ) )
+            {
+               char *ln = fread_line( fp );
+               int x1, x2, x3, x4, x5;
+
+               x1 = x2 = x3 = x4 = x5 = 0;
+               sscanf( ln, "%d %d %d %d %d", &x1, &x2, &x3, &x4, &x5 );
+
+               pMobIndex->height = x1;
+               pMobIndex->weight = x2;
+               pMobIndex->numattacks = x3;
+               pMobIndex->hitroll = x4;
+               pMobIndex->damroll = x5;
+
+               break;
+            }
+
+            if( !str_cmp( word, "Suscept" ) )
+            {
+               const char *suscep = fread_flagstring( fp );
+
+               while( suscep[0] != '\0' )
+               {
+                  suscep = one_argument( suscep, flag );
+                  value = get_risflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown RIS flag (S): %s", flag );
+                  else
+                     SET_BIT( pMobIndex->susceptible, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'V':
+            if( !str_cmp( word, "VIPFlags" ) )
+            {
+               const char *vip = fread_flagstring( fp );
+
+               while( vip[0] != '\0' )
+               {
+                  vip = one_argument( vip, flag );
+                  value = get_vip_flag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown VIP flag: %s", flag );
+                  else
+                     SET_BIT( pMobIndex->vip_flags, 1 << value );
+               }
+               break;
+            }
+
+            if( !str_cmp( word, "Vnum" ) )
+            {
+               bool tmpBootDb = fBootDb;
+               fBootDb = false;
+
+               int vnum = fread_number( fp );
+
+               if( get_mob_index( vnum ) )
+               {
+                  if( tmpBootDb )
+                  {
+                     fBootDb = tmpBootDb;
+                     bug( "%s: vnum %d duplicated.", __FUNCTION__, vnum );
+
+                     // Try to recover, read to end of duplicated mobile and then bail out
+                     for( ;; )
+                     {
+                        word = feof( fp ) ? "#ENDMOBILE" : fread_word( fp );
+
+                        if( !str_cmp( word, "#ENDMOBILE" ) )
+                           return;
+                     }
+                  }
+                  else
+                  {
+                     pMobIndex = get_mob_index( vnum );
+                     log_printf_plus( LOG_BUILD, sysdata.build_level, "Cleaning mobile: %d", vnum );
+                     clean_mob( pMobIndex );
+                     oldmob = true;
+                  }
+               }
+               else
+               {
+                  CREATE( pMobIndex, MOB_INDEX_DATA, 1 );
+                  oldmob = false;
+               }
+               pMobIndex->vnum = vnum;
+               fBootDb = tmpBootDb;
+
+               if( fBootDb )
+               {
+                  if( !tarea->low_m_vnum )
+                     tarea->low_m_vnum = vnum;
+                  if( vnum > tarea->hi_m_vnum )
+                     tarea->hi_m_vnum = vnum;
+               }
+               break;
+            }
+            break;
+      }
+   }
+}
+
+void fread_fuss_areadata( FILE * fp, AREA_DATA * tarea )
+{
+   bool fMatch;   // Unused, but needed to shut the compiler up about the KEY macro
+
+   for( ;; )
+   {
+      const char *word = ( feof( fp ) ? "#ENDAREADATA" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         log_printf( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "#ENDAREADATA";
+      }
+
+      switch ( word[0] )
+      {
+         default:
+            log_printf( "%s: no match: %s", __FUNCTION__, word );
+            fread_to_eol( fp );
+            break;
+
+         case '#':
+            if( !str_cmp( word, "#ENDAREADATA" ) )
+            {
+               tarea->age = tarea->reset_frequency;
+               return;
+            }
+            break;
+
+         case 'A':
+            KEY( "Author", tarea->author, fread_string( fp ) );
+            break;
+
+         case 'E':
+            if( !str_cmp( word, "Economy" ) )
+            {
+               tarea->high_economy = fread_number( fp );
+               tarea->low_economy = fread_number( fp );
+               break;
+            }
+            break;
+
+         case 'F':
+            if( !str_cmp( word, "Flags" ) )
+            {
+               const char *areaflags = NULL;
+               char flag[MAX_INPUT_LENGTH];
+               int value;
+
+               areaflags = fread_flagstring( fp );
+
+               while( areaflags[0] != '\0' )
+               {
+                  areaflags = one_argument( areaflags, flag );
+                  value = get_areaflag( flag );
+                  if( value < 0 || value > 31 )
+                     bug( "Unknown area flag: %s", flag );
+                  else
+                     SET_BIT( tarea->flags, 1 << value );
+               }
+               break;
+            }
+            break;
+
+         case 'N':
+            KEY( "Name", tarea->name, fread_string_nohash( fp ) );
+            break;
+
+         case 'R':
+            if( !str_cmp( word, "Ranges" ) )
+            {
+               int x1, x2, x3, x4;
+               char *ln;
+
+               ln = fread_line( fp );
+
+               x1 = x2 = x3 = x4 = 0;
+               sscanf( ln, "%d %d %d %d", &x1, &x2, &x3, &x4 );
+
+               tarea->low_soft_range = x1;
+               tarea->hi_soft_range = x2;
+               tarea->low_hard_range = x3;
+               tarea->hi_hard_range = x4;
+
+               break;
+            }
+            KEY( "ResetMsg", tarea->resetmsg, fread_string_nohash( fp ) );
+            KEY( "ResetFreq", tarea->reset_frequency, fread_number( fp ) );
+            break;
+
+         case 'V':
+            KEY( "Version", tarea->version, fread_number( fp ) );
+            break;
+      }
+   }
+}
+
+/*
+ * Load an 'area' header line.
+ */
+AREA_DATA *create_area( void )
+{
+   AREA_DATA *pArea;
+
+   CREATE( pArea, AREA_DATA, 1 );
+   pArea->first_room = pArea->last_room = NULL;
+   pArea->name = NULL;
+   pArea->author = NULL;
+   pArea->filename = str_dup( strArea );
+   pArea->age = 15;
+   pArea->reset_frequency = 15;
+   pArea->nplayer = 0;
+   pArea->low_r_vnum = 0;
+   pArea->low_o_vnum = 0;
+   pArea->low_m_vnum = 0;
+   pArea->hi_r_vnum = 0;
+   pArea->hi_o_vnum = 0;
+   pArea->hi_m_vnum = 0;
+   pArea->low_soft_range = 0;
+   pArea->hi_soft_range = MAX_LEVEL;
+   pArea->low_hard_range = 0;
+   pArea->hi_hard_range = MAX_LEVEL;
+   pArea->version = 1;
+
+   LINK( pArea, first_area, last_area, next, prev );
+   ++top_area;
+   return pArea;
+}
+
+AREA_DATA *fread_fuss_area( AREA_DATA * tarea, FILE * fp )
+{
+   for( ;; )
+   {
+      char letter;
+      const char *word;
+
+      letter = fread_letter( fp );
+      if( letter == '*' )
+      {
+         fread_to_eol( fp );
+         continue;
+      }
+
+      if( letter != '#' )
+      {
+         bug( "%s: # not found. Invalid format.", __FUNCTION__ );
+         if( fBootDb )
+            exit( 1 );
+         break;
+      }
+
+      word = ( feof( fp ) ? "ENDAREA" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         bug( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "ENDAREA";
+      }
+
+      if( !str_cmp( word, "AREADATA" ) )
+      {
+         if( !tarea )
+            tarea = create_area(  );
+         fread_fuss_areadata( fp, tarea );
+      }
+      else if( !str_cmp( word, "MOBILE" ) )
+         fread_fuss_mobile( fp, tarea );
+      else if( !str_cmp( word, "OBJECT" ) )
+         fread_fuss_object( fp, tarea );
+      else if( !str_cmp( word, "ROOM" ) )
+         fread_fuss_room( fp, tarea );
+      else if( !str_cmp( word, "ENDAREA" ) )
+         break;
+      else
+      {
+         bug( "%s: Bad section header: %s", __FUNCTION__, word );
+         fread_to_eol( fp );
+      }
+   }
+   return tarea;
+}
+
+void load_area_file( AREA_DATA * tarea, const char *filename )
+{
+   char *word;
+   int aversion = 0;
+
+   if( !( fpArea = fopen( filename, "r" ) ) )
+   {
+      perror( filename );
+      bug( "%s: error loading file (can't open) %s", __FUNCTION__, filename );
+      return;
+   }
+
+   if( fread_letter( fpArea ) != '#' )
+   {
+      if( fBootDb )
+      {
+         bug( "%s: No # found at start of area file.", __FUNCTION__ );
+         exit( 1 );
+      }
+      else
+      {
+         bug( "%s: No # found at start of area file.", __FUNCTION__ );
+         fclose( fpArea );
+         fpArea = NULL;
+         return;
+      }
+   }
+
+   word = fread_word( fpArea );
+
+   // New FUSS area format support -- Samson 7/5/07
+   if( !str_cmp( word, "FUSSAREA" ) )
+   {
+      tarea = fread_fuss_area( tarea, fpArea );
+      fclose( fpArea );
+      fpArea = NULL;
+
+      if( tarea )
+         process_sorting( tarea );
+      return;
+   }
+
+   // Drop through to the old format processor
+   if( !str_cmp( word, "AREA" ) )
+   {
+      if( fBootDb )
+         tarea = load_area( fpArea, 0 );
+      else
+      {
+         DISPOSE( tarea->name );
+         tarea->name = fread_string_nohash( fpArea );
+      }
+   }
+   // Only seen at this stage for help.are
+   else if( !str_cmp( word, "HELPS" ) )
+      load_helps( fpArea );
+   // Only seen at this stage for SmaugWiz areas
+   else if( !str_cmp( word, "VERSION" ) )
+      aversion = fread_number( fpArea );
+
+   for( ;; )
+   {
       if( fread_letter( fpArea ) != '#' )
       {
-         bug( tarea->filename );
-         bug( "load_area: # not found." );
+         bug( "%s: # not found", __FUNCTION__ );
          exit( 1 );
       }
 
@@ -5300,19 +7288,9 @@ void load_area_file( AREA_DATA * tarea, char *filename )
 
       if( word[0] == '$' )
          break;
+      // Only seen at this stage for SmaugWiz areas. The format had better be right or there'll be trouble here!
       else if( !str_cmp( word, "AREA" ) )
-      {
-         if( fBootDb )
-         {
-            load_area( fpArea );
-            tarea = last_area;
-         }
-         else
-         {
-            DISPOSE( tarea->name );
-            tarea->name = fread_string_nohash( fpArea );
-         }
-      }
+         tarea = load_area( fpArea, aversion );
       else if( !str_cmp( word, "AUTHOR" ) )
          load_author( tarea, fpArea );
       else if( !str_cmp( word, "FLAGS" ) )
@@ -5327,7 +7305,7 @@ void load_area_file( AREA_DATA * tarea, char *filename )
        * Rennard 
        */
       else if( !str_cmp( word, "HELPS" ) )
-         load_helps( tarea, fpArea );
+         load_helps( fpArea );
       else if( !str_cmp( word, "MOBILES" ) )
          load_mobiles( tarea, fpArea );
       else if( !str_cmp( word, "OBJECTS" ) )
@@ -5337,15 +7315,16 @@ void load_area_file( AREA_DATA * tarea, char *filename )
       else if( !str_cmp( word, "ROOMS" ) )
          load_rooms( tarea, fpArea );
       else if( !str_cmp( word, "SHOPS" ) )
-         load_shops( tarea, fpArea );
+         load_shops( fpArea );
       else if( !str_cmp( word, "REPAIRS" ) )
-         load_repairs( tarea, fpArea );
+         load_repairs( fpArea );
       else if( !str_cmp( word, "SPECIALS" ) )
-         load_specials( tarea, fpArea );
+         load_specials( fpArea );
+      else if( !str_cmp( word, "VERSION" ) )
+         load_version( tarea, fpArea );
       else
       {
-         bug( tarea->filename );
-         bug( "load_area: bad section name." );
+         bug( "%s: bad section name: %s", __FUNCTION__, word );
          if( fBootDb )
             exit( 1 );
          else
@@ -5358,19 +7337,9 @@ void load_area_file( AREA_DATA * tarea, char *filename )
    }
    fclose( fpArea );
    fpArea = NULL;
-   if( tarea )
-   {
-      if( fBootDb )
-         sort_area( tarea, FALSE );
 
-      fprintf( stderr, "%-14s: Rooms: %5d - %-5d Objs: %5d - %-5d Mobs: %5d - %d\n",
-               tarea->filename,
-               tarea->low_r_vnum, tarea->hi_r_vnum,
-               tarea->low_o_vnum, tarea->hi_o_vnum, tarea->low_m_vnum, tarea->hi_m_vnum );
-      if( !tarea->author )
-         tarea->author = STRALLOC( "" );
-      SET_BIT( tarea->status, AREA_LOADED );
-   }
+   if( tarea )
+      process_sorting( tarea );
    else
       fprintf( stderr, "(%s)\n", filename );
 }
@@ -5494,6 +7463,33 @@ void load_buildlist( void )
    closedir( dp );
 }
 
+/*
+ * Sort areas by name alphanumercially
+ *      - 4/27/97, Fireblade
+ */
+void sort_area_by_name( AREA_DATA * pArea )
+{
+   AREA_DATA *temp_area;
+
+   if( !pArea )
+   {
+      bug( "Sort_area_by_name: NULL pArea" );
+      return;
+   }
+   for( temp_area = first_area_name; temp_area; temp_area = temp_area->next_sort_name )
+   {
+      if( strcmp( pArea->name, temp_area->name ) < 0 )
+      {
+         INSERT( pArea, temp_area, first_area_name, next_sort_name, prev_sort_name );
+         break;
+      }
+   }
+   if( !temp_area )
+   {
+      LINK( pArea, first_area_name, last_area_name, next_sort_name, prev_sort_name );
+   }
+   return;
+}
 
 /*
  * Sort by room vnums					-Altrag & Thoric
@@ -5573,7 +7569,8 @@ void sort_area( AREA_DATA * pArea, bool proto )
  * Display vnums currently assigned to areas		-Altrag & Thoric
  * Sorted, and flagged if loaded.
  */
-void show_vnums( CHAR_DATA * ch, int low, int high, bool proto, bool shownl, char *loadst, char *notloadst )
+void show_vnums( CHAR_DATA * ch, int low, int high, bool proto, bool shownl,
+		 const char *loadst, const char *notloadst )
 {
    AREA_DATA *pArea, *first_sort;
    int count, loaded;
@@ -5613,7 +7610,7 @@ void show_vnums( CHAR_DATA * ch, int low, int high, bool proto, bool shownl, cha
  * Shows prototype vnums ranges, and if loaded
  */
 
-void do_vnums( CHAR_DATA * ch, char *argument )
+void do_vnums( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -5635,7 +7632,7 @@ void do_vnums( CHAR_DATA * ch, char *argument )
 /*
  * Shows installed areas, sorted.  Mark unloaded areas with an X
  */
-void do_zones( CHAR_DATA * ch, char *argument )
+void do_zones( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -5662,7 +7659,7 @@ void do_zones( CHAR_DATA * ch, char *argument )
 /*
  * Show prototype areas, sorted.  Only show loaded areas
  */
-void do_newzones( CHAR_DATA * ch, char *argument )
+void do_newzones( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
    char arg2[MAX_INPUT_LENGTH];
@@ -5734,7 +7731,7 @@ void save_sysdata( SYSTEM_DATA sys )
 
 void fread_sysdata( SYSTEM_DATA * sys, FILE * fp )
 {
-   char *word;
+   const char *word;
    bool fMatch;
 
    sys->time_of_max = NULL;
@@ -5774,8 +7771,8 @@ void fread_sysdata( SYSTEM_DATA * sys, FILE * fp )
             break;
 
          case 'G':
-            KEY( "Guildoverseer", sys->guild_overseer, fread_string( fp ) );
-            KEY( "Guildadvisor", sys->guild_advisor, fread_string( fp ) );
+            KEY( "Guildoverseer", sys->guild_overseer, fread_string_nohash( fp ) );
+            KEY( "Guildadvisor", sys->guild_advisor, fread_string_nohash( fp ) );
             break;
 
          case 'H':
@@ -5854,7 +7851,7 @@ bool load_systemdata( SYSTEM_DATA * sys )
       for( ;; )
       {
          char letter;
-         char *word;
+         const char *word;
 
          letter = fread_letter( fp );
          if( letter == '*' )
@@ -5933,7 +7930,7 @@ void load_banlist( void )
 
 /* Check to make sure range of vnums is free - Scryn 2/27/96 */
 
-void do_check_vnums( CHAR_DATA * ch, char *argument )
+void do_check_vnums( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_STRING_LENGTH];
    char buf2[MAX_STRING_LENGTH];
@@ -6227,4 +8224,164 @@ void do_check_vnums( CHAR_DATA * ch, char *argument )
 void tail_chain( void )
 {
    return;
+}
+
+size_t mudstrlcpy( char *dst, const char *src, size_t siz )
+{
+  register char *d = dst;
+  register const char *s = src;
+  register size_t n = siz;
+
+  if( !src )
+    {
+      bug( "%s: NULL src string passed!", __FUNCTION__ );
+      return 0;
+    }
+
+  if( !dst )
+    {
+      bug( "%s: NULL dst string being passed!", __FUNCTION__ );
+      return 0;
+    }
+
+  /*
+   * Copy as many bytes as will fit
+   */
+  if( n != 0 && --n != 0 )
+    {
+      do
+	{
+	  if( ( *d++ = *s++ ) == 0 )
+            break;
+	}
+      while( --n != 0 );
+    }
+
+  /*
+   * Not enough room in dst, add NUL and traverse rest of src
+   */
+  if( n == 0 )
+    {
+      if( siz != 0 )
+	*d = '\0';  /* NUL-terminate dst */
+      while( *s++ )
+	;
+    }
+  return ( s - src - 1 ); /* count does not include NUL */
+}
+
+size_t mudstrlcat( char *dst, const char *src, size_t siz )
+{
+  register char *d = dst;
+  register const char *s = src;
+  register size_t n = siz;
+  size_t dlen;
+
+  if( !src )
+    {
+      bug( "%s: NULL src string passed!", __FUNCTION__ );
+      return 0;
+    }
+
+  /*
+   * Find the end of dst and adjust bytes left but don't go past end
+   */
+  while( n-- != 0 && *d != '\0' )
+    d++;
+  dlen = d - dst;
+  n = siz - dlen;
+
+  if( n == 0 )
+    return ( dlen + strlen( s ) );
+  while( *s != '\0' )
+    {
+      if( n != 1 )
+	{
+	  *d++ = *s;
+	  n--;
+	}
+      s++;
+    }
+  *d = '\0';
+  return ( dlen + ( s - src ) );   /* count does not include NUL */
+}
+
+/*
+ * Read a string of text based flags from file fp. Ending in ~
+ */
+ char *fread_flagstring( FILE * fp )
+{
+    static char buf[MAX_STRING_LENGTH];
+    char *plast;
+    char c;
+    int ln;
+
+    plast = buf;
+    buf[0] = '\0';
+    ln = 0;
+
+    /*
+     * Skip blanks.
+     * Read first char.
+     */
+    do
+    {
+        if( feof( fp ) )
+        {
+            bug( "%s", "fread_string: EOF encountered on read." );
+            if( fBootDb )
+            {
+                shutdown_mud( "Corrupt file somewhere." );
+                exit( 1 );
+            }
+            snprintf( buf, MAX_STRING_LENGTH, "%s", "" );
+            return buf;
+        }
+        c = getc( fp );
+    }
+    while( isspace( c ) );
+
+    if( ( *plast++ = c ) == '~' )
+    {
+        snprintf( buf, MAX_STRING_LENGTH, "%s", "" );
+        return buf;
+    }
+
+    for( ;; )
+    {
+        if( ln >= ( MAX_STRING_LENGTH - 1 ) )
+        {
+            bug( "%s", "fread_flagstring: string too long" );
+            *plast = '\0';
+            return ( buf );
+        }
+        switch ( *plast = getc( fp ) )
+        {
+           default:
+               plast++;
+               ln++;
+               break;
+
+           case EOF:
+               bug( "%s", "Fread_string: EOF" );
+               if( fBootDb )
+                   exit( 1 );
+               *plast = '\0';
+               return ( buf );
+
+           case '\n':
+               ++plast;
+               ++ln;
+               *plast++ = '\r';
+               ++ln;
+               break;
+
+           case '\r':
+               break;
+
+           case '~':
+               *plast = '\0';
+               return ( buf );
+        }
+    }
 }

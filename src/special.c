@@ -84,7 +84,7 @@ void load_specfuns( void )
    SPEC_LIST *specfun;
    FILE *fp;
    char filename[256];
-   char *word;
+   const char *word;
 
    first_specfun = NULL;
    last_specfun = NULL;
@@ -122,7 +122,7 @@ void load_specfuns( void )
 }
 
 /* Simple validation function to be sure a function can be used on mobs */
-bool validate_spec_fun( char *name )
+bool validate_spec_fun( const char *name )
 {
    SPEC_LIST *specfun;
 
@@ -137,7 +137,7 @@ bool validate_spec_fun( char *name )
 /*
  * Given a name, return the appropriate spec_fun.
  */
-SPEC_FUN *spec_lookup( char *name )
+SPEC_FUN *spec_lookup( const char *name )
 {
    void *funHandle;
    const char *error;
@@ -940,7 +940,7 @@ bool spec_dark_jedi( CHAR_DATA * ch )
 {
    CHAR_DATA *victim;
    CHAR_DATA *v_next;
-   char *spell;
+   const char *spell;
    int sn;
 
    if( ch->position != POS_FIGHTING )
@@ -1107,7 +1107,7 @@ bool spec_guardian( CHAR_DATA * ch )
    CHAR_DATA *victim;
    CHAR_DATA *v_next;
    CHAR_DATA *ech;
-   char *crime;
+   const char *crime;
    int max_evil;
 
    if( !IS_AWAKE( ch ) || ch->fighting )

@@ -1,344 +1,470 @@
-#AREA   Honoghr~
+#FUSSAREA
+#AREADATA
+Version      1
+Name         Honoghr~
+Author       Thrawn~
+Ranges       5 103 5 103
+Economy      0 9928240
+ResetMsg     A warm breeze blows through the kholm grass.~
+ResetFreq    15
+#ENDAREADATA
 
-
-
-#AUTHOR Thrawn~
-
-#RANGES
-5 103 5 103
-$
-
-#RESETMSG A warm breeze blows through the kholm grass.~
-
-#FLAGS
-0
-
-#ECONOMY 0 9928240
-
-#MOBILES
-#1000
-Noghri male Khabarakh~
-Khabarakh, clan Kihm'bar~
-A noghri male is standing here.
+#MOBILE
+Vnum       1000
+Keywords   Noghri male Khabarakh~
+Short      Khabarakh, clan Kihm'bar~
+Long       A noghri male is standing here.
 ~
-~
-1025 32768 0 Z
-45 0 52 10d9+450 3d8+2
-225 0
-8 8 1
-13 13 13 20 13 13 13
-0 0 0 0 0
-6 0 0 0 67 67 3
-7 9 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-> fight_prog 1000~
-get dagger sheath
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     male~
+Actflags   npc practice~
+Affected   sneak~
+Stats1     0 45 0 52 225 0
+Stats2     10 9 450
+Stats3     3 8 2
+Stats4     0 0 3 7 9
+Attribs    13 13 13 20 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common wookiee noghri~
+Speaking   common wookiee noghri~
+VIPFlags   honoghr~
+#MUDPROG
+Progtype  fight_prog~
+Arglist   1000~
+Comlist   get dagger sheath
 wield dagger
 ~
-|
-#1001
-the dynast~
-The Dynast~
-The Dynast is here keeping control of the clans.
+#ENDPROG
+
+#ENDMOBILE
+
+#MOBILE
+Vnum       1001
+Keywords   the dynast~
+Short      The Dynast~
+Long       The Dynast is here keeping control of the clans.
 ~
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc sentinel stayarea~
+Affected   sneak~
+Stats1     0 90 0 -125 450 0
+Stats2     18 10 900
+Stats3     11 4 2
+Stats4     0 0 0 16 18
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1002
+Keywords   noghri ~
+Short      a noghri~
+Long       A noghri is walking ever so quietly past you.
 ~
-67 32768 0 Z
-90 0 -125 18d10+900 11d4+2
-450 0
-8 8 0
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-16 18 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1002
-noghri ~
-a noghri~
-A noghri is walking ever so quietly past you.
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     male~
+Actflags   npc~
+Affected   sneak~
+Stats1     0 15 0 62 75 0
+Stats2     3 10 150
+Stats3     2 4 2
+Stats4     0 0 0 0 1
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common~
+Speaking   noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1003
+Keywords   noghri child~
+Short      a noghri child~
+Long       A noghri child is playing ball here.
 ~
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc~
+Affected   sneak~
+Stats1     0 5 0 87 0 0
+Stats2     1 10 50
+Stats3     1 4 2
+Stats4     0 0 0 1 1
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1004
+Keywords   noghri female~
+Short      a noghri female~
+Long       A noghri female is silently walking aound the village.
 ~
-1 32768 0 Z
-15 0 62 3d10+150 2d4+2
-75 0
-8 8 1
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 1 64 0
-0 1 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1003
-noghri child~
-a noghri child~
-A noghri child is playing ball here.
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     female~
+Actflags   npc~
+Affected   sneak~
+Stats1     0 15 0 62 75 0
+Stats2     3 10 150
+Stats3     2 4 2
+Stats4     0 0 0 0 0
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     noghri~
+Speaking   common noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1005
+Keywords   decon droid~
+Short      a decon droid~
+Long       A decon droid is cleaning the soil here.
 ~
-~
-1 32768 0 Z
-5 0 87 1d10+50 1d4+2
-0 0
-8 8 0
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-1 1 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1004
-noghri female~
-a noghri female~
-A noghri female is silently walking aound the village.
-~
-~
-1 32768 0 Z
-15 0 62 3d10+150 2d4+2
-75 0
-8 8 2
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 64 65 0
-0 0 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1005
-decon droid~
-a decon droid~
-A decon droid is cleaning the soil here.
-~
-This common make of astromech droid is also known as an R2 unit. It is
+Desc       This common make of astromech droid is also known as an R2 unit. It is
 a small wheeled droid designed primarily for ship maintenence and
 repair. It has an interface apendage to plug into a ships computer as
 well as several other tools hidden within its domed frame that it
 uses to preform various functions.
 ~
-83886209 0 0 Z
-5 0 88 0d0+0 1d4+0
-0 0
-8 8 0
-13 13 13 13 13 13 13
-0 0 0 0 0
-0 0 0 0 2048 2048 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-#1006
-noghri honor guard~
-a noghri honor guard~
-A noghri honor guard is standing here on duty.
+Race       Human~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc wimpy noassist droid~
+Stats1     0 5 0 88 0 0
+Stats2     0 0 0
+Stats3     1 4 0
+Stats4     0 0 0 0 0
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     droid~
+Speaking   droid~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1006
+Keywords   noghri honor guard~
+Short      a noghri honor guard~
+Long       A noghri honor guard is standing here on duty.
 ~
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Specfun    spec_guardian~
+Gender     male~
+Actflags   npc sentinel~
+Stats1     0 20 0 50 0 0
+Stats2     4 10 200
+Stats3     2 4 2
+Stats4     0 0 0 2 4
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1007
+Keywords   Vor'corkh noghri dynast~
+Short      Vork'Corkh ~
+Long       Vork'Corkh, First Dynast is here.
 ~
-3 0 0 Z
-20 0 50 4d10+200 2d4+2
-0 0
-8 8 1
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-2 4 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1007
-Vor'corkh noghri dynast~
-Vork'Corkh ~
-Vork'Corkh, First Dynast is here.
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc sentinel stayarea~
+Affected   sneak~
+Stats1     0 90 0 -125 450 0
+Stats2     18 10 900
+Stats3     11 4 2
+Stats4     0 0 0 16 18
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1008
+Keywords   Ir'Khanim noghri dynast~
+Short      Ir'Khanim~
+Long       Ir'Khanim, Second Dynast is here.
 ~
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc sentinel stayarea~
+Affected   sneak~
+Stats1     0 90 0 -125 450 0
+Stats2     18 10 900
+Stats3     11 4 2
+Stats4     0 0 0 16 18
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+VIPFlags   honoghr~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1009
+Keywords   Maitrakh matiark noghri leader~
+Short      Maitrakh, clan Kihm'bar~
+Long       Maitrakh, clan Kihm'bar is looking at her clan history.
 ~
-67 32768 0 Z
-90 0 -125 18d10+900 11d4+2
-450 0
-8 8 0
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-16 18 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1008
-Ir'Khanim noghri dynast~
-Ir'Khanim~
-Ir'Khanim, Second Dynast is here.
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     female~
+Actflags   npc stayarea~
+Affected   sneak~
+Stats1     0 90 0 -125 450 0
+Stats2     18 10 900
+Stats3     11 4 2
+Stats4     0 0 0 16 18
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+#ENDMOBILE
+
+#MOBILE
+Vnum       1010
+Keywords   Rukh noghri assassin~
+Short      Rukh~
+Long       Rukh, ex-imperial death commando is here watching you.
 ~
-~
-67 32768 0 Z
-90 0 -125 18d10+900 11d4+2
-450 0
-8 8 0
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-16 18 0 0 0 0 0 0
-64 0 0 0 0 0 0 0
-#1009
-Maitrakh matiark noghri leader~
-Maitrakh, clan Kihm'bar~
-Maitrakh, clan Kihm'bar is looking at her clan history.
-~
-~
-65 32768 0 Z
-90 0 -125 18d10+900 11d4+2
-450 0
-8 8 2
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-16 18 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-#1010
-Rukh noghri assassin~
-Rukh~
-Rukh, ex-imperial death commando is here watching you.
-~
-~
-3 98304 0 Z
-90 0 -76 18d10+900 11d4+0
-420 0
-8 8 1
-21 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 65 0
-15 14 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-> fight_prog 100~
-get dagger sheath
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     male~
+Actflags   npc sentinel~
+Affected   sneak hide~
+Stats1     0 90 0 -76 420 0
+Stats2     18 10 900
+Stats3     11 4 0
+Stats4     0 0 0 15 14
+Attribs    21 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   common noghri~
+#MUDPROG
+Progtype  fight_prog~
+Arglist   100~
+Comlist   get dagger sheath
 wield dagger
 ~
-|
-#1011
-noghri cook ~
-a noghri cook~
-A noghri cook is here ready to serve you.
-~
-~
-3 32768 0 Z
-15 0 62 3d10+150 2d4+2
-75 0
-8 8 1
-13 13 13 13 13 13 13
-0 0 0 0 0
-6 0 0 0 65 64 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-#1099
-noghri ~
-a newly created noghri ~
-Some god abandoned a newly created noghri  here.
-~
-~
-1 0 0 Z
-1 0 0 0d0+0 0d0+0
-0 0
-8 8 0
-10 10 10 10 10 10 10
-0 0 0 0 0
-0 0 0 0 1 1 0
-0 0 0 0 0 0 0 0
-0 0 0 0 0 0 0 0
-#0
+#ENDPROG
 
+#ENDMOBILE
 
-#OBJECTS
-#1000
-dagger~
-a finely crafted dagger~
-A dagger is collecting dust here.~
+#MOBILE
+Vnum       1011
+Keywords   noghri cook ~
+Short      a noghri cook~
+Long       A noghri cook is here ready to serve you.
 ~
-5 262144 8193
-12 1 6 11
-1 0 0
-A
-18 2
-A
-19 1
-A
-32 5
-#1001
-chest plate camo~
-camoflage chest plate~
-A well hidden chest plate is here.~
-~
-9 262144 9
-5 5 0 0
-3 500 50
-A
-37 3
-#1002
-wrist sheath~
-a wrist sheath~
-A wierd looking sheath has been left here.~
-~
-15 262144 4097 2
-2 0 0 12
-1 0 0
-#1003
-robe noghri brown~
-brown noghri robe~
-A small brown robe has been dumped here.~
-~
-9 262144 1025 16
-4 4 0 0
-1 60 6
-A
-37 10
-#1004
-leg camo guards~
-camoflage leg guards~
-On the ground you barly notice some leg guards.~
-~
-9 262144 33 8
-5 5 0 0
-1 450 45
-A
-37 4
-#1005
-camo arm guards~
-camoflage arm guards~
-You barely notice a pair of arm guards on the ground.~
-~
-9 262144 257 8
-3 3 0 0
-2 250 25
-A
-37 3
-#1006
-leather gloves pair~
-a pair of leather gloves~
-Two leather gloves are lying on the ground.~
-~
-9 262144 129
-1 3 0 0
-1 100 10
-#1007
-hood brown~
-a brown hood~
-A small piece of cloth is blowing around here.~
-~
-9 262144 17
-2 2 0 0
-1 10 1
-#1008
-booth~
-a booth~
-A booth is here.~
-~
-13 0 0
-0 0 0 0
-1 0 0
-#1009
-assassin dagger~
-an assassin's dagger~
-A fine blade has been carelessly droped here.~
-~
-5 262144 8193
-13 9 2 0
-1 0 0
-#1099
-blaster ~
-a newly created blaster ~
-Some god dropped a newly created blaster  here.~
-~
-13 0 0
-0 0 0 0
-1 0 0
-#0
+Race       Noghri~
+Position   aggressive~
+DefPos     aggressive~
+Gender     male~
+Actflags   npc sentinel~
+Affected   sneak~
+Stats1     0 15 0 62 75 0
+Stats2     3 10 150
+Stats3     2 4 2
+Stats4     0 0 0 0 0
+Attribs    13 13 13 13 13 13 13 0
+Saves      0 0 0 0 0
+Speaks     common noghri~
+Speaking   noghri~
+ShopData   0 19 0 0 0 120 90 0 23
+#ENDMOBILE
 
+#MOBILE
+Vnum       1099
+Keywords   noghri ~
+Short      a newly created noghri ~
+Long       Some god abandoned a newly created noghri  here.
+~
+Race       Human~
+Position   aggressive~
+DefPos     aggressive~
+Gender     neuter~
+Actflags   npc~
+Stats1     0 1 0 0 0 0
+Stats2     0 0 0
+Stats3     0 0 0
+Stats4     0 0 0 0 0
+Attribs    10 10 10 10 10 10 10 0
+Saves      0 0 0 0 0
+Speaks     common~
+Speaking   common~
+#ENDMOBILE
 
-#ROOMS
-#1000
-Nystao Port~
-You are standing in the Nystao Port. At one point in history 
+#OBJECT
+Vnum     1000
+Keywords dagger~
+Type     weapon~
+Short    a finely crafted dagger~
+Long     A dagger is collecting dust here.~
+Flags    small_size~
+WFlags   take wield~
+Values   12 1 6 11 0 0
+Stats    1 0 0 0 0
+Affect       -1 -1 2 18 0
+Affect       -1 -1 1 19 0
+Affect       -1 -1 5 32 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1001
+Keywords chest plate camo~
+Type     armor~
+Short    camoflage chest plate~
+Long     A well hidden chest plate is here.~
+Flags    small_size~
+WFlags   take body~
+Values   5 5 0 0 0 0
+Stats    3 500 50 0 0
+Affect       -1 -1 3 37 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1002
+Keywords wrist sheath~
+Type     container~
+Short    a wrist sheath~
+Long     A wierd looking sheath has been left here.~
+Flags    small_size~
+WFlags   take wrist~
+Values   2 0 0 12 0 0
+Stats    1 0 0 0 2
+#ENDOBJECT
+
+#OBJECT
+Vnum     1003
+Keywords robe noghri brown~
+Type     armor~
+Short    brown noghri robe~
+Long     A small brown robe has been dumped here.~
+Flags    small_size~
+WFlags   take about~
+Values   4 4 0 0 0 0
+Stats    1 60 6 0 16
+Affect       -1 -1 10 37 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1004
+Keywords leg camo guards~
+Type     armor~
+Short    camoflage leg guards~
+Long     On the ground you barly notice some leg guards.~
+Flags    small_size~
+WFlags   take legs~
+Values   5 5 0 0 0 0
+Stats    1 450 45 0 8
+Affect       -1 -1 4 37 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1005
+Keywords camo arm guards~
+Type     armor~
+Short    camoflage arm guards~
+Long     You barely notice a pair of arm guards on the ground.~
+Flags    small_size~
+WFlags   take arms~
+Values   3 3 0 0 0 0
+Stats    2 250 25 0 8
+Affect       -1 -1 3 37 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1006
+Keywords leather gloves pair~
+Type     armor~
+Short    a pair of leather gloves~
+Long     Two leather gloves are lying on the ground.~
+Flags    small_size~
+WFlags   take hands~
+Values   1 3 0 0 0 0
+Stats    1 100 10 0 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1007
+Keywords hood brown~
+Type     armor~
+Short    a brown hood~
+Long     A small piece of cloth is blowing around here.~
+Flags    small_size~
+WFlags   take head~
+Values   2 2 0 0 0 0
+Stats    1 10 1 0 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1008
+Keywords booth~
+Type     trash~
+Short    a booth~
+Long     A booth is here.~
+Values   0 0 0 0 0 0
+Stats    1 0 0 0 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1009
+Keywords assassin dagger~
+Type     weapon~
+Short    an assassin's dagger~
+Long     A fine blade has been carelessly droped here.~
+Flags    small_size~
+WFlags   take wield~
+Values   13 9 2 0 0 0
+Stats    1 0 0 0 0
+#ENDOBJECT
+
+#OBJECT
+Vnum     1099
+Keywords blaster ~
+Type     trash~
+Short    a newly created blaster ~
+Long     Some god dropped a newly created blaster  here.~
+Values   0 0 0 0 0 0
+Stats    1 0 0 0 0
+#ENDOBJECT
+
+#ROOM
+Vnum     1000
+Name     Nystao Port~
+Sector   city~
+Flags    nomob~
+Desc     You are standing in the Nystao Port. At one point in history 
 this port would have had imperial troopers standing guard here, 
 or the Grand Admiral Thrawn makeing his presence felt, or even
 The Dark Lord himself, Darth vader would be here letting the
@@ -351,33 +477,37 @@ used to be an Imperial shuttle sitting here as a reminder to
 the people of Honoghr of their struggles in life as well
 as with themselves.
 ~
-0 4 1
-D1
-~
-~
-0 -1 1001
-R M 0 1006 2 1000
-  R E 1 1005 1 10
-  R E 1 1004 1 7
-  R E 1 1002 1 14
-  R E 1 1001 1 5
-  R E 1 1003 1 12
-  R E 1 1006 1 9
-  R E 1 1007 1 6
-  R E 1 53 1 16
-R M 0 1006 2 1000
-  R E 1 1002 1 14
-  R E 1 1001 1 5
-  R E 1 1006 1 9
-  R E 1 1007 1 6
-  R E 1 1003 1 12
-  R E 1 1005 1 10
-  R E 1 1004 1 7
-  R E 1 53 1 16
-S
-#1001
-Nystao Port~
-You are standing in the Nystao Port. At one point in history 
+#EXIT
+Direction east~
+ToRoom    1001
+#ENDEXIT
+
+Reset M 0 1006 2 1000
+  Reset E 1 1005 1 10
+  Reset E 1 1004 1 7
+  Reset E 1 1002 1 14
+  Reset E 1 1001 1 5
+  Reset E 1 1003 1 12
+  Reset E 1 1006 1 9
+  Reset E 1 1007 1 6
+  Reset E 1 53 1 16
+Reset M 0 1006 2 1000
+  Reset E 1 1002 1 14
+  Reset E 1 1001 1 5
+  Reset E 1 1006 1 9
+  Reset E 1 1007 1 6
+  Reset E 1 1003 1 12
+  Reset E 1 1005 1 10
+  Reset E 1 1004 1 7
+  Reset E 1 53 1 16
+#ENDROOM
+
+#ROOM
+Vnum     1001
+Name     Nystao Port~
+Sector   city~
+Flags    nomob safe~
+Desc     You are standing in the Nystao Port. At one point in history 
 this port would have had imperial troopers standing guard here, 
 or the Grand Admiral Thrawn makeing his presence felt, or even
 The Dark Lord himself, Darth vader would be here letting the
@@ -390,19 +520,24 @@ used to be an Imperial shuttle sitting here as a reminder to
 the people of Honoghr of their struggles in life as well
 as with themselves.
 ~
-0 1028 1
-D0
-~
-~
-0 -1 1002
-D3
-~
-~
-0 -1 1000
-S
-#1002
-Road Way~
-With Nystao Port to the south you see to the east the Grand Dukha,
+#EXIT
+Direction north~
+ToRoom    1002
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1000
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1002
+Name     Road Way~
+Sector   city~
+Flags    nomob~
+Desc     With Nystao Port to the south you see to the east the Grand Dukha,
 where all the noghri hold meetings of great importance wether
 it be for punishment of a clan member or for farming news
 it all get told in that building. Farther off to the northeast 
@@ -412,19 +547,24 @@ you looking at you and some of the children giggle at you as you
 look at them. Some of the young adults look at you as though you
 had two heads, since they very rarely get visitors here.
 ~
-0 4 1
-D1
-~
-~
-0 -1 1003
-D2
-~
-~
-0 -1 1001
-S
-#1003
-Road Way~
-With Nystao Port to the southeast you see to the east the Grand Dukha,
+#EXIT
+Direction east~
+ToRoom    1003
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1001
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1003
+Name     Road Way~
+Sector   city~
+Flags    nomob~
+Desc     With Nystao Port to the southeast you see to the east the Grand Dukha,
 where all the noghri hold meetings of great importance wether
 it be for punishment of a clan member or for farming news
 it all get told in that building. Farther off to the northeast 
@@ -434,19 +574,24 @@ you looking at you and some of the children giggle at you as you
 look at them. Some of the young adults look at you as though you
 had two heads, since they very rarely get visitors here.
 ~
-0 4 1
-D1
-~
-~
-0 -1 1004
-D3
-~
-~
-0 -1 1002
-S
-#1004
-Road Way~
-With Nystao Port to the southeast you see to the east the Grand Dukha,
+#EXIT
+Direction east~
+ToRoom    1004
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1002
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1004
+Name     Road Way~
+Sector   city~
+Flags    nomob~
+Desc     With Nystao Port to the southeast you see to the east the Grand Dukha,
 where all the noghri hold meetings of great importance wether
 it be for punishment of a clan member or for farming news
 it all get told in that building. Farther off to the northeast 
@@ -456,19 +601,23 @@ you looking at you and some of the children giggle at you as you
 look at them. Some of the young adults look at you as though you
 had two heads, since they very rarely get visitors here.
 ~
-0 4 1
-D1
-~
-~
-0 -1 1005
-D3
-~
-~
-0 -1 1003
-S
-#1005
-Road Way~
-With Nystao to the southeast you see to the distant east
+#EXIT
+Direction east~
+ToRoom    1005
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1003
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1005
+Name     Road Way~
+Sector   city~
+Desc     With Nystao to the southeast you see to the distant east
 the Grand Dukha, where all the noghri hold mettings of great
 importance wether it be for punishment of a clan member
 or for farming news it all gets told in that building. 
@@ -480,20 +629,24 @@ younge adults look at you as though you had two heads, since
 they rarely get visitors here anyone new is going to get
 look at in a wierd way.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1006
-D3
-~
-~
-0 -1 1004
-R M 0 1005 15 1005
-S
-#1006
-Road Way~
-With Nystao to the southeast you see to the distant east
+#EXIT
+Direction east~
+ToRoom    1006
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1004
+#ENDEXIT
+
+Reset M 0 1005 15 1005
+#ENDROOM
+
+#ROOM
+Vnum     1006
+Name     Road Way~
+Sector   city~
+Desc     With Nystao to the southeast you see to the distant east
 the Grand Dukha, where all the noghri hold mettings of great
 importance wether it be for punishment of a clan member
 or for farming news it all gets told in that building. 
@@ -505,46 +658,59 @@ younge adults look at you as though you had two heads, since
 they rarely get visitors here anyone new is going to get
 look at in a wierd way.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1007
-D3
-~
-~
-0 -1 1005
-S
-#1007
-Road Way~
-You have finaly reached the entrance to the Grand Dukha, doesn't seem to
+#EXIT
+Direction east~
+ToRoom    1007
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1005
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1007
+Name     Road Way~
+Sector   city~
+Desc     You have finaly reached the entrance to the Grand Dukha, doesn't seem to
 be in use at the moment, but, the Noghri are a very sneaky race
 and as far as you know, the place could be crawling with them.
 You see that the Grand Dukha is much bigger then all the other buildings 
 that make up the villages.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1012
-D2
-~
-door~
-3 -1 1008
-D3
-~
-~
-0 -1 1006
-D6
-~
-~
-0 -1 1021
-R D 0 1007 2 1
-S
-#1008
-The Grand Dukha~
-This is much larger the the normal clan Dukhas not only in size but
+#EXIT
+Direction north~
+ToRoom    1012
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1008
+Keywords  door~
+Flags     isdoor closed~
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1006
+#ENDEXIT
+
+#EXIT
+Direction northeast~
+ToRoom    1021
+#ENDEXIT
+
+Reset D 0 1007 2 1
+#ENDROOM
+
+#ROOM
+Vnum     1008
+Name     The Grand Dukha~
+Sector   city~
+Flags    indoors~
+Desc     This is much larger the the normal clan Dukhas not only in size but
 in almost every other aspect. The walls and roof are made of a 
 silver-blue metal instead of wood, with no carvings of any sort on
 there surface. The supporting pillars are black, metal or worked
@@ -552,31 +718,39 @@ stone, you can't tell which. A wide set of black-and-red-marbled
 steps lead up to a grey flagstone entrance terrace outside the 
 double doors.
 ~
-0 8 1
-D0
-~
-door~
-3 -1 1007
-D1
-~
-~
-0 -1 1009
-D2
-~
-~
-0 -1 1011
-R M 0 1007 1 1008
-  R E 1 1003 1 12
-R M 0 1008 1 1008
-  R E 1 1003 1 12
-R M 0 1001 1 1008
-  R E 1 1003 1 12
-  R E 1 1003 1 12
-R D 0 1008 0 1
-S
-#1009
-The Grand Dukha~
-This is much larger the the normal clan Dukhas not only in size but
+#EXIT
+Direction north~
+ToRoom    1007
+Keywords  door~
+Flags     isdoor closed~
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1009
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1011
+#ENDEXIT
+
+Reset M 0 1007 1 1008
+  Reset E 1 1003 1 12
+Reset M 0 1008 1 1008
+  Reset E 1 1003 1 12
+Reset M 0 1001 1 1008
+  Reset E 1 1003 1 12
+  Reset E 1 1003 1 12
+Reset D 0 1008 0 1
+#ENDROOM
+
+#ROOM
+Vnum     1009
+Name     The Grand Dukha~
+Sector   city~
+Flags    indoors~
+Desc     This is much larger the the normal clan Dukhas not only in size but
 in almost every other aspect. The walls and roof are made of a 
 silver-blue metal instead of wood, with no carvings of any sort on
 there surface. The supporting pillars are black, metal or worked
@@ -584,19 +758,24 @@ stone, you can't tell which. A wide set of black-and-red-marbled
 steps lead up to a grey flagstone entrance terrace outside the 
 double doors.
 ~
-0 8 1
-D2
-~
-~
-0 -1 1010
-D3
-~
-~
-0 -1 1008
-S
-#1010
-The Grand Dukha~
-This is much larger the the normal clan Dukhas not only in size but
+#EXIT
+Direction south~
+ToRoom    1010
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1008
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1010
+Name     The Grand Dukha~
+Sector   city~
+Flags    indoors~
+Desc     This is much larger the the normal clan Dukhas not only in size but
 in almost every other aspect. The walls and roof are made of a 
 silver-blue metal instead of wood, with no carvings of any sort on
 there surface. The supporting pillars are black, metal or worked
@@ -604,19 +783,24 @@ stone, you can't tell which. A wide set of black-and-red-marbled
 steps lead up to a grey flagstone entrance terrace outside the 
 double doors.
 ~
-0 8 1
-D0
-~
-~
-0 -1 1009
-D3
-~
-~
-0 -1 1011
-S
-#1011
-The Grand Dukha~
-This is much larger the the normal clan Dukhas not only in size but
+#EXIT
+Direction north~
+ToRoom    1009
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1011
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1011
+Name     The Grand Dukha~
+Sector   city~
+Flags    indoors~
+Desc     This is much larger the the normal clan Dukhas not only in size but
 in almost every other aspect. The walls and roof are made of a 
 silver-blue metal instead of wood, with no carvings of any sort on
 there surface. The supporting pillars are black, metal or worked
@@ -624,19 +808,23 @@ stone, you can't tell which. A wide set of black-and-red-marbled
 steps lead up to a grey flagstone entrance terrace outside the 
 double doors.
 ~
-0 8 1
-D0
-~
-~
-0 -1 1008
-D1
-~
-~
-0 -1 1010
-S
-#1012
-Road Way~
-With the Grand Dukha to the south and the port to the southwest, you 
+#EXIT
+Direction north~
+ToRoom    1008
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1010
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1012
+Name     Road Way~
+Sector   city~
+Desc     With the Grand Dukha to the south and the port to the southwest, you 
 start to head into the village. Its nothing really special, since 
 its made up of mostly huts and nothing else except for the 
 bakery and a supply hut there is nothing in this village that
@@ -646,30 +834,36 @@ have only partialy adopted it into their farming and for their
 guarding of they Grand Dukha and the port, other then that the Noghri
 are a very low-tech race of people.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1013
-D1
-~
-~
-0 -1 1019
-D2
-~
-~
-0 -1 1007
-D3
-~
-~
-0 -1 1020
-R M 0 1002 30 1012
-R M 0 1004 30 1012
-R M 0 1005 30 1012
-S
-#1013
-Road Way~
-With the Grand Dukha to the south and the port to the southwest, you 
+#EXIT
+Direction north~
+ToRoom    1013
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1019
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1007
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1020
+#ENDEXIT
+
+Reset M 0 1002 30 1012
+Reset M 0 1004 30 1012
+Reset M 0 1005 30 1012
+#ENDROOM
+
+#ROOM
+Vnum     1013
+Name     Road Way~
+Sector   city~
+Desc     With the Grand Dukha to the south and the port to the southwest, you 
 start to head into the village. Its nothing really special, since 
 its made up of mostly huts and nothing else except for the 
 bakery and a supply hut there is nothing in this village that
@@ -679,27 +873,33 @@ have only partialy adopted it into their farming and for their
 guarding of they Grand Dukha and the port, other then that the Noghri
 are a very low-tech race of people.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1018
-D1
-~
-~
-0 -1 1014
-D2
-~
-~
-0 -1 1012
-D3
-~
-~
-0 -1 1017
-S
-#1014
-Road Way~
-With the Grand Dukha to the south and the port to the southwest, you 
+#EXIT
+Direction north~
+ToRoom    1018
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1014
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1012
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1017
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1014
+Name     Road Way~
+Sector   city~
+Desc     With the Grand Dukha to the south and the port to the southwest, you 
 start to head into the village. Its nothing really special, since 
 its made up of mostly huts and nothing else except for the 
 bakery and a supply hut there is nothing in this village that
@@ -709,23 +909,29 @@ have only partialy adopted it into their farming and for their
 guarding of they Grand Dukha and the port, other then that the Noghri
 are a very low-tech race of people.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1015
-D2
-~
-~
-0 -1 1016
-D3
-~
-~
-0 -1 1013
-S
-#1015
-Noghri Guest House~
-The hut is very small, but it is, at the same time, very cozy. 
+#EXIT
+Direction north~
+ToRoom    1015
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1016
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1013
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1015
+Name     Noghri Guest House~
+Sector   city~
+Flags    safe hotel~
+Desc     The hut is very small, but it is, at the same time, very cozy. 
 With a small fire burning in the fire pit located in the middle 
 of the hut give the room a nice warmth as well as a slight spicey
 smell which makes it all the more refeshing to the sences. The
@@ -736,15 +942,18 @@ here worth while.
 You can safely quit here.
  
 ~
-0 8389632 1
-D2
-~
-~
-0 -1 1014
-S
-#1016
-Hut~
-The hut is very small, but it is, at the same time, very cozy. 
+#EXIT
+Direction south~
+ToRoom    1014
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1016
+Name     Hut~
+Sector   city~
+Desc     The hut is very small, but it is, at the same time, very cozy. 
 With a small fire burning in the fire pit located in the middle 
 of the hut give the room a nice warmth as well as a slight spicey
 smell which makes it all the more refeshing to the sences. The
@@ -752,15 +961,19 @@ hut has almost nothing in it, except fot the sleeping hamocks
 lining the walls and the odd tool here and there, there is nothing
 here worth while.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1014
-S
-#1017
-Cook House~
-The cook hous is almost exactly the same as the huts except for one
+#EXIT
+Direction north~
+ToRoom    1014
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1017
+Name     Cook House~
+Sector   city~
+Flags    indoors safe~
+Desc     The cook hous is almost exactly the same as the huts except for one
 difference it sells food. Just like the other huts it has a small fire
 burning in a fire pit and a cauldron of sorts hanging in the middle. No
 Hamocks line this hut, but it is lined with the carcasus of the local live
@@ -769,19 +982,23 @@ of stumbling across. Strangly enough though it also has some imported
 foods, from Coruscant, the New Republic must be willing to send some food
 to the noghri who wished to stay with their roots 
 ~
-0 1032 1
-D1
-~
-~
-0 -1 1013
-R M 0 1011 1 1017
-  R G 1 32252 1
-  R G 1 10313 1
-  R G 1 31522 1
-S
-#1018
-Hut~
-The hut is very small, but it is, at the same time, very cozy. 
+#EXIT
+Direction east~
+ToRoom    1013
+#ENDEXIT
+
+Reset M 0 1011 1 1017
+  Reset G 1 32252 1
+  Reset G 1 10313 1
+  Reset G 1 31522 1
+#ENDROOM
+
+#ROOM
+Vnum     1018
+Name     Hut~
+Sector   city~
+Flags    indoors~
+Desc     The hut is very small, but it is, at the same time, very cozy. 
 With a small fire burning in the fire pit located in the middle 
 of the hut give the room a nice warmth as well as a slight spicey
 smell which makes it all the more refeshing to the sences. The
@@ -789,15 +1006,19 @@ hut has almost nothing in it, except fot the sleeping hamocks
 lining the walls and the odd tool here and there, there is nothing
 here worth while.
 ~
-0 8 1
-D2
-~
-~
-0 -1 1013
-S
-#1019
-Hut~
-The hut is very small, but it is, at the same time, very cozy. 
+#EXIT
+Direction south~
+ToRoom    1013
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1019
+Name     Hut~
+Sector   city~
+Flags    indoors~
+Desc     The hut is very small, but it is, at the same time, very cozy. 
 With a small fire burning in the fire pit located in the middle 
 of the hut give the room a nice warmth as well as a slight spicey
 smell which makes it all the more refeshing to the sences. The
@@ -805,189 +1026,229 @@ hut has almost nothing in it, except fot the sleeping hamocks
 lining the walls and the odd tool here and there, there is nothing
 here worth while.
 ~
-0 8 1
-D3
-~
-~
-0 -1 1012
-S
-#1020
-Hut~
-The hut is very small, but it is, at the same time, very cozy. 
+#EXIT
+Direction west~
+ToRoom    1012
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1020
+Name     Hut~
+Sector   city~
+Flags    indoors~
+Desc     The hut is very small, but it is, at the same time, very cozy. 
 With a small fire burning in the fire pit located in the middle 
 of the hut give the room a nice warmth as well as a slight spicey
 smell which makes it all the more refeshing to the sences. The
 lining the walls and the odd tool here and there, there is nothing
 here worth while.
 ~
-0 8 1
-D1
-~
-~
-0 -1 1012
-R M 0 1010 1 1020
-  R E 1 1002 1 14
-    R P 0 1009 1 1002
-  R E 1 1007 1 6
-  R E 1 1003 1 12
-  R E 1 1006 1 9
-  R E 1 10424 1 17
-S
-#1021
-Road Way~
-Way off to in the distant north you see another tinny little 
+#EXIT
+Direction east~
+ToRoom    1012
+#ENDEXIT
+
+Reset M 0 1010 1 1020
+  Reset E 1 1002 1 14
+    Reset P 0 1009 1 1002
+  Reset E 1 1007 1 6
+  Reset E 1 1003 1 12
+  Reset E 1 1006 1 9
+  Reset E 1 10424 1 17
+#ENDROOM
+
+#ROOM
+Vnum     1021
+Name     Road Way~
+Sector   city~
+Desc     Way off to in the distant north you see another tinny little 
 village which seems to be made in the same manor as the previous 
 village, except this one has a smaller version of a dukha in the 
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D2
-~
-~
-0 -1 1022
-D9
-~
-~
-0 -1 1007
-S
-#1022
-Road Way~
-Way off to in the distant north you see another tinny little 
+#EXIT
+Direction south~
+ToRoom    1022
+#ENDEXIT
+
+#EXIT
+Direction southwest~
+ToRoom    1007
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1022
+Name     Road Way~
+Sector   city~
+Desc     Way off to in the distant north you see another tinny little 
 village which seems to be made in the same manor as the previous 
 village, except this one has a smaller version of a dukha in the 
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1021
-D1
-~
-~
-0 -1 1023
-S
-#1023
-Road Way~
-Way off to in the distant north you see another tinny little 
+#EXIT
+Direction north~
+ToRoom    1021
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1023
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1023
+Name     Road Way~
+Sector   city~
+Desc     Way off to in the distant north you see another tinny little 
 village which seems to be made in the same manor as the previous 
 village, except this one has a smaller version of a dukha in the 
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D2
-~
-~
-0 -1 1024
-D3
-~
-~
-0 -1 1022
-S
-#1024
-Road Way~
-Way off to in the distant north you see another tinny little 
+#EXIT
+Direction south~
+ToRoom    1024
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1022
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1024
+Name     Road Way~
+Sector   city~
+Desc     Way off to in the distant north you see another tinny little 
 village which seems to be made in the same manor as the previous 
 village, except this one has a smaller version of a dukha in the 
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1023
-D2
-~
-~
-0 -1 1025
-S
-#1025
-Road Way~
-Way off to in the distant north you see another tinny little 
+#EXIT
+Direction north~
+ToRoom    1023
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1025
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1025
+Name     Road Way~
+Sector   city~
+Desc     Way off to in the distant north you see another tinny little 
 village which seems to be made in the same manor as the previous 
 village, except this one has a smaller version of a dukha in the 
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1024
-D2
-~
-~
-0 -1 1026
-S
-#1026
-Road Way~
-Way off to the distant north you see another tinny little
+#EXIT
+Direction north~
+ToRoom    1024
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1026
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1026
+Name     Road Way~
+Sector   city~
+Flags    nomob~
+Desc     Way off to the distant north you see another tinny little
 village which seems to be made in the same manor as the previous
 village, except this one has a smaller version of a dukha in the
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 4 1
-D0
-~
-~
-0 -1 1025
-D2
-~
-~
-0 -1 1027
-S
-#1027
-Road Way~
-Way off to the distant north you see another tinny little
+#EXIT
+Direction north~
+ToRoom    1025
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1027
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1027
+Name     Road Way~
+Sector   city~
+Desc     Way off to the distant north you see another tinny little
 village which seems to be made in the same manor as the previous
 village, except this one has a smaller version of a dukha in the
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1026
-D2
-~
-~
-0 -1 1028
-S
-#1028
-Road Way~
-Way off to the distant north you see another tinny little
+#EXIT
+Direction north~
+ToRoom    1026
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1028
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1028
+Name     Road Way~
+Sector   city~
+Desc     Way off to the distant north you see another tinny little
 village which seems to be made in the same manor as the previous
 village, except this one has a smaller version of a dukha in the
 center. Probably a place for a different clan family to hold their
 own meetings that don't need the advice of the Dynast for such
 small family matters.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1027
-D2
-~
-~
-0 -1 1029
-S
-#1029
-Village Road~
-The village road runs to the east right into the heart of the 
+#EXIT
+Direction north~
+ToRoom    1027
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1029
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1029
+Name     Village Road~
+Sector   city~
+Desc     The village road runs to the east right into the heart of the 
 village itself. Much the same as the city of Nystao only there 
 isn't as many huts and the Dukha isn't half as big as the Grand
 Dukha. The people of this village are just as curious as the
@@ -996,19 +1257,23 @@ ten heads instead of the two you felt you had in the city since if
 there are visitors in the city there are almost none who venture
 to this small village
 ~
-0 0 1
-D0
-~
-~
-0 -1 1028
-D1
-~
-~
-0 -1 1030
-S
-#1030
-Village Road~
-The village road runs to the east right into the heart of the 
+#EXIT
+Direction north~
+ToRoom    1028
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1030
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1030
+Name     Village Road~
+Sector   city~
+Desc     The village road runs to the east right into the heart of the 
 village itself. Much the same as the city of Nystao only there 
 isn't as many huts and the Dukha isn't half as big as the Grand
 Dukha. The people of this village are just as curious as the
@@ -1017,19 +1282,23 @@ ten heads instead of the two you felt you had in the city since if
 there are visitors in the city there are almost none who venture
 to this small village
 ~
-0 0 1
-D1
-~
-~
-0 -1 1031
-D3
-~
-~
-0 -1 1029
-S
-#1031
-Village Road~
-The village road runs to the east right into the heart of the 
+#EXIT
+Direction east~
+ToRoom    1031
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1029
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1031
+Name     Village Road~
+Sector   city~
+Desc     The village road runs to the east right into the heart of the 
 village itself. Much the same as the city of Nystao only there 
 isn't as many huts and the Dukha isn't half as big as the Grand
 Dukha. The people of this village are just as curious as the
@@ -1038,19 +1307,23 @@ ten heads instead of the two you felt you had in the city since if
 there are visitors in the city there are almost none who venture
 to this small village
 ~
-0 0 1
-D1
-~
-~
-0 -1 1032
-D3
-~
-~
-0 -1 1030
-S
-#1032
-Village Road~
-The village road runs to the east right into the heart of the 
+#EXIT
+Direction east~
+ToRoom    1032
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1030
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1032
+Name     Village Road~
+Sector   city~
+Desc     The village road runs to the east right into the heart of the 
 village itself. Much the same as the city of Nystao only there 
 isn't as many huts and the Dukha isn't half as big as the Grand
 Dukha. The people of this village are just as curious as the
@@ -1059,42 +1332,53 @@ ten heads instead of the two you felt you had in the city since if
 there are visitors in the city there are almost none who venture
 to this small village
 ~
-0 0 1
-D2
-~
-~
-0 -1 1034
-D3
-~
-~
-0 -1 1031
-S
-#1033
-The Village Dukha~
-The Dukha is covered with the history of the noghri people, hard to
+#EXIT
+Direction south~
+ToRoom    1034
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1031
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1033
+Name     The Village Dukha~
+Sector   city~
+Flags    indoors~
+Desc     The Dukha is covered with the history of the noghri people, hard to
 understand how to read it but it looks very beautiful, like
 hyroglyphs from an ancient city this one gives the entire history
 from further back then the clone wars. In the corner of the Dukha 
 is a small thing that looks almost like a confession booth, only
 this is made from the same wood that the Dukha itself is made from.
 ~
-0 8 1
-D1
-~
-~
-0 -1 1034
-D10
-~
-booth~
-133120 -1 1047
-R M 0 1009 1 1033
-  R E 1 1003 1 12
-  R E 1 1007 1 6
-R O 0 1008 1 1033
-S
-#1034
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction east~
+ToRoom    1034
+#ENDEXIT
+
+#EXIT
+Direction somewhere~
+ToRoom    1047
+Keywords  booth~
+Flags     hidden can_enter~
+#ENDEXIT
+
+Reset M 0 1009 1 1033
+  Reset E 1 1003 1 12
+  Reset E 1 1007 1 6
+Reset O 0 1008 1 1033
+#ENDROOM
+
+#ROOM
+Vnum     1034
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1104,23 +1388,28 @@ also rendered farming impossible. Some how the people are
 surviving without farms and live stock and you wonder how this is 
 possible.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1032
-D1
-~
-~
-0 -1 1035
-D3
-~
-~
-0 -1 1033
-S
-#1035
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction north~
+ToRoom    1032
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1035
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1033
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1035
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1129,19 +1418,23 @@ also rendered farming impossible. Some how the people are
 surviving without farms and live stock and you wonder how this is 
 possible.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1036
-D3
-~
-~
-0 -1 1034
-S
-#1036
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction east~
+ToRoom    1036
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1034
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1036
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1151,19 +1444,23 @@ also rendered farming impossible. Some how the people are
 surviving without farms and live stock and you wonder how this is 
 possible.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1037
-D3
-~
-~
-0 -1 1035
-S
-#1037
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction east~
+ToRoom    1037
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1035
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1037
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1173,19 +1470,23 @@ also rendered farming impossible. Some how the people are
 surviving without farms and live stock and you wonder how this is 
 possible.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1038
-D3
-~
-~
-0 -1 1036
-S
-#1038
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction east~
+ToRoom    1038
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1036
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1038
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1195,19 +1496,23 @@ also rendered farming impossible. Some how the people are
 surviving without farms and live stock and you wonder how this is 
 possible.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1039
-D3
-~
-~
-0 -1 1037
-S
-#1039
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction east~
+ToRoom    1039
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1037
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1039
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1217,19 +1522,23 @@ also rendered farming impossible. Some how the people are
 surviving without farms and live stock and you wonder how this is 
 possible.
 ~
-0 0 1
-D1
-~
-~
-0 -1 1040
-D3
-~
-~
-0 -1 1038
-S
-#1040
-Village Road~
-The village is off the the east and as you approach it you notice
+#EXIT
+Direction east~
+ToRoom    1040
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1038
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1040
+Name     Village Road~
+Sector   city~
+Desc     The village is off the the east and as you approach it you notice
 that it is almost an exact replica of the city, but as mentioned
 before, it is very small in size. Looking of to the supposed farm
 lands, you just notice that the fields are not filled with crops
@@ -1238,39 +1547,49 @@ has, from what you can see, over run the entire farm lands and has
 also rendered farming impossible. Some how the people are 
 possible.
 ~
-0 0 1
-D0
-~
-~
-0 -1 1041
-D1
-~
-~
-0 -1 1043
-D2
-~
-~
-0 -1 1042
-D3
-~
-~
-0 -1 1039
-D7
-~
-~
-0 -1 1046
-D8
-~
-~
-0 -1 1044
-D9
-~
-~
-0 -1 1045
-S
-#1041
-A Hut~
-This hut, much like all the others, is very small and at the same
+#EXIT
+Direction north~
+ToRoom    1041
+#ENDEXIT
+
+#EXIT
+Direction east~
+ToRoom    1043
+#ENDEXIT
+
+#EXIT
+Direction south~
+ToRoom    1042
+#ENDEXIT
+
+#EXIT
+Direction west~
+ToRoom    1039
+#ENDEXIT
+
+#EXIT
+Direction northwest~
+ToRoom    1046
+#ENDEXIT
+
+#EXIT
+Direction southeast~
+ToRoom    1044
+#ENDEXIT
+
+#EXIT
+Direction southwest~
+ToRoom    1045
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1041
+Name     A Hut~
+Sector   city~
+Flags    indoors~
+Desc     This hut, much like all the others, is very small and at the same
 time very comfortable. With a small fire burning in the centre fire
 pit it give the place a nice warm and very cozy feel and a nice 
 spicey smell giving an even more pleasant and refreshing felling
@@ -1278,15 +1597,19 @@ to the sences. The hut has almost nothing in it except for the
 sleeping hamocks the are lining the walls and the odd assortment of
 tools here and there. There is nothing here worth while.
 ~
-0 8 1
-D2
-~
-~
-0 -1 1040
-S
-#1042
-A Hut~
-This hut, much like all the others, is very small and at the same
+#EXIT
+Direction south~
+ToRoom    1040
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1042
+Name     A Hut~
+Sector   city~
+Flags    indoors~
+Desc     This hut, much like all the others, is very small and at the same
 time very comfortable. With a small fire burning in the centre fire
 pit it give the place a nice warm and very cozy feel and a nice 
 spicey smell giving an even more pleasant and refreshing felling
@@ -1294,15 +1617,19 @@ to the sences. The hut has almost nothing in it except for the
 sleeping hamocks the are lining the walls and the odd assortment of
 tools here and there. There is nothing here worth while.
 ~
-0 8 1
-D0
-~
-~
-0 -1 1040
-S
-#1043
-A Hut~
-This hut, much like all the others, is very small and at the same
+#EXIT
+Direction north~
+ToRoom    1040
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1043
+Name     A Hut~
+Sector   city~
+Flags    indoors~
+Desc     This hut, much like all the others, is very small and at the same
 time very comfortable. With a small fire burning in the centre fire
 pit it give the place a nice warm and very cozy feel and a nice 
 spicey smell giving an even more pleasant and refreshing felling
@@ -1310,15 +1637,19 @@ to the sences. The hut has almost nothing in it except for the
 sleeping hamocks the are lining the walls and the odd assortment of
 tools here and there. There is nothing here worth while.
 ~
-0 8 1
-D3
-~
-~
-0 -1 1040
-S
-#1044
-A Hut~
-This hut, much like all the others, is very small and at the same
+#EXIT
+Direction west~
+ToRoom    1040
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1044
+Name     A Hut~
+Sector   city~
+Flags    indoors~
+Desc     This hut, much like all the others, is very small and at the same
 time very comfortable. With a small fire burning in the centre fire
 pit it give the place a nice warm and very cozy feel and a nice 
 spicey smell giving an even more pleasant and refreshing felling
@@ -1326,15 +1657,19 @@ to the sences. The hut has almost nothing in it except for the
 sleeping hamocks the are lining the walls and the odd assortment of
 tools here and there. There is nothing here worth while.
 ~
-0 8 1
-D7
-~
-~
-0 -1 1040
-S
-#1045
-A Hut~
-This hut, much like all the others, is very small and at the same
+#EXIT
+Direction northwest~
+ToRoom    1040
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1045
+Name     A Hut~
+Sector   city~
+Flags    indoors~
+Desc     This hut, much like all the others, is very small and at the same
 time very comfortable. With a small fire burning in the centre fire
 pit it give the place a nice warm and very cozy feel and a nice 
 spicey smell giving an even more pleasant and refreshing felling
@@ -1342,15 +1677,19 @@ to the sences. The hut has almost nothing in it except for the
 sleeping hamocks the are lining the walls and the odd assortment of
 tools here and there. There is nothing here worth while.
 ~
-0 8 1
-D6
-~
-~
-0 -1 1040
-S
-#1046
-A Hut~
-This hut, much like all the others, is very small and at the same
+#EXIT
+Direction northeast~
+ToRoom    1040
+#ENDEXIT
+
+#ENDROOM
+
+#ROOM
+Vnum     1046
+Name     A Hut~
+Sector   city~
+Flags    indoors~
+Desc     This hut, much like all the others, is very small and at the same
 time very comfortable. With a small fire burning in the centre fire
 pit it give the place a nice warm and very cozy feel and a nice 
 spicey smell giving an even more pleasant and refreshing felling
@@ -1358,21 +1697,25 @@ to the sences. The hut has almost nothing in it except for the
 sleeping hamocks the are lining the walls and the odd assortment of
 tools here and there. There is nothing here worth while.
 ~
-0 8 1
-D8
-~
-~
-0 -1 1040
-R M 0 1000 1 1046
-  R E 1 1002 1 14
-  R E 1 1003 1 12
-  R E 1 1001 1 5
-  R E 1 10424 1 17
-  R E 1 1007 1 6
-S
-#1047
-Inside the Booth~
-The booth is very small and very cramped. It has a bench and a mesh
+#EXIT
+Direction southeast~
+ToRoom    1040
+#ENDEXIT
+
+Reset M 0 1000 1 1046
+  Reset E 1 1002 1 14
+  Reset E 1 1003 1 12
+  Reset E 1 1001 1 5
+  Reset E 1 10424 1 17
+  Reset E 1 1007 1 6
+#ENDROOM
+
+#ROOM
+Vnum     1047
+Name     Inside the Booth~
+Sector   city~
+Flags    indoors~
+Desc     The booth is very small and very cramped. It has a bench and a mesh
 screen that you can see into the Dukha from. You notice a very odd
 thing, on the floor of the booth is what looks to be dried and now
 grey and hard wookiee hairs. very odd indeed, you heard rumours 
@@ -1381,31 +1724,19 @@ the Grand Admiral came here to visit but you only thought those to
 be rumors and fabrications, besides maybe it was a different wookiee
 or some animal of some sort, who kows...
 ~
-0 8 1
-D1
-~
-screen~
-33556480 -1 1033
-D10
-~
-~
-264192 -1 1033
-S
-#0
+#EXIT
+Direction east~
+ToRoom    1033
+Keywords  screen~
+Flags     hidden window~
+#ENDEXIT
 
+#EXIT
+Direction somewhere~
+ToRoom    1033
+Flags     hidden can_leave~
+#ENDEXIT
 
-#SHOPS
- 1011    0 19  0  0  0   120  90         0 23    ; a noghri cook
-0
+#ENDROOM
 
-
-#REPAIRS
-0
-
-
-#SPECIALS
-M  1006 spec_guardian
-S
-
-
-#$
+#ENDAREA
