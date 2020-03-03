@@ -567,14 +567,6 @@ Log         0
 End
 
 #COMMAND
-Name        clear~
-Code        reserved
-Position    0
-Level       0
-Log         0
-End
-
-#COMMAND
 Name        cedit~
 Code        do_cedit
 Position    0
@@ -609,14 +601,6 @@ End
 #COMMAND
 Name        config~
 Code        do_config
-Position    0
-Level       0
-Log         0
-End
-
-#COMMAND
-Name        councils~
-Code        reserved
 Position    0
 Level       0
 Log         0
@@ -1083,22 +1067,6 @@ Name        gossip~
 Code        do_ooc
 Position    0
 Level       5
-Log         0
-End
-
-#COMMAND
-Name        governments~
-Code        reserved
-Position    0
-Level       1
-Log         0
-End
-
-#COMMAND
-Name        gain~
-Code        reserved
-Position    0
-Level       1
 Log         0
 End
 
@@ -1735,14 +1703,6 @@ Log         1
 End
 
 #COMMAND
-Name        makecouncil~
-Code        reserved
-Position    0
-Level       103
-Log         1
-End
-
-#COMMAND
 Name        makerepair~
 Code        do_makerepair
 Position    0
@@ -1887,34 +1847,10 @@ Log         0
 End
 
 #COMMAND
-Name        muse~
-Code        reserved
-Position    0
-Level       102
-Log         0
-End
-
-#COMMAND
 Name        mwhere~
 Code        do_mwhere
 Position    0
 Level       102
-Log         0
-End
-
-#COMMAND
-Name        mpfavor~
-Code        reserved
-Position    0
-Level       1
-Log         0
-End
-
-#COMMAND
-Name        makegovernment~
-Code        reserved
-Position    0
-Level       103
 Log         0
 End
 
@@ -2207,14 +2143,6 @@ Log         0
 End
 
 #COMMAND
-Name        opentourney~
-Code        reserved
-Position    0
-Level       105
-Log         1
-End
-
-#COMMAND
 Name        oset~
 Code        do_oset
 Position    0
@@ -2259,14 +2187,6 @@ Name        practice~
 Code        do_practice
 Position    4
 Level       0
-Log         0
-End
-
-#COMMAND
-Name        pagelength~
-Code        reserved
-Position    0
-Level       1
 Log         0
 End
 
@@ -2372,14 +2292,6 @@ Code        do_quest
 Position    6
 Level       0
 Log         0
-End
-
-#COMMAND
-Name        qpset~
-Code        reserved
-Position    0
-Level       102
-Log         1
 End
 
 #COMMAND
@@ -2703,14 +2615,6 @@ Log         0
 End
 
 #COMMAND
-Name        rreset~
-Code        do_rreset
-Position    0
-Level       102
-Log         3
-End
-
-#COMMAND
 Name        south~
 Code        do_south
 Position    8
@@ -2849,14 +2753,6 @@ End
 #COMMAND
 Name        setclan~
 Code        do_setclan
-Position    0
-Level       103
-Log         1
-End
-
-#COMMAND
-Name        setcouncil~
-Code        reserved
 Position    0
 Level       103
 Log         1
@@ -3095,22 +2991,6 @@ Log         1
 End
 
 #COMMAND
-Name        showclass~
-Code        reserved
-Position    0
-Level       103
-Log         0
-End
-
-#COMMAND
-Name        setclass~
-Code        reserved
-Position    0
-Level       105
-Log         1
-End
-
-#COMMAND
 Name        starsystems~
 Code        do_starsystems
 Position    0
@@ -3191,14 +3071,6 @@ Log         0
 End
 
 #COMMAND
-Name        showplanet~
-Code        reserved
-Position    0
-Level       105
-Log         0
-End
-
-#COMMAND
 Name        tell~
 Code        do_tell
 Position    5
@@ -3235,14 +3107,6 @@ Name        tamp~
 Code        do_tamp
 Position    5
 Level       0
-Log         0
-End
-
-#COMMAND
-Name        think~
-Code        reserved
-Position    0
-Level       103
 Log         0
 End
 

@@ -51,32 +51,32 @@ bool check_pos( CHAR_DATA * ch, short position )
       switch ( ch->position )
       {
          case POS_DEAD:
-            send_to_char( "A little difficult to do when you are DEAD...\n\r", ch );
+            send_to_char( "A little difficult to do when you are DEAD...\r\n", ch );
             break;
 
          case POS_MORTAL:
          case POS_INCAP:
-            send_to_char( "You are hurt far too bad for that.\n\r", ch );
+            send_to_char( "You are hurt far too bad for that.\r\n", ch );
             break;
 
          case POS_STUNNED:
-            send_to_char( "You are too stunned to do that.\n\r", ch );
+            send_to_char( "You are too stunned to do that.\r\n", ch );
             break;
 
          case POS_SLEEPING:
-            send_to_char( "In your dreams, or what?\n\r", ch );
+            send_to_char( "In your dreams, or what?\r\n", ch );
             break;
 
          case POS_RESTING:
-            send_to_char( "Nah... You feel too relaxed...\n\r", ch );
+            send_to_char( "Nah... You feel too relaxed...\r\n", ch );
             break;
 
          case POS_SITTING:
-            send_to_char( "You can't do that sitting down.\n\r", ch );
+            send_to_char( "You can't do that sitting down.\r\n", ch );
             break;
 
          case POS_FIGHTING:
-            send_to_char( "No way!  You are still fighting!\n\r", ch );
+            send_to_char( "No way!  You are still fighting!\r\n", ch );
             break;
 
       }
@@ -181,7 +181,7 @@ void interpret( CHAR_DATA * ch, char *argument )
        */
       if( !IS_NPC( ch ) && IS_SET( ch->act, PLR_FREEZE ) )
       {
-         send_to_char( "You're totally frozen!\n\r", ch );
+         send_to_char( "You're totally frozen!\r\n", ch );
          return;
       }
 
@@ -272,7 +272,7 @@ void interpret( CHAR_DATA * ch, char *argument )
       write_to_buffer( ch->desc->snoop_by, logname, 0 );
       write_to_buffer( ch->desc->snoop_by, "% ", 2 );
       write_to_buffer( ch->desc->snoop_by, logline, 0 );
-      write_to_buffer( ch->desc->snoop_by, "\n\r", 2 );
+      write_to_buffer( ch->desc->snoop_by, "\r\n", 2 );
    }
 
 
@@ -322,13 +322,13 @@ void interpret( CHAR_DATA * ch, char *argument )
                if( !IS_SET( pexit->exit_info, EX_SECRET ) )
                   act( AT_PLAIN, "The $d is closed.", ch, NULL, pexit->keyword, TO_CHAR );
                else
-                  send_to_char( "You cannot do that here.\n\r", ch );
+                  send_to_char( "You cannot do that here.\r\n", ch );
                return;
             }
             move_char( ch, pexit, 0 );
             return;
          }
-         send_to_char( "Huh?\n\r", ch );
+         send_to_char( "Huh?\r\n", ch );
       }
       return;
    }
@@ -345,7 +345,7 @@ void interpret( CHAR_DATA * ch, char *argument )
     */
    if( !str_cmp( cmd->name, "flee" ) && IS_AFFECTED( ch, AFF_BERSERK ) )
    {
-      send_to_char( "You aren't thinking very clearly..\n\r", ch );
+      send_to_char( "You aren't thinking very clearly..\r\n", ch );
       return;
    }
 
@@ -391,15 +391,17 @@ CMDTYPE *find_command( char *command )
    return NULL;
 }
 
-SOCIALTYPE *find_social( char *command )
+SOCIALTYPE *find_social( const char *command )
 {
    SOCIALTYPE *social;
    int hash;
 
-   if( command[0] < 'a' || command[0] > 'z' )
+   char c = LOWER(command[0]);
+
+   if( c < 'a' || c > 'z' )
       hash = 0;
    else
-      hash = ( command[0] - 'a' ) + 1;
+      hash = ( c - 'a' ) + 1;
 
    for( social = social_index[hash]; social; social = social->next )
       if( !str_prefix( command, social->name ) )
@@ -419,23 +421,23 @@ bool check_social( CHAR_DATA * ch, char *command, char *argument )
 
    if( !IS_NPC( ch ) && IS_SET( ch->act, PLR_NO_EMOTE ) )
    {
-      send_to_char( "You are anti-social!\n\r", ch );
+      send_to_char( "You are anti-social!\r\n", ch );
       return TRUE;
    }
 
    switch ( ch->position )
    {
       case POS_DEAD:
-         send_to_char( "Lie still; you are DEAD.\n\r", ch );
+         send_to_char( "Lie still; you are DEAD.\r\n", ch );
          return TRUE;
 
       case POS_INCAP:
       case POS_MORTAL:
-         send_to_char( "You are hurt far too bad for that.\n\r", ch );
+         send_to_char( "You are hurt far too bad for that.\r\n", ch );
          return TRUE;
 
       case POS_STUNNED:
-         send_to_char( "You are too stunned to do that.\n\r", ch );
+         send_to_char( "You are too stunned to do that.\r\n", ch );
          return TRUE;
 
       case POS_SLEEPING:
@@ -445,7 +447,7 @@ bool check_social( CHAR_DATA * ch, char *command, char *argument )
           */
          if( !str_cmp( social->name, "snore" ) )
             break;
-         send_to_char( "In your dreams, or what?\n\r", ch );
+         send_to_char( "In your dreams, or what?\r\n", ch );
          return TRUE;
 
    }
@@ -459,7 +461,7 @@ bool check_social( CHAR_DATA * ch, char *command, char *argument )
    }
    else if( ( victim = get_char_room( ch, arg ) ) == NULL )
    {
-      send_to_char( "They aren't here.\n\r", ch );
+      send_to_char( "They aren't here.\r\n", ch );
    }
    else if( victim == ch )
    {
@@ -567,16 +569,14 @@ int number_argument( char *argument, char *arg )
    return 1;
 }
 
-
-
 /*
  * Pick off one argument from a string and return the rest.
- * Understands quotes.
+ * Understands quotes. No longer mangles case either. That used to be annoying.
  */
 char *one_argument( char *argument, char *arg_first )
 {
    char cEnd;
-   short count;
+   int count;
 
    count = 0;
 
@@ -594,7 +594,7 @@ char *one_argument( char *argument, char *arg_first )
          argument++;
          break;
       }
-      *arg_first = LOWER( *argument );
+      *arg_first = ( *argument );
       arg_first++;
       argument++;
    }
@@ -609,6 +609,7 @@ char *one_argument( char *argument, char *arg_first )
 /*
  * Pick off one argument from a string and return the rest.
  * Understands quotes.  Delimiters = { ' ', '-' }
+ * No longer mangles case either. That used to be annoying.
  */
 char *one_argument2( char *argument, char *arg_first )
 {
@@ -616,6 +617,12 @@ char *one_argument2( char *argument, char *arg_first )
    short count;
 
    count = 0;
+
+   if( !argument || argument[0] == '\0' )
+   {
+      arg_first[0] = '\0';
+      return argument;
+   }
 
    while( isspace( *argument ) )
       argument++;
@@ -631,7 +638,7 @@ char *one_argument2( char *argument, char *arg_first )
          argument++;
          break;
       }
-      *arg_first = LOWER( *argument );
+      *arg_first = ( *argument );
       arg_first++;
       argument++;
    }
@@ -651,37 +658,37 @@ void do_timecmd( CHAR_DATA * ch, char *argument )
    extern CHAR_DATA *timechar;
    char arg[MAX_INPUT_LENGTH];
 
-   send_to_char( "Timing\n\r", ch );
+   send_to_char( "Timing\r\n", ch );
    if( timing )
       return;
    one_argument( argument, arg );
    if( !*arg )
    {
-      send_to_char( "No command to time.\n\r", ch );
+      send_to_char( "No command to time.\r\n", ch );
       return;
    }
    if( !str_cmp( arg, "update" ) )
    {
       if( timechar )
-         send_to_char( "Another person is already timing updates.\n\r", ch );
+         send_to_char( "Another person is already timing updates.\r\n", ch );
       else
       {
          timechar = ch;
-         send_to_char( "Setting up to record next update loop.\n\r", ch );
+         send_to_char( "Setting up to record next update loop.\r\n", ch );
       }
       return;
    }
    set_char_color( AT_PLAIN, ch );
-   send_to_char( "Starting timer.\n\r", ch );
+   send_to_char( "Starting timer.\r\n", ch );
    timing = TRUE;
    gettimeofday( &sttime, NULL );
    interpret( ch, argument );
    gettimeofday( &etime, NULL );
    timing = FALSE;
    set_char_color( AT_PLAIN, ch );
-   send_to_char( "Timing complete.\n\r", ch );
+   send_to_char( "Timing complete.\r\n", ch );
    subtract_times( &etime, &sttime );
-   ch_printf( ch, "Timing took %d.%06d seconds.\n\r", etime.tv_sec, etime.tv_usec );
+   ch_printf( ch, "Timing took %d.%06d seconds.\r\n", etime.tv_sec, etime.tv_usec );
    return;
 }
 
@@ -727,9 +734,9 @@ void send_timer( struct timerset *vtime, CHAR_DATA * ch )
    ntime.tv_sec = vtime->total_time.tv_sec / vtime->num_uses;
    carry = ( vtime->total_time.tv_sec % vtime->num_uses ) * 1000000;
    ntime.tv_usec = ( vtime->total_time.tv_usec + carry ) / vtime->num_uses;
-   ch_printf( ch, "Has been used %d times this boot.\n\r", vtime->num_uses );
+   ch_printf( ch, "Has been used %d times this boot.\r\n", vtime->num_uses );
    ch_printf( ch, "Time (in secs): min %d.%0.6d; avg: %d.%0.6d; max %d.%0.6d"
-              "\n\r", vtime->min_time.tv_sec, vtime->min_time.tv_usec, ntime.tv_sec,
+              "\r\n", vtime->min_time.tv_sec, vtime->min_time.tv_usec, ntime.tv_sec,
               ntime.tv_usec, vtime->max_time.tv_sec, vtime->max_time.tv_usec );
    return;
 }

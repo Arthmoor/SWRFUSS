@@ -48,7 +48,6 @@
  *                          SWR Hotboot module                                           *
  ****************************************************************************************/
 
-
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
@@ -67,6 +66,7 @@ static OBJ_DATA *rgObjNest[MAX_NEST];
 
 bool write_to_descriptor( DESCRIPTOR_DATA * d, char *txt, int length );
 bool write_to_descriptor_old( int desc, char *txt, int length );
+void update_room_reset( CHAR_DATA *ch, bool setting );
 
 extern ROOM_INDEX_DATA *room_index_hash[MAX_KEY_HASH];
 extern int port;  /* Port number to be used       */
@@ -175,7 +175,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
       if( ship == NULL )
       {
-         bug( "load_ship: No ship data for filename %s", name );
+         bug( "%s: No ship data for filename %s", __FUNCTION__, name );
          DISPOSE( name );
          return NULL;
 
@@ -185,9 +185,7 @@ SHIP_DATA *load_ship( FILE * fp )
             if( !str_cmp( word, "EndShip" ) )
                break;
          }
-
       }
-
       DISPOSE( name );
    }
    else
@@ -198,9 +196,10 @@ SHIP_DATA *load_ship( FILE * fp )
          if( !str_cmp( word, "EndShip" ) )
             break;
       }
-      bug( "load_ship: shipfname not found" );
+      bug( "%s: shipfname not found", __FUNCTION__ );
       return NULL;
    }
+
    for( ;; )
    {
       word = feof( fp ) ? "EndShip" : fread_word( fp );
@@ -211,6 +210,7 @@ SHIP_DATA *load_ship( FILE * fp )
             fMatch = TRUE;
             fread_to_eol( fp );
             break;
+
             /*
              * case '#':
              * if ( !str_cmp( word, "#TORPEDO" ) )
@@ -218,13 +218,16 @@ SHIP_DATA *load_ship( FILE * fp )
              * mob->tempnum = -9999; 
              * fread_obj( mob, fp, OS_CARRY );
              * }
+             * break;
              */
+
          case 'A':
             KEY( "Autorecharge", ship->autorecharge, ( bool ) fread_number( fp ) );
             KEY( "Autotrack", ship->autotrack, ( bool ) fread_number( fp ) );
             KEY( "Autospeed", ship->autospeed, ( bool ) fread_number( fp ) );
             KEY( "Autopilot", ship->autopilot, ( bool ) fread_number( fp ) );
             break;
+
          case 'C':
             KEY( "Currspeed", ship->currspeed, fread_number( fp ) );
             if( !str_cmp( word, "Currjump" ) )
@@ -264,11 +267,11 @@ SHIP_DATA *load_ship( FILE * fp )
             KEY( "JY", ship->jy, ( float )fread_number( fp ) );
             KEY( "JZ", ship->jz, ( float )fread_number( fp ) );
             break;
+
          case 'L':
             if( !str_cmp( word, "Landdest" ) )
             {
-               if( ship->dest != NULL )
-                  STRFREE( ship->dest );
+               STRFREE( ship->dest );
                ship->dest = fread_string( fp );
                fMatch = TRUE;
                break;
@@ -278,9 +281,11 @@ SHIP_DATA *load_ship( FILE * fp )
          case 'M':
             KEY( "Missiles", ship->missiles, fread_number( fp ) );
             break;
+
          case 'R':
             KEY( "Rockets", ship->rockets, fread_number( fp ) );
             break;
+
          case 'S':
             KEY( "Shield", ship->shield, fread_number( fp ) );
             KEY( "Shipstate", ship->shipstate, fread_number( fp ) );
@@ -300,6 +305,7 @@ SHIP_DATA *load_ship( FILE * fp )
                break;
             }
             break;
+
          case 'T':
             KEY( "Torpedos", ship->torpedos, fread_number( fp ) );
             if( !str_cmp( word, "target0" ) )
@@ -308,26 +314,34 @@ SHIP_DATA *load_ship( FILE * fp )
                SHIP_DATA *target = get_ship( temp );
 
                ship->target0 = target;
-               DISPOSE( temp );
+               STRFREE( temp );
+               fMatch = TRUE;
+               break;
             }
+
             if( !str_cmp( word, "target1" ) )
             {
                char *temp = fread_string( fp );
                SHIP_DATA *target = get_ship( temp );
 
                ship->target1 = target;
-               DISPOSE( temp );
+               STRFREE( temp );
+               fMatch = TRUE;
+               break;
             }
+
             if( !str_cmp( word, "target2" ) )
             {
                char *temp = fread_string( fp );
                SHIP_DATA *target = get_ship( temp );
 
                ship->target2 = target;
-               DISPOSE( temp );
+               STRFREE( temp );
+               fMatch = TRUE;
+               break;
             }
-
             break;
+
          case 'V':
             KEY( "VX", ship->vx, ( float )fread_number( fp ) );
             KEY( "VY", ship->vy, ( float )fread_number( fp ) );
@@ -336,7 +350,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
       }
       if( !fMatch && str_cmp( word, "End" ) )
-         bug( "load_mobile: no match: %s", word );
+         bug( "%s: no match: %s", __FUNCTION__, word );
    }
    return NULL;
 }
@@ -355,6 +369,8 @@ void save_mobile( FILE * fp, CHAR_DATA * mob )
    fprintf( fp, "Vnum	%d\n", mob->pIndexData->vnum );
    fprintf( fp, "Level   %d\n", mob->top_level );
    fprintf( fp, "Gold	%d\n", mob->gold );
+   fprintf( fp, "Resetvnum %d\n", mob->resetvnum );
+   fprintf( fp, "Resetnum  %d\n", mob->resetnum );
    if( mob->in_room )
    {
       if( IS_SET( mob->act, ACT_SENTINEL ) )
@@ -513,7 +529,7 @@ CHAR_DATA *load_mobile( FILE * fp )
       vnum = fread_number( fp );
       if( get_mob_index( vnum ) == NULL )
       {
-         bug( "load_mobile: No index data for vnum %d", vnum );
+         bug( "%s: No index data for vnum %d", __FUNCTION__, vnum );
          return NULL;
       }
       mob = create_mobile( get_mob_index( vnum ) );
@@ -529,7 +545,7 @@ CHAR_DATA *load_mobile( FILE * fp )
             if( !str_cmp( word, "EndMobile" ) )
                break;
          }
-         bug( "load_mobile: Unable to create mobile for vnum %d", vnum );
+         bug( "%s: Unable to create mobile for vnum %d", __FUNCTION__, vnum );
          return NULL;
       }
    }
@@ -546,9 +562,10 @@ CHAR_DATA *load_mobile( FILE * fp )
             break;
       }
       extract_char( mob, TRUE );
-      bug( "%s", "load_mobile: Vnum not found" );
+      bug( "%s: Vnum not found", __FUNCTION__ );
       return NULL;
    }
+
    for( ;; )
    {
       word = feof( fp ) ? "EndMobile" : fread_word( fp );
@@ -559,12 +576,15 @@ CHAR_DATA *load_mobile( FILE * fp )
             fMatch = TRUE;
             fread_to_eol( fp );
             break;
+
          case '#':
             if( !str_cmp( word, "#OBJECT" ) )
             {
                mob->tempnum = -9999;   /* Hackish, yes. Works though doesn't it? */
                fread_obj( mob, fp, OS_CARRY );
             }
+            break;
+
          case 'A':
             if( !str_cmp( word, "Affect" ) || !str_cmp( word, "AffectData" ) )
             {
@@ -604,6 +624,7 @@ CHAR_DATA *load_mobile( FILE * fp )
             }
             KEY( "AffectedBy", mob->affected_by, fread_number( fp ) );
             break;
+
 #ifdef OVERLANDCODE
          case 'C':
             if( !str_cmp( word, "Coordinates" ) )
@@ -617,9 +638,17 @@ CHAR_DATA *load_mobile( FILE * fp )
             }
             break;
 #endif
+
          case 'D':
-            KEY( "Description", mob->description, fread_string( fp ) );
+            if( !str_cmp( word, "Description" ) )
+            {
+               STRFREE( mob->description );
+               mob->description = fread_string( fp );
+               fMatch = TRUE;
+               break;
+            }
             break;
+
          case 'E':
             if( !str_cmp( word, "EndMobile" ) )
             {
@@ -630,16 +659,21 @@ CHAR_DATA *load_mobile( FILE * fp )
                   pRoomIndex = get_room_index( ROOM_VNUM_LIMBO );
                char_to_room( mob, pRoomIndex );
                mob->tempnum = -9998;   /* Yet another hackish fix! */
+               update_room_reset( mob, FALSE );
                return mob;
             }
             if( !str_cmp( word, "End" ) ) /* End of object, need to ignore this. sometimes they creep in there somehow -- Scion */
                fMatch = TRUE; /* Trick the system into thinking it matched something */
             break;
+
          case 'F':
             KEY( "Flags", mob->act, fread_number( fp ) );
+            break;
+
          case 'G':
             KEY( "Gold", mob->gold, fread_number( fp ) );
             break;
+
          case 'H':
             if( !str_cmp( word, "HpManaMove" ) )
             {
@@ -657,28 +691,60 @@ CHAR_DATA *load_mobile( FILE * fp )
                break;
             }
             break;
+
          case 'L':
-            KEY( "Long", mob->long_descr, fread_string( fp ) );
+            if( !str_cmp( word, "Long" ) )
+            {
+               STRFREE( mob->long_descr );
+               mob->long_descr = fread_string( fp );
+               fMatch = TRUE;
+               break;
+            }
             KEY( "Level", mob->top_level, fread_number( fp ) );
             break;
+
          case 'M':
-            KEY( "Mobclan", mob->mob_clan, fread_string( fp ) );
+            if( !str_cmp( word, "Mobclan" ) )
+            {
+               STRFREE( mob->mob_clan );
+               mob->mob_clan = fread_string( fp );
+               fMatch = TRUE;
+               break;
+            }
             break;
+
          case 'N':
-            KEY( "Name", mob->name, fread_string( fp ) );
+            if( !str_cmp( word, "Name" ) )
+            {
+               STRFREE( mob->name );
+               mob->name = fread_string( fp );
+               fMatch = TRUE;
+               break;
+            }
             break;
+
          case 'P':
             KEY( "Position", mob->position, fread_number( fp ) );
             break;
+
          case 'R':
             KEY( "Room", inroom, fread_number( fp ) );
+            KEY( "Resetvnum", mob->resetvnum, fread_number( fp ) );
+            KEY( "Resetnum", mob->resetnum, fread_number( fp ) );
             break;
+
          case 'S':
-            KEY( "Short", mob->short_descr, fread_string( fp ) );
+            if( !str_cmp( word, "Short" ) )
+            {
+               STRFREE( mob->short_descr );
+               mob->short_descr = fread_string( fp );
+               fMatch = TRUE;
+               break;
+            }
             break;
       }
       if( !fMatch && str_cmp( word, "End" ) )
-         bug( "load_mobile: no match: %s", word );
+         bug( "%s: no match: %s", __FUNCTION__, word );
    }
    return NULL;
 }
@@ -903,7 +969,7 @@ void do_hotboot( CHAR_DATA * ch, char *argument )
 
    if( found )
    {
-      ch_printf( ch, "Cannot hotboot at this time. There are %d combats in progress.\n\r", count );
+      ch_printf( ch, "Cannot hotboot at this time. There are %d combats in progress.\r\n", count );
       return;
    }
 
@@ -919,7 +985,7 @@ void do_hotboot( CHAR_DATA * ch, char *argument )
 
    if( found )
    {
-      send_to_char( "Cannot hotboot at this time. Someone is using the line editor.\n\r", ch );
+      send_to_char( "Cannot hotboot at this time. Someone is using the line editor.\r\n", ch );
       return;
    }
 
@@ -930,7 +996,7 @@ void do_hotboot( CHAR_DATA * ch, char *argument )
 
    if( !fp )
    {
-      send_to_char( "Hotboot file not writeable, aborted.\n\r", ch );
+      send_to_char( "Hotboot file not writeable, aborted.\r\n", ch );
       bug( "Could not write to hotboot file: %s. Hotboot aborted.", HOTBOOT_FILE );
       perror( "do_copyover:fopen" );
       return;
@@ -954,7 +1020,7 @@ void do_hotboot( CHAR_DATA * ch, char *argument )
    log_string( "Saving player files and connection states...." );
    if( ch && ch->desc )
       write_to_descriptor( ch->desc, "\033[0m", 0 );
-   sprintf( buf, "\n\rYou feel a great disturbance in the Force." );
+   sprintf( buf, "\r\nYou feel a great disturbance in the Force." );
    /*
     * For each playing descriptor, save its state 
     */
@@ -965,7 +1031,7 @@ void do_hotboot( CHAR_DATA * ch, char *argument )
       de_next = d->next;   /* We delete from the list , so need to save this */
       if( !d->character || d->connected < CON_PLAYING )  /* drop those logging on */
       {
-         write_to_descriptor( d, "\n\rSorry, we are rebooting. Come back in a few minutes.\n\r", 0 );
+         write_to_descriptor( d, "\r\nSorry, we are rebooting. Come back in a few minutes.\r\n", 0 );
          close_socket( d, FALSE );  /* throw'em out */
       }
       else
@@ -1015,18 +1081,21 @@ void do_hotboot( CHAR_DATA * ch, char *argument )
    strncpy( buf3, "-1", 100 );
 #endif
 
-   /*
-    * Uncomment this bfd_close line if you've installed the dlsym snippet, you'll need it. 
-    */
-   // dlclose( sysdata.dlHandle );
+   dlclose( sysdata.dlHandle );
    execl( EXE_FILE, "swreality", buf, "hotboot", buf2, buf3, ( char * )NULL );
 
    /*
     * Failed - sucessful exec will not return 
     */
    perror( "do_hotboot: execl" );
+   sysdata.dlHandle = dlopen( NULL, RTLD_LAZY );
+   if( !sysdata.dlHandle )
+   {
+	bug( "%s", "FATAL ERROR: Unable to reopen system executable handle!" );
+	exit( 1 );
+   }
    bug( "%s", "Hotboot execution failed!!" );
-   send_to_char( "Hotboot FAILED!\n\r", ch );
+   send_to_char( "Hotboot FAILED!\r\n", ch );
 }
 
 /* Recover from a hotboot - load players */
@@ -1067,7 +1136,7 @@ void hotboot_recover( void )
       /*
        * Write something, and check if it goes error-free 
        */
-      if( !write_to_descriptor_old( desc, "\n\rThe Force swirls around you.\n\r", 0 ) )
+      if( !write_to_descriptor_old( desc, "\r\nThe Force swirls around you.\r\n", 0 ) )
       {
          close( desc ); /* nope */
          continue;
@@ -1103,12 +1172,12 @@ void hotboot_recover( void )
 
       if( !fOld ) /* Player file not found?! */
       {
-         write_to_descriptor( d, "\n\rSomehow, your character was lost during hotboot. Contact the immortals ASAP.\n\r", 0 );
+         write_to_descriptor( d, "\r\nSomehow, your character was lost during hotboot. Contact the immortals ASAP.\r\n", 0 );
          close_socket( d, FALSE );
       }
       else  /* ok! */
       {
-         write_to_descriptor( d, "Suddenly, you remember nothing as the Force continues into the Galaxy.\n\r", 0 );
+         write_to_descriptor( d, "Suddenly, you remember nothing as the Force continues into the Galaxy.\r\n", 0 );
          d->character->in_room = get_room_index( room );
          if( !d->character->in_room )
             d->character->in_room = get_room_index( ROOM_VNUM_TEMPLE );

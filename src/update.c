@@ -296,9 +296,9 @@ int max_level( CHAR_DATA * ch, int ability )
 void advance_level( CHAR_DATA * ch, int ability )
 {
 
-   if( ch->top_level < ch->skill_level[ability] && ch->top_level < 100 )
+   if( ch->top_level < ch->skill_level[ability] && ch->top_level < LEVEL_HERO )
    {
-      ch->top_level = URANGE( 1, ch->skill_level[ability], 100 );
+      ch->top_level = URANGE( 1, ch->skill_level[ability], LEVEL_HERO );
    }
 
    if( !IS_NPC( ch ) )
@@ -306,8 +306,6 @@ void advance_level( CHAR_DATA * ch, int ability )
 
    return;
 }
-
-
 
 void gain_exp( CHAR_DATA * ch, int gain, int ability )
 {
@@ -319,7 +317,7 @@ void gain_exp( CHAR_DATA * ch, int gain, int ability )
 
    if( NOT_AUTHED( ch ) && ch->experience[ability] >= exp_level( ch->skill_level[ability] + 1 ) )
    {
-      send_to_char( "You can not ascend to a higher level until you are authorized.\n\r", ch );
+      send_to_char( "You can not ascend to a higher level until you are authorized.\r\n", ch );
       ch->experience[ability] = ( exp_level( ch->skill_level[ability] + 1 ) - 1 );
       return;
    }
@@ -332,7 +330,7 @@ void gain_exp( CHAR_DATA * ch, int gain, int ability )
          return;
       }
       set_char_color( AT_WHITE + AT_BLINK, ch );
-      ch_printf( ch, "You have now obtained %s level %d!\n\r", ability_name[ability], ++ch->skill_level[ability] );
+      ch_printf( ch, "You have now obtained %s level %d!\r\n", ability_name[ability], ++ch->skill_level[ability] );
       advance_level( ch, ability );
    }
 
@@ -388,7 +386,7 @@ int hit_gain( CHAR_DATA * ch )
 
    if( get_age( ch ) > 800 )
    {
-      send_to_char( "You are very old.\n\rYou are becoming weaker with every moment.\n\rSoon you will die.\n\r", ch );
+      send_to_char( "You are very old.\r\nYou are becoming weaker with every moment.\r\nSoon you will die.\r\n", ch );
       return -10;
    }
    else if( get_age( ch ) > 500 )
@@ -562,28 +560,28 @@ void gain_addiction( CHAR_DATA * ch )
 
       if( ch->pcdata->addiction[drug] > ch->pcdata->drug_level[drug] + 200 )
       {
-         ch_printf( ch, "You feel like you are going to die. You NEED %s\n\r.", spice_table[drug] );
+         ch_printf( ch, "You feel like you are going to die. You NEED %s\r\n.", spice_table[drug] );
          worsen_mental_state( ch, 2 );
          retcode = damage( ch, ch, 5, TYPE_UNDEFINED );
       }
       else if( ch->pcdata->addiction[drug] > ch->pcdata->drug_level[drug] + 100 )
       {
-         ch_printf( ch, "You need some %s.\n\r", spice_table[drug] );
+         ch_printf( ch, "You need some %s.\r\n", spice_table[drug] );
          worsen_mental_state( ch, 2 );
       }
       else if( ch->pcdata->addiction[drug] > ch->pcdata->drug_level[drug] + 50 )
       {
-         ch_printf( ch, "You really crave some %s.\n\r", spice_table[drug] );
+         ch_printf( ch, "You really crave some %s.\r\n", spice_table[drug] );
          worsen_mental_state( ch, 1 );
       }
       else if( ch->pcdata->addiction[drug] > ch->pcdata->drug_level[drug] + 25 )
       {
-         ch_printf( ch, "Some more %s would feel quite nice.\n\r", spice_table[drug] );
+         ch_printf( ch, "Some more %s would feel quite nice.\r\n", spice_table[drug] );
       }
       else if( ch->pcdata->addiction[drug] < ch->pcdata->drug_level[drug] - 50 )
       {
-         act( AT_POISON, "$n bends over and vomits.\n\r", ch, NULL, NULL, TO_ROOM );
-         act( AT_POISON, "You vomit.\n\r", ch, NULL, NULL, TO_CHAR );
+         act( AT_POISON, "$n bends over and vomits.\r\n", ch, NULL, NULL, TO_ROOM );
+         act( AT_POISON, "You vomit.\r\n", ch, NULL, NULL, TO_CHAR );
          ch->pcdata->drug_level[drug] -= 10;
       }
 
@@ -616,7 +614,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_HUNGRY, ch );
-               send_to_char( "You are STARVING!\n\r", ch );
+               send_to_char( "You are STARVING!\r\n", ch );
                act( AT_HUNGRY, "$n is starved half to death!", ch, NULL, NULL, TO_ROOM );
                worsen_mental_state( ch, 1 );
                retcode = damage( ch, ch, 5, TYPE_UNDEFINED );
@@ -627,7 +625,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_THIRSTY, ch );
-               send_to_char( "You are DYING of THIRST!\n\r", ch );
+               send_to_char( "You are DYING of THIRST!\r\n", ch );
                act( AT_THIRSTY, "$n is dying of thirst!", ch, NULL, NULL, TO_ROOM );
                worsen_mental_state( ch, 2 );
                retcode = damage( ch, ch, 5, TYPE_UNDEFINED );
@@ -638,7 +636,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( condition != 0 )
             {
                set_char_color( AT_SOBER, ch );
-               send_to_char( "You are sober.\n\r", ch );
+               send_to_char( "You are sober.\r\n", ch );
             }
             retcode = rNONE;
             break;
@@ -660,7 +658,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_HUNGRY, ch );
-               send_to_char( "You are really hungry.\n\r", ch );
+               send_to_char( "You are really hungry.\r\n", ch );
                act( AT_HUNGRY, "You can hear $n's stomach growling.", ch, NULL, NULL, TO_ROOM );
                if( number_bits( 1 ) == 0 )
                   worsen_mental_state( ch, 1 );
@@ -671,7 +669,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_THIRSTY, ch );
-               send_to_char( "You are really thirsty.\n\r", ch );
+               send_to_char( "You are really thirsty.\r\n", ch );
                worsen_mental_state( ch, 1 );
                act( AT_THIRSTY, "$n looks a little parched.", ch, NULL, NULL, TO_ROOM );
             }
@@ -681,7 +679,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( condition != 0 )
             {
                set_char_color( AT_SOBER, ch );
-               send_to_char( "You are feeling a little less light headed.\n\r", ch );
+               send_to_char( "You are feeling a little less light headed.\r\n", ch );
             }
             break;
       }
@@ -696,7 +694,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_HUNGRY, ch );
-               send_to_char( "You are hungry.\n\r", ch );
+               send_to_char( "You are hungry.\r\n", ch );
             }
             break;
 
@@ -704,7 +702,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_THIRSTY, ch );
-               send_to_char( "You are thirsty.\n\r", ch );
+               send_to_char( "You are thirsty.\r\n", ch );
             }
             break;
 
@@ -719,7 +717,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_HUNGRY, ch );
-               send_to_char( "You are a mite peckish.\n\r", ch );
+               send_to_char( "You are a mite peckish.\r\n", ch );
             }
             break;
 
@@ -727,7 +725,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             if( ch->top_level <= LEVEL_AVATAR )
             {
                set_char_color( AT_THIRSTY, ch );
-               send_to_char( "You could use a sip of something refreshing.\n\r", ch );
+               send_to_char( "You could use a sip of something refreshing.\r\n", ch );
             }
             break;
 
@@ -735,8 +733,6 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
    }
    return;
 }
-
-
 
 /*
  * Mob autonomous action.
@@ -760,7 +756,7 @@ void mobile_update( void )
       set_cur_char( ch );
       if( ch == first_char && ch->prev )
       {
-         bug( "mobile_update: first_char->prev != NULL... fixed", 0 );
+         bug( "%s: first_char->prev != NULL... fixed", __FUNCTION__ );
          ch->prev = NULL;
       }
 
@@ -768,9 +764,7 @@ void mobile_update( void )
 
       if( gch_prev && gch_prev->next != ch )
       {
-         sprintf( buf, "FATAL: Mobile_update: %s->prev->next doesn't point to ch.", ch->name );
-         bug( buf, 0 );
-         bug( "Short-cutting here", 0 );
+         bug( "FATAL: %s: %s->prev->next doesn't point to ch.", __FUNCTION__, ch->name );
          gch_prev = NULL;
          ch->prev = NULL;
          do_shout( ch, "Thoric says, 'Prepare for the worst!'" );
@@ -800,15 +794,15 @@ void mobile_update( void )
 
       if( !IS_SET( ch->act, ACT_RUNNING ) && !IS_SET( ch->act, ACT_SENTINEL ) && !ch->fighting && ch->hunting )
       {
-         if( ch->top_level < 20 )
+         if( ch->top_level < ( LEVEL_HERO * 0.2 ) )
             WAIT_STATE( ch, 6 * PULSE_PER_SECOND );
-         else if( ch->top_level < 40 )
+         else if( ch->top_level < ( LEVEL_HERO * 0.4 ) )
             WAIT_STATE( ch, 5 * PULSE_PER_SECOND );
-         else if( ch->top_level < 60 )
+         else if( ch->top_level < ( LEVEL_HERO * 0.6 ) )
             WAIT_STATE( ch, 4 * PULSE_PER_SECOND );
-         else if( ch->top_level < 80 )
+         else if( ch->top_level < ( LEVEL_HERO * 0.8 ) )
             WAIT_STATE( ch, 3 * PULSE_PER_SECOND );
-         else if( ch->top_level < 100 )
+         else if( ch->top_level < LEVEL_HERO )
             WAIT_STATE( ch, 2 * PULSE_PER_SECOND );
          else
             WAIT_STATE( ch, 1 * PULSE_PER_SECOND );
@@ -877,7 +871,6 @@ void mobile_update( void )
       if( IS_SET( ch->in_room->room_flags, ROOM_SAFE ) && IS_SET( ch->act, ACT_AGGRESSIVE ) )
          do_emote( ch, "glares around and snarls." );
 
-
       /*
        * MOBprogram random trigger 
        */
@@ -918,6 +911,9 @@ void mobile_update( void )
          obj_best = NULL;
          for( obj = ch->in_room->first_content; obj; obj = obj->next_content )
          {
+            if ( IS_OBJ_STAT( obj, ITEM_PROTOTYPE ) && !IS_SET( ch->act, ACT_PROTOTYPE ) )
+               continue;
+
             if( CAN_WEAR( obj, ITEM_TAKE ) && obj->cost > max && !IS_OBJ_STAT( obj, ITEM_BURRIED ) )
             {
                obj_best = obj;
@@ -942,6 +938,7 @@ void mobile_update( void )
           && ( door = number_bits( 5 ) ) <= 9
           && ( pexit = get_exit( ch->in_room, door ) ) != NULL
           && pexit->to_room
+          && !IS_SET( pexit->exit_info, EX_WINDOW )
           && !IS_SET( pexit->exit_info, EX_CLOSED )
           && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB )
           && ( !IS_SET( ch->act, ACT_STAY_AREA ) || pexit->to_room->area == ch->in_room->area ) )
@@ -965,7 +962,10 @@ void mobile_update( void )
       if( ch->hit < ch->max_hit / 2
           && ( door = number_bits( 4 ) ) <= 9
           && ( pexit = get_exit( ch->in_room, door ) ) != NULL
-          && pexit->to_room && !IS_SET( pexit->exit_info, EX_CLOSED ) && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) )
+          && pexit->to_room
+          && !IS_SET( pexit->exit_info, EX_WINDOW )
+          && !IS_SET( pexit->exit_info, EX_CLOSED )
+          && !IS_SET( pexit->to_room->room_flags, ROOM_NO_MOB ) )
       {
          CHAR_DATA *rch;
          bool found;
@@ -1392,36 +1392,36 @@ void char_update( void )
             switch ( ( ch->mental_state + 5 ) / 10 )
             {
                case 3:
-                  send_to_char( "You feel feverish.\n\r", ch );
+                  send_to_char( "You feel feverish.\r\n", ch );
                   act( AT_ACTION, "$n looks kind of out of it.", ch, NULL, NULL, TO_ROOM );
                   break;
                case 4:
-                  send_to_char( "You do not feel well at all.\n\r", ch );
+                  send_to_char( "You do not feel well at all.\r\n", ch );
                   act( AT_ACTION, "$n doesn't look too good.", ch, NULL, NULL, TO_ROOM );
                   break;
                case 5:
-                  send_to_char( "You need help!\n\r", ch );
+                  send_to_char( "You need help!\r\n", ch );
                   act( AT_ACTION, "$n looks like $e could use your help.", ch, NULL, NULL, TO_ROOM );
                   break;
                case 6:
-                  send_to_char( "Seekest thou a cleric.\n\r", ch );
+                  send_to_char( "Seekest thou a cleric.\r\n", ch );
                   act( AT_ACTION, "Someone should fetch a healer for $n.", ch, NULL, NULL, TO_ROOM );
                   break;
                case 7:
-                  send_to_char( "You feel reality slipping away...\n\r", ch );
+                  send_to_char( "You feel reality slipping away...\r\n", ch );
                   act( AT_ACTION, "$n doesn't appear to be aware of what's going on.", ch, NULL, NULL, TO_ROOM );
                   break;
                case 8:
-                  send_to_char( "You begin to understand... everything.\n\r", ch );
+                  send_to_char( "You begin to understand... everything.\r\n", ch );
                   act( AT_ACTION, "$n starts ranting like a madman!", ch, NULL, NULL, TO_ROOM );
                   break;
                case 9:
-                  send_to_char( "You are ONE with the universe.\n\r", ch );
+                  send_to_char( "You are ONE with the universe.\r\n", ch );
                   act( AT_ACTION, "$n is ranting on about 'the answer', 'ONE' and other mumbo-jumbo...", ch, NULL, NULL,
                        TO_ROOM );
                   break;
                case 10:
-                  send_to_char( "You feel the end is near.\n\r", ch );
+                  send_to_char( "You feel the end is near.\r\n", ch );
                   act( AT_ACTION, "$n is muttering and ranting in tongues...", ch, NULL, NULL, TO_ROOM );
                   break;
             }
@@ -1435,7 +1435,7 @@ void char_update( void )
                            || ch->position < POS_FIGHTING ) && number_percent(  ) + 10 < abs( ch->mental_state ) )
                         do_sleep( ch, "" );
                      else
-                        send_to_char( "You're barely conscious.\n\r", ch );
+                        send_to_char( "You're barely conscious.\r\n", ch );
                   }
                   break;
                case 9:
@@ -1445,7 +1445,7 @@ void char_update( void )
                            || ch->position < POS_FIGHTING ) && ( number_percent(  ) + 20 ) < abs( ch->mental_state ) )
                         do_sleep( ch, "" );
                      else
-                        send_to_char( "You can barely keep your eyes open.\n\r", ch );
+                        send_to_char( "You can barely keep your eyes open.\r\n", ch );
                   }
                   break;
                case 8:
@@ -1454,28 +1454,28 @@ void char_update( void )
                      if( ch->position < POS_SITTING && ( number_percent(  ) + 30 ) < abs( ch->mental_state ) )
                         do_sleep( ch, "" );
                      else
-                        send_to_char( "You're extremely drowsy.\n\r", ch );
+                        send_to_char( "You're extremely drowsy.\r\n", ch );
                   }
                   break;
                case 7:
                   if( ch->position > POS_RESTING )
-                     send_to_char( "You feel very unmotivated.\n\r", ch );
+                     send_to_char( "You feel very unmotivated.\r\n", ch );
                   break;
                case 6:
                   if( ch->position > POS_RESTING )
-                     send_to_char( "You feel sedated.\n\r", ch );
+                     send_to_char( "You feel sedated.\r\n", ch );
                   break;
                case 5:
                   if( ch->position > POS_RESTING )
-                     send_to_char( "You feel sleepy.\n\r", ch );
+                     send_to_char( "You feel sleepy.\r\n", ch );
                   break;
                case 4:
                   if( ch->position > POS_RESTING )
-                     send_to_char( "You feel tired.\n\r", ch );
+                     send_to_char( "You feel tired.\r\n", ch );
                   break;
                case 3:
                   if( ch->position > POS_RESTING )
-                     send_to_char( "You could use a rest.\n\r", ch );
+                     send_to_char( "You could use a rest.\r\n", ch );
                   break;
             }
 
@@ -1799,7 +1799,7 @@ void char_check( void )
             REMOVE_BIT( ch->mount->act, ACT_MOUNTED );
             ch->mount = NULL;
             ch->position = POS_STANDING;
-            send_to_char( "No longer upon your mount, you fall to the ground...\n\rOUCH!\n\r", ch );
+            send_to_char( "No longer upon your mount, you fall to the ground...\r\nOUCH!\r\n", ch );
          }
 
          if( ( ch->in_room && ch->in_room->sector_type == SECT_UNDERWATER )
@@ -1817,7 +1817,7 @@ void char_check( void )
                   if( ch->hit <= 0 )
                      dam = UMIN( 10, dam );
                   if( number_bits( 3 ) == 0 )
-                     send_to_char( "You cough and choke as you try to breathe water!\n\r", ch );
+                     send_to_char( "You cough and choke as you try to breathe water!\r\n", ch );
                   damage( ch, ch, dam, TYPE_UNDEFINED );
                }
             }
@@ -1845,7 +1845,7 @@ void char_check( void )
                      if( ch->hit <= 0 )
                         dam = UMIN( 10, dam );
                      if( number_bits( 3 ) == 0 )
-                        send_to_char( "Struggling with exhaustion, you choke on a mouthful of water.\n\r", ch );
+                        send_to_char( "Struggling with exhaustion, you choke on a mouthful of water.\r\n", ch );
                      damage( ch, ch, dam, TYPE_UNDEFINED );
                   }
                }
@@ -1873,10 +1873,7 @@ void char_check( void )
 void aggr_update( void )
 {
    DESCRIPTOR_DATA *d, *dnext;
-   CHAR_DATA *wch;
-   CHAR_DATA *ch;
-   CHAR_DATA *ch_next;
-   CHAR_DATA *victim;
+   CHAR_DATA *wch, *ch, *ch_next, *victim;
    struct act_prog_data *apdtmp;
 
 #ifdef UNDEFD
@@ -1929,7 +1926,6 @@ void aggr_update( void )
       DISPOSE( apdtmp );
    }
 
-
    /*
     * Just check descriptors here for victims to aggressive mobs
     * We can check for linkdead victims to mobile_update   -Thoric
@@ -1937,7 +1933,7 @@ void aggr_update( void )
    for( d = first_descriptor; d; d = dnext )
    {
       dnext = d->next;
-      if( d->connected != CON_PLAYING || ( wch = d->character ) == NULL )
+      if( ( d->connected != CON_PLAYING && d->connected != CON_EDITING ) || ( wch = d->character ) == NULL )
          continue;
 
       if( char_died( wch ) || IS_NPC( wch ) || wch->top_level >= LEVEL_IMMORTAL || !wch->in_room )
@@ -2057,64 +2053,64 @@ void halucinations( CHAR_DATA * ch )
       {
          default:
          case 1:
-            t = "You feel very restless... you can't sit still.\n\r";
+            t = "You feel very restless... you can't sit still.\r\n";
             break;
          case 2:
-            t = "You're tingling all over.\n\r";
+            t = "You're tingling all over.\r\n";
             break;
          case 3:
-            t = "Your skin is crawling.\n\r";
+            t = "Your skin is crawling.\r\n";
             break;
          case 4:
-            t = "You suddenly feel that something is terribly wrong.\n\r";
+            t = "You suddenly feel that something is terribly wrong.\r\n";
             break;
          case 5:
-            t = "Those damn little fairies keep laughing at you!\n\r";
+            t = "Those damn little fairies keep laughing at you!\r\n";
             break;
          case 6:
-            t = "You can hear your mother crying...\n\r";
+            t = "You can hear your mother crying...\r\n";
             break;
          case 7:
-            t = "Have you been here before, or not?  You're not sure...\n\r";
+            t = "Have you been here before, or not?  You're not sure...\r\n";
             break;
          case 8:
-            t = "Painful childhood memories flash through your mind.\n\r";
+            t = "Painful childhood memories flash through your mind.\r\n";
             break;
          case 9:
-            t = "You hear someone call your name in the distance...\n\r";
+            t = "You hear someone call your name in the distance...\r\n";
             break;
          case 10:
-            t = "Your head is pulsating... you can't think straight.\n\r";
+            t = "Your head is pulsating... you can't think straight.\r\n";
             break;
          case 11:
-            t = "The ground... seems to be squirming...\n\r";
+            t = "The ground... seems to be squirming...\r\n";
             break;
          case 12:
-            t = "You're not quite sure what is real anymore.\n\r";
+            t = "You're not quite sure what is real anymore.\r\n";
             break;
          case 13:
-            t = "It's all a dream... or is it?\n\r";
+            t = "It's all a dream... or is it?\r\n";
             break;
          case 14:
-            t = "They're coming to get you... coming to take you away...\n\r";
+            t = "They're coming to get you... coming to take you away...\r\n";
             break;
          case 15:
-            t = "You begin to feel all powerful!\n\r";
+            t = "You begin to feel all powerful!\r\n";
             break;
          case 16:
-            t = "You're light as air... the heavens are yours for the taking.\n\r";
+            t = "You're light as air... the heavens are yours for the taking.\r\n";
             break;
          case 17:
-            t = "Your whole life flashes by... and your future...\n\r";
+            t = "Your whole life flashes by... and your future...\r\n";
             break;
          case 18:
-            t = "You are everywhere and everything... you know all and are all!\n\r";
+            t = "You are everywhere and everything... you know all and are all!\r\n";
             break;
          case 19:
-            t = "You feel immortal!\n\r";
+            t = "You feel immortal!\r\n";
             break;
          case 20:
-            t = "Ahh... the power of a Supreme Entity... what to do...\n\r";
+            t = "Ahh... the power of a Supreme Entity... what to do...\r\n";
             break;
       }
       send_to_char( t, ch );
@@ -2180,13 +2176,13 @@ void auth_update( void )
    char buf[MAX_INPUT_LENGTH];
    bool found_hit = FALSE; /* was at least one found? */
 
-   strcpy( log_buf, "Pending authorizations:\n\r" );
+   strcpy( log_buf, "Pending authorizations:\r\n" );
    for( d = first_descriptor; d; d = d->next )
    {
       if( ( victim = d->character ) && IS_WAITING_FOR_AUTH( victim ) )
       {
          found_hit = TRUE;
-         sprintf( buf, " %s@%s new %s\n\r", victim->name, victim->desc->host, race_table[victim->race].race_name );
+         sprintf( buf, " %s@%s new %s\r\n", victim->name, victim->desc->host, race_table[victim->race].race_name );
          strcat( log_buf, buf );
       }
    }
@@ -2219,7 +2215,7 @@ void update_handler( void )
    if( timechar )
    {
       set_char_color( AT_PLAIN, timechar );
-      send_to_char( "Starting update timer.\n\r", timechar );
+      send_to_char( "Starting update timer.\r\n", timechar );
       gettimeofday( &sttime, NULL );
    }
 
@@ -2309,9 +2305,9 @@ void update_handler( void )
    {
       gettimeofday( &etime, NULL );
       set_char_color( AT_PLAIN, timechar );
-      send_to_char( "Update timing complete.\n\r", timechar );
+      send_to_char( "Update timing complete.\r\n", timechar );
       subtract_times( &etime, &sttime );
-      ch_printf( timechar, "Timing took %d.%06d seconds.\n\r", etime.tv_sec, etime.tv_usec );
+      ch_printf( timechar, "Timing took %d.%06d seconds.\r\n", etime.tv_sec, etime.tv_usec );
       timechar = NULL;
    }
    tail_chain(  );
@@ -2404,7 +2400,7 @@ void reboot_check( time_t reset )
       "SYSTEM: Reboot in 10 minutes.",
    };
    static const int times[] = { 10, 30, 60, 120, 180, 240, 300, 600 };
-   static const int timesize = UMIN( sizeof( times ) / sizeof( *times ), sizeof( tmsg ) / sizeof( *tmsg ) );
+   static const int timesize = 8; // UMIN( sizeof( times ) / sizeof( *times ), sizeof( tmsg ) / sizeof( *tmsg ) );
    char buf[MAX_STRING_LENGTH];
    static int trun;
    static bool init;
@@ -2440,11 +2436,11 @@ void reboot_check( time_t reset )
          if( auction->buyer && auction->buyer != auction->seller )
          {
             auction->buyer->gold += auction->bet;
-            send_to_char( "Your money has been returned.\n\r", auction->buyer );
+            send_to_char( "Your money has been returned.\r\n", auction->buyer );
          }
       }
       echo_to_all( AT_YELLOW, "You are forced from these realms by a strong "
-                   "presence\n\ras life here is reconstructed.", ECHOTAR_ALL );
+                   "presence\r\nas life here is reconstructed.", ECHOTAR_ALL );
 
       for( vch = first_char; vch; vch = vch->next )
          if( !IS_NPC( vch ) )
@@ -2541,7 +2537,7 @@ void reboot_check( char *arg )
          if( auction->buyer != NULL && auction->seller != auction->buyer ) /* return money to the buyer */
          {
             auction->buyer->gold += auction->bet;
-            send_to_char( "Your money has been returned.\n\r", auction->buyer );
+            send_to_char( "Your money has been returned.\r\n", auction->buyer );
          }
       }
 
@@ -2727,7 +2723,7 @@ void auction_update( void )
             tax = ( int )auction->bet * 0.1;
             boost_economy( auction->seller->in_room->area, tax );
             auction->seller->gold += pay; /* give him the money, tax 10 % */
-            sprintf( buf, "The auctioneer pays you %d gold, charging an auction fee of %d.\n\r", pay, tax );
+            sprintf( buf, "The auctioneer pays you %d gold, charging an auction fee of %d.\r\n", pay, tax );
             send_to_char( buf, auction->seller );
             auction->item = NULL;   /* reset item */
             if( IS_SET( sysdata.save_flags, SV_AUCTION ) )
@@ -2738,7 +2734,7 @@ void auction_update( void )
          }
          else  /* not sold */
          {
-            sprintf( buf, "No bids received for %s - object has been removed from auction\n\r.",
+            sprintf( buf, "No bids received for %s - object has been removed from auction\r\n.",
                      auction->item->short_descr );
             talk_auction( buf );
             act( AT_ACTION, "The auctioneer appears before you to return $p to you.",
@@ -2757,7 +2753,7 @@ void auction_update( void )
                obj_to_char( auction->item, auction->seller );
             tax = ( int )auction->item->cost * 0.05;
             boost_economy( auction->seller->in_room->area, tax );
-            sprintf( buf, "The auctioneer charges you an auction fee of %d.\n\r", tax );
+            sprintf( buf, "The auctioneer charges you an auction fee of %d.\r\n", tax );
             send_to_char( buf, auction->seller );
             if( ( auction->seller->gold - tax ) < 0 )
                auction->seller->gold = 0;

@@ -30,7 +30,7 @@
 #include <signal.h>
 #include <stdarg.h>
 #include "mud.h"
-#include "md5.h"
+#include "sha256.h"
 #include "mccp.h"
 
 /*
@@ -331,7 +331,7 @@ static void caught_alarm( int signum )
 {
    char buf[MAX_STRING_LENGTH];
    bug( "ALARM CLOCK!" );
-   strcpy( buf, "Alas, the hideous malevalent entity known only as 'Lag' rises once more!\n\r" );
+   strcpy( buf, "Alas, the hideous malevalent entity known only as 'Lag' rises once more!\r\n" );
    echo_to_all( AT_IMMORT, buf, ECHOTAR_ALL );
    if( newdesc )
    {
@@ -459,7 +459,7 @@ void game_loop( void )
                   || ( d->connected != CON_PLAYING && d->idle > 1200 )  /* 5 mins */
                   || d->idle > 28800 ) /* 2 hrs  */
          {
-            write_to_descriptor( d, "Idle timeout... disconnecting.\n\r", 0 );
+            write_to_descriptor( d, "Idle timeout... disconnecting.\r\n", 0 );
             d->outtop = 0;
             close_socket( d, TRUE );
             continue;
@@ -618,7 +618,6 @@ void game_loop( void )
    return;
 }
 
-
 void new_descriptor( int new_desc )
 {
    char buf[MAX_STRING_LENGTH];
@@ -627,7 +626,8 @@ void new_descriptor( int new_desc )
    struct hostent *from;
    char *hostname;
    struct sockaddr_in sock;
-   size_t desc, size;
+   int desc;
+   socklen_t size;
 
    set_alarm( 20 );
    size = sizeof( sock );
@@ -683,7 +683,7 @@ void new_descriptor( int new_desc )
    CREATE( dnew->outbuf, char, dnew->outsize );
 
    strcpy( buf, inet_ntoa( sock.sin_addr ) );
-   sprintf( log_buf, "Sock.sinaddr:  %s, port %hd.", buf, dnew->port );
+   sprintf( log_buf, "Sock.sinaddr:  %s, port %d.", buf, dnew->port );
    log_string_plus( log_buf, LOG_COMM, sysdata.log_level );
 
    dnew->host = STRALLOC( buf );
@@ -695,7 +695,7 @@ void new_descriptor( int new_desc )
    {
       if( ( !str_prefix( pban->name, dnew->host ) || !str_suffix( pban->name, hostname ) ) && pban->level >= LEVEL_SUPREME )
       {
-         write_to_descriptor( dnew, "Your site has been banned from this Mud.\n\r", 0 );
+         write_to_descriptor( dnew, "Your site has been banned from this Mud.\r\n", 0 );
          free_desc( dnew );
          set_alarm( 0 );
          return;
@@ -734,9 +734,9 @@ void new_descriptor( int new_desc )
    {
       extern char *help_greeting;
       if( help_greeting[0] == '.' )
-         write_to_buffer( dnew, help_greeting + 1, 0 );
+         send_to_desc_color( help_greeting + 1, dnew );
       else
-         write_to_buffer( dnew, help_greeting, 0 );
+         send_to_desc_color( help_greeting, dnew );
    }
 
    if( ++num_descriptors > sysdata.maxplayers )
@@ -787,7 +787,7 @@ void close_socket( DESCRIPTOR_DATA * dclose, bool force )
     * say bye to whoever's snooping this descriptor 
     */
    if( dclose->snoop_by )
-      write_to_buffer( dclose->snoop_by, "Your victim has left the game.\n\r", 0 );
+      write_to_buffer( dclose->snoop_by, "Your victim has left the game.\r\n", 0 );
 
    /*
     * stop snooping everyone else 
@@ -925,7 +925,7 @@ bool read_from_descriptor( DESCRIPTOR_DATA * d )
    {
       sprintf( log_buf, "%s input overflow!", d->host );
       log_string( log_buf );
-      write_to_descriptor( d, "\n\r*** PUT A LID ON IT!!! ***\n\r", 0 );
+      write_to_descriptor( d, "\r\n*** PUT A LID ON IT!!! ***\r\n", 0 );
       return FALSE;
    }
 
@@ -989,7 +989,7 @@ void read_from_buffer( DESCRIPTOR_DATA * d )
    {
       if( k >= 254 )
       {
-         write_to_descriptor( d, "Line too long.\n\r", 0 );
+         write_to_descriptor( d, "Line too long.\r\n", 0 );
 
          /*
           * skip the rest of the line 
@@ -1052,7 +1052,7 @@ void read_from_buffer( DESCRIPTOR_DATA * d )
 /*		sprintf( log_buf, "%s input spamming!", d->host );
 		log_string( log_buf );
 */
-            write_to_descriptor( d, "\n\r*** PUT A LID ON IT!!! ***\n\r", 0 );
+            write_to_descriptor( d, "\r\n*** PUT A LID ON IT!!! ***\r\n", 0 );
          }
       }
    }
@@ -1129,7 +1129,7 @@ bool flush_buffer( DESCRIPTOR_DATA * d, bool fPrompt )
    {
       ch = d->original ? d->original : d->character;
       if( IS_SET( ch->act, PLR_BLANK ) )
-         write_to_buffer( d, "\n\r", 2 );
+         write_to_buffer( d, "\r\n", 2 );
 
       if( IS_SET( ch->act, PLR_PROMPT ) )
          display_prompt( d );
@@ -1215,7 +1215,7 @@ void write_to_buffer( DESCRIPTOR_DATA * d, const char *txt, int length )
 */
 
    /*
-    * Initial \n\r if needed.
+    * Initial \r\n if needed.
     */
    if( d->outtop == 0 && !d->fcommand )
    {
@@ -1419,48 +1419,9 @@ void show_title( DESCRIPTOR_DATA * d )
    }
    else
    {
-      write_to_buffer( d, "Press enter...\n\r", 0 );
+      write_to_buffer( d, "Press enter...\r\n", 0 );
    }
    d->connected = CON_PRESS_ENTER;
-}
-
-char *smaug_crypt( const char *pwd )
-{
-   md5_state_t state;
-   md5_byte_t digest[17];
-   static char passwd[17];
-   unsigned int x;
-
-   md5_init( &state );
-   md5_append( &state, ( const md5_byte_t * )pwd, strlen( pwd ) );
-   md5_finish( &state, digest );
-
-   strncpy( passwd, ( const char * )digest, 16 );
-   passwd[16] = '\0';
-
-   /*
-    * The listed exceptions below will fubar the MD5 authentication packets, so change them 
-    */
-   for( x = 0; x < strlen( passwd ); x++ )
-   {
-      if( passwd[x] == '\n' )
-         passwd[x] = 'n';
-      if( passwd[x] == '\r' )
-         passwd[x] = 'r';
-      if( passwd[x] == '\t' )
-         passwd[x] = 't';
-      if( passwd[x] == ' ' )
-         passwd[x] = 's';
-      if( ( int )passwd[x] == 11 )
-         passwd[x] = 'x';
-      if( ( int )passwd[x] == 12 )
-         passwd[x] = 'X';
-      if( passwd[x] == '~' )
-         passwd[x] = '+';
-      if( passwd[x] == EOF )
-         passwd[x] = 'E';
-   }
-   return ( passwd );
 }
 
 /*
@@ -1468,16 +1429,12 @@ char *smaug_crypt( const char *pwd )
  */
 void nanny( DESCRIPTOR_DATA * d, char *argument )
 {
-/*	extern int lang_array[];
-	extern char *lang_names[];*/
    char buf[MAX_STRING_LENGTH];
    char arg[MAX_STRING_LENGTH];
    CHAR_DATA *ch;
    char *pwdnew;
-   char *p;
    int iRace, iClass;
    BAN_DATA *pban;
-/*    int iLang;*/
    bool fOld, chk;
 
    while( isspace( *argument ) )
@@ -1487,7 +1444,6 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 
    switch ( d->connected )
    {
-
       default:
          bug( "Nanny: bad d->connected %d.", d->connected );
          close_socket( d, TRUE );
@@ -1503,7 +1459,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          argument[0] = UPPER( argument[0] );
          if( !check_parse_name( argument ) )
          {
-            write_to_buffer( d, "Illegal name, try another.\n\rName: ", 0 );
+            write_to_buffer( d, "Illegal name, try another.\r\nName: ", 0 );
             return;
          }
 
@@ -1519,19 +1475,19 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                 */
                if( sysdata.DENY_NEW_PLAYERS == TRUE )
                {
-                  sprintf( buf, "The mud is currently preparing for a reboot.\n\r" );
+                  sprintf( buf, "The mud is currently preparing for a reboot.\r\n" );
                   write_to_buffer( d, buf, 0 );
-                  sprintf( buf, "New players are not accepted during this time.\n\r" );
+                  sprintf( buf, "New players are not accepted during this time.\r\n" );
                   write_to_buffer( d, buf, 0 );
-                  sprintf( buf, "Please try again in a few minutes.\n\r" );
+                  sprintf( buf, "Please try again in a few minutes.\r\n" );
                   write_to_buffer( d, buf, 0 );
                   close_socket( d, FALSE );
                }
-               sprintf( buf, "\n\rChoosing a name is one of the most important parts of this game...\n\r"
-                        "Make sure to pick a name appropriate to the character you are going\n\r"
-                        "to role play, and be sure that it suits our Star Wars theme.\n\r"
-                        "If the name you select is not acceptable, you will be asked to choose\n\r"
-                        "another one.\n\r\n\rPlease choose a name for your character: " );
+               sprintf( buf, "\r\nChoosing a name is one of the most important parts of this game...\r\n"
+                        "Make sure to pick a name appropriate to the character you are going\r\n"
+                        "to role play, and be sure that it suits our Star Wars theme.\r\n"
+                        "If the name you select is not acceptable, you will be asked to choose\r\n"
+                        "another one.\r\n\r\nPlease choose a name for your character: " );
                write_to_buffer( d, buf, 0 );
                d->newstate++;
                d->connected = CON_GET_NAME;
@@ -1539,7 +1495,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
             }
             else
             {
-               write_to_buffer( d, "Illegal name, try another.\n\rName: ", 0 );
+               write_to_buffer( d, "Illegal name, try another.\r\nName: ", 0 );
                return;
             }
          }
@@ -1555,7 +1511,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          {
             sprintf( log_buf, "Bad player file %s@%s.", argument, d->host );
             log_string( log_buf );
-            write_to_buffer( d, "Your playerfile is corrupt...Please notify Thoric@mud.compulink.com.\n\r", 0 );
+            write_to_buffer( d, "Your playerfile is corrupt...Please notify Thoric@mud.compulink.com.\r\n", 0 );
             close_socket( d, FALSE );
             return;
          }
@@ -1566,7 +1522,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
             if( ( !str_prefix( pban->name, d->host )
                   || !str_suffix( pban->name, d->host ) ) && pban->level >= ch->top_level )
             {
-               write_to_buffer( d, "Your site has been banned from this Mud.\n\r", 0 );
+               write_to_buffer( d, "Your site has been banned from this Mud.\r\n", 0 );
                close_socket( d, FALSE );
                return;
             }
@@ -1581,7 +1537,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                d->connected = CON_GET_NAME;
                return;
             }
-            write_to_buffer( d, "You are denied access.\n\r", 0 );
+            write_to_buffer( d, "You are denied access.\r\n", 0 );
             close_socket( d, FALSE );
             return;
          }
@@ -1598,8 +1554,8 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          {
             if( wizlock && !IS_IMMORTAL( ch ) )
             {
-               write_to_buffer( d, "The game is wizlocked.  Only immortals can connect now.\n\r", 0 );
-               write_to_buffer( d, "Please try back later.\n\r", 0 );
+               write_to_buffer( d, "The game is wizlocked.  Only immortals can connect now.\r\n", 0 );
+               write_to_buffer( d, "Please try back later.\r\n", 0 );
                close_socket( d, FALSE );
                return;
             }
@@ -1623,7 +1579,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          }
          else
          {
-            write_to_buffer( d, "\n\rI don't recognize your name, you must be new here.\n\r\n\r", 0 );
+            write_to_buffer( d, "\r\nI don't recognize your name, you must be new here.\r\n\r\n", 0 );
             sprintf( buf, "Did I get that right, %s (Y/N)? ", argument );
             write_to_buffer( d, buf, 0 );
             d->connected = CON_CONFIRM_NEW_NAME;
@@ -1632,11 +1588,11 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          break;
 
       case CON_GET_OLD_PASSWORD:
-         write_to_buffer( d, "\n\r", 2 );
+         write_to_buffer( d, "\r\n", 2 );
 
-         if( str_cmp( smaug_crypt( argument ), ch->pcdata->pwd ) )
+         if( str_cmp( sha256_crypt( argument ), ch->pcdata->pwd ) )
          {
-            write_to_buffer( d, "Wrong password, disconnecting.\n\r", 0 );
+            write_to_buffer( d, "Wrong password, disconnecting.\r\n", 0 );
             /*
              * clear descriptor pointer to get rid of bug message in log 
              */
@@ -1691,8 +1647,8 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          {
             case 'y':
             case 'Y':
-               sprintf( buf, "\n\rMake sure to use a password that won't be easily guessed by someone else."
-                        "\n\rPick a good password for %s: %s", ch->name, echo_off_str );
+               sprintf( buf, "\r\nMake sure to use a password that won't be easily guessed by someone else."
+                        "\r\nPick a good password for %s: %s", ch->name, echo_off_str );
                write_to_buffer( d, buf, 0 );
                d->connected = CON_GET_NEW_PASSWORD;
                break;
@@ -1716,48 +1672,40 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          break;
 
       case CON_GET_NEW_PASSWORD:
-         write_to_buffer( d, "\n\r", 2 );
+         write_to_buffer( d, "\r\n", 2 );
 
          if( strlen( argument ) < 5 )
          {
-            write_to_buffer( d, "Password must be at least five characters long.\n\rPassword: ", 0 );
+            write_to_buffer( d, "Password must be at least five characters long.\r\nPassword: ", 0 );
             return;
          }
 
          if( argument[0] == '!' )
          {
-            write_to_buffer( d, "Password cannot begin with the '!' character.\n\rPassword: ", 0 );
+            write_to_buffer( d, "Password cannot begin with the '!' character.\r\nPassword: ", 0 );
             return;
          }
 
-         pwdnew = smaug_crypt( argument );   /* MD5 Encryption */
-         for( p = pwdnew; *p != '\0'; p++ )
-         {
-            if( *p == '~' )
-            {
-               write_to_buffer( d, "New password not acceptable, cannot use the ~ character.\n\rPassword: ", 0 );
-               return;
-            }
-         }
+         pwdnew = sha256_crypt( argument );   /* SHA-256 Encryption */
 
          DISPOSE( ch->pcdata->pwd );
          ch->pcdata->pwd = str_dup( pwdnew );
-         write_to_buffer( d, "\n\rPlease retype the password to confirm: ", 0 );
+         write_to_buffer( d, "\r\nPlease retype the password to confirm: ", 0 );
          d->connected = CON_CONFIRM_NEW_PASSWORD;
          break;
 
       case CON_CONFIRM_NEW_PASSWORD:
-         write_to_buffer( d, "\n\r", 2 );
+         write_to_buffer( d, "\r\n", 2 );
 
-         if( str_cmp( smaug_crypt( argument ), ch->pcdata->pwd ) )
+         if( str_cmp( sha256_crypt( argument ), ch->pcdata->pwd ) )
          {
-            write_to_buffer( d, "Passwords don't match.\n\rRetype password: ", 0 );
+            write_to_buffer( d, "Passwords don't match.\r\nRetype password: ", 0 );
             d->connected = CON_GET_NEW_PASSWORD;
             return;
          }
 
          write_to_buffer( d, echo_on_str, 0 );
-         write_to_buffer( d, "\n\rWhat is your sex (M/F/N)? ", 0 );
+         write_to_buffer( d, "\r\nWhat is your sex (M/F/N)? ", 0 );
          d->connected = CON_GET_NEW_SEX;
          break;
 
@@ -1777,12 +1725,12 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                ch->sex = SEX_NEUTRAL;
                break;
             default:
-               write_to_buffer( d, "That's not a sex.\n\rWhat IS your sex? ", 0 );
+               write_to_buffer( d, "That's not a sex.\r\nWhat IS your sex? ", 0 );
                return;
          }
 
 
-         write_to_buffer( d, "\n\rYou may choose from the following races, or type help [race] to learn more:\n\r[", 0 );
+         write_to_buffer( d, "\r\nYou may choose from the following races, or type help [race] to learn more:\r\n[", 0 );
          buf[0] = '\0';
          for( iRace = 0; iRace < MAX_RACE; iRace++ )
          {
@@ -1792,7 +1740,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                {
                   if( strlen( buf ) + strlen( race_table[iRace].race_name ) > 77 )
                   {
-                     strcat( buf, "\n\r" );
+                     strcat( buf, "\r\n" );
                      write_to_buffer( d, buf, 0 );
                      buf[0] = '\0';
                   }
@@ -1802,7 +1750,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                strcat( buf, race_table[iRace].race_name );
             }
          }
-         strcat( buf, "]\n\r: " );
+         strcat( buf, "]\r\n: " );
          write_to_buffer( d, buf, 0 );
          d->connected = CON_GET_NEW_RACE;
          break;
@@ -1829,11 +1777,11 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 
          if( iRace == MAX_RACE || !race_table[iRace].race_name || race_table[iRace].race_name[0] == '\0' )
          {
-            write_to_buffer( d, "That's not a race.\n\rWhat IS your race? ", 0 );
+            write_to_buffer( d, "That's not a race.\r\nWhat IS your race? ", 0 );
             return;
          }
 
-         write_to_buffer( d, "\n\rPlease choose a main ability from the folowing classes:\n\r[", 0 );
+         write_to_buffer( d, "\r\nPlease choose a main ability from the folowing classes:\r\n[", 0 );
          buf[0] = '\0';
          for( iClass = 0; iClass < MAX_ABILITY; iClass++ )
          {
@@ -1843,7 +1791,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                {
                   if( strlen( buf ) + strlen( ability_name[iClass] ) > 77 )
                   {
-                     strcat( buf, "\n\r" );
+                     strcat( buf, "\r\n" );
                      write_to_buffer( d, buf, 0 );
                      buf[0] = '\0';
                   }
@@ -1853,7 +1801,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                strcat( buf, ability_name[iClass] );
             }
          }
-         strcat( buf, "]\n\r: " );
+         strcat( buf, "]\r\n: " );
          write_to_buffer( d, buf, 0 );
          d->connected = CON_GET_NEW_CLASS;
          break;
@@ -1879,11 +1827,11 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 
          if( iClass == MAX_ABILITY || !ability_name[iClass] || ability_name[iClass][0] == '\0' )
          {
-            write_to_buffer( d, "That's not a skill class.\n\rWhat IS it going to be? ", 0 );
+            write_to_buffer( d, "That's not a skill class.\r\nWhat IS it going to be? ", 0 );
             return;
          }
 
-         write_to_buffer( d, "\n\rRolling stats....\n\r", 0 );
+         write_to_buffer( d, "\r\nRolling stats....\r\n", 0 );
 
       case CON_ROLL_STATS:
 
@@ -1901,11 +1849,11 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          ch->perm_con += race_table[ch->race].con_plus;
          ch->perm_cha += race_table[ch->race].cha_plus;
 
-         sprintf( buf, "\n\rSTR: %d  INT: %d  WIS: %d  DEX: %d  CON: %d  CHA: %d\n\r",
+         sprintf( buf, "\r\nSTR: %d  INT: %d  WIS: %d  DEX: %d  CON: %d  CHA: %d\r\n",
                   ch->perm_str, ch->perm_int, ch->perm_wis, ch->perm_dex, ch->perm_con, ch->perm_cha );
 
          write_to_buffer( d, buf, 0 );
-         write_to_buffer( d, "\n\rAre these stats OK?. ", 0 );
+         write_to_buffer( d, "\r\nAre these stats OK?. ", 0 );
          d->connected = CON_STATS_OK;
          break;
 
@@ -1932,18 +1880,18 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
                ch->perm_con += race_table[ch->race].con_plus;
                ch->perm_cha += race_table[ch->race].cha_plus;
 
-               sprintf( buf, "\n\rSTR: %d  INT: %d  WIS: %d  DEX: %d  CON: %d  CHA: %d\n\r",
+               sprintf( buf, "\r\nSTR: %d  INT: %d  WIS: %d  DEX: %d  CON: %d  CHA: %d\r\n",
                         ch->perm_str, ch->perm_int, ch->perm_wis, ch->perm_dex, ch->perm_con, ch->perm_cha );
 
                write_to_buffer( d, buf, 0 );
-               write_to_buffer( d, "\n\rOK?. ", 0 );
+               write_to_buffer( d, "\r\nOK?. ", 0 );
                return;
             default:
-               write_to_buffer( d, "Invalid selection.\n\rYES or NO? ", 0 );
+               write_to_buffer( d, "Invalid selection.\r\nYES or NO? ", 0 );
                return;
          }
 
-         write_to_buffer( d, "\n\rWould you like ANSI or no graphic/color support, (R/A/N)? ", 0 );
+         write_to_buffer( d, "\r\nWould you like ANSI or no graphic/color support, (R/A/N)? ", 0 );
          d->connected = CON_GET_WANT_RIPANSI;
          break;
 
@@ -1958,7 +1906,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
             case 'N':
                break;
             default:
-               write_to_buffer( d, "Invalid selection.\n\rANSI or NONE? ", 0 );
+               write_to_buffer( d, "Invalid selection.\r\nANSI or NONE? ", 0 );
                return;
          }
          write_to_buffer( d, "Does your mud client have the Mud Sound Protocol? ", 0 );
@@ -1977,7 +1925,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
             case 'N':
                break;
             default:
-               write_to_buffer( d, "Invalid selection.\n\rYES or NO? ", 0 );
+               write_to_buffer( d, "Invalid selection.\r\nYES or NO? ", 0 );
                return;
          }
 /*
@@ -2002,7 +1950,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
          break;
 /*	}
 
-	write_to_buffer( d, "\n\rYou now have to wait for a god to authorize you... please be patient...\n\r", 0 );
+	write_to_buffer( d, "\r\nYou now have to wait for a god to authorize you... please be patient...\r\n", 0 );
 	sprintf( log_buf, "(1) %s@%s new %s applying for authorization...",
 				ch->name, d->host,
 				race_table[ch->race].race_name);
@@ -2012,7 +1960,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 	break;
 
      case CON_WAIT_1:
-	write_to_buffer( d, "\n\rTwo more tries... please be patient...\n\r", 0 );
+	write_to_buffer( d, "\r\nTwo more tries... please be patient...\r\n", 0 );
 	sprintf( log_buf, "(2) %s@%s new %s applying for authorization...",
 				ch->name, d->host,
 				race_table[ch->race].race_name);
@@ -2022,7 +1970,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 	break;
 
      case CON_WAIT_2:
-	write_to_buffer( d, "\n\rThis is your last try...\n\r", 0 );
+	write_to_buffer( d, "\r\nThis is your last try...\r\n", 0 );
 	sprintf( log_buf, "(3) %s@%s new %s applying for authorization...",
 				ch->name, d->host,
 				race_table[ch->race].race_name);
@@ -2032,7 +1980,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 	break;
 
     case CON_WAIT_3:
-	write_to_buffer( d, "Sorry... try again later.\n\r", 0 );
+	write_to_buffer( d, "Sorry... try again later.\r\n", 0 );
 	close_socket( d, FALSE );
 	return;
 	break;
@@ -2043,7 +1991,7 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 				race_table[ch->race].race_name);
 	log_string_plus( log_buf, LOG_COMM, sysdata.log_level );
 	to_channel( log_buf, CHANNEL_MONITOR, "Monitor", LEVEL_IMMORTAL );
-	write_to_buffer( d, "\n\r", 2 );
+	write_to_buffer( d, "\r\n", 2 );
 	show_title(d);
 	    {
 	       int ability;
@@ -2063,27 +2011,27 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
             send_to_pager( "\014", ch );
          if( IS_IMMORTAL( ch ) )
          {
-            send_to_pager( "&WImmortal Message of the Day&w\n\r", ch );
+            send_to_pager( "&WImmortal Message of the Day&w\r\n", ch );
             do_help( ch, "imotd" );
          }
          if( ch->top_level > 0 )
          {
-            send_to_pager( "\n\r&WMessage of the Day&w\n\r", ch );
+            send_to_pager( "\r\n&WMessage of the Day&w\r\n", ch );
             do_help( ch, "motd" );
          }
-         if( ch->top_level >= 100 )
+         if( ch->top_level >= LEVEL_HERO )
          {
-            send_to_pager( "\n\r&WAvatar Message of the Day&w\n\r", ch );
+            send_to_pager( "\r\n&WAvatar Message of the Day&w\r\n", ch );
             do_help( ch, "amotd" );
          }
          if( ch->top_level == 0 )
             do_help( ch, "nmotd" );
-         send_to_pager( "\n\r&WPress [ENTER] &Y", ch );
+         send_to_pager( "\r\n&WPress [ENTER] &Y", ch );
          d->connected = CON_READ_MOTD;
          break;
 
       case CON_READ_MOTD:
-         write_to_buffer( d, "\n\rWelcome to Star Wars Reality...\n\r\n\r", 0 );
+         write_to_buffer( d, "\r\nWelcome to Star Wars Reality...\r\n\r\n", 0 );
          add_char( ch );
          d->connected = CON_PLAYING;
 
@@ -2344,20 +2292,18 @@ void nanny( DESCRIPTOR_DATA * d, char *argument )
 				add_char( ch );
 				SET_BIT( ch->speaks, lang_array[iLang] );
 				set_char_color( AT_SAY, ch );
-				ch_printf( ch, "You can now speak %s.\n\r", lang_names[iLang] );
+				ch_printf( ch, "You can now speak %s.\r\n", lang_names[iLang] );
 				d->connected = CON_PLAYING;
 				return;
 			}
 	set_char_color( AT_SAY, ch );
-	write_to_buffer( d, "You may not learn that language.  Please choose another.\n\r"
+	write_to_buffer( d, "You may not learn that language.  Please choose another.\r\n"
 				  "New language: ", 0 );
 	break;*/
    }
 
    return;
 }
-
-
 
 /*
  * Parse a name for acceptability.
@@ -2411,8 +2357,6 @@ bool check_parse_name( char *name )
    return TRUE;
 }
 
-
-
 /*
  * Look for link-dead player to reconnect.
  */
@@ -2426,7 +2370,7 @@ bool check_reconnect( DESCRIPTOR_DATA * d, char *name, bool fConn )
       {
          if( fConn && ch->switched )
          {
-            write_to_buffer( d, "Already playing.\n\rName: ", 0 );
+            write_to_buffer( d, "Already playing.\r\nName: ", 0 );
             d->connected = CON_GET_NAME;
             if( d->character )
             {
@@ -2454,7 +2398,7 @@ bool check_reconnect( DESCRIPTOR_DATA * d, char *name, bool fConn )
             d->character = ch;
             ch->desc = d;
             ch->timer = 0;
-            send_to_char( "Reconnecting.\n\r", ch );
+            send_to_char( "Reconnecting.\r\n", ch );
             act( AT_ACTION, "$n has reconnected.", ch, NULL, NULL, TO_ROOM );
             sprintf( log_buf, "%s (%s) reconnected.", ch->name, d->host );
             log_string_plus( log_buf, LOG_COMM, UMAX( sysdata.log_level, ch->top_level ) );
@@ -2463,11 +2407,8 @@ bool check_reconnect( DESCRIPTOR_DATA * d, char *name, bool fConn )
          return TRUE;
       }
    }
-
    return FALSE;
 }
-
-
 
 /*
  * Check if already playing.
@@ -2505,7 +2446,7 @@ bool check_multi( DESCRIPTOR_DATA * d, char *name )
          }
          if( iloop >= 10 )
             return FALSE;
-         write_to_buffer( d, "Sorry multi-playing is not allowed ... have you other character quit first.\n\r", 0 );
+         write_to_buffer( d, "Sorry multi-playing is not allowed ... have you other character quit first.\r\n", 0 );
          sprintf( log_buf, "%s attempting to multiplay with %s.",
                   dold->original ? dold->original->name : dold->character->name, d->character->name );
          log_string_plus( log_buf, LOG_COMM, sysdata.log_level );
@@ -2536,15 +2477,15 @@ bool check_playing( DESCRIPTOR_DATA * d, char *name, bool kick )
          ch = dold->original ? dold->original : dold->character;
          if( !ch->name || ( cstate != CON_PLAYING && cstate != CON_EDITING ) )
          {
-            write_to_buffer( d, "Already connected - try again.\n\r", 0 );
+            write_to_buffer( d, "Already connected - try again.\r\n", 0 );
             sprintf( log_buf, "%s already connected.", ch->name );
             log_string_plus( log_buf, LOG_COMM, sysdata.log_level );
             return BERR;
          }
          if( !kick )
             return TRUE;
-         write_to_buffer( d, "Already playing... Kicking off old connection.\n\r", 0 );
-         write_to_buffer( dold, "Kicking off old connection... bye!\n\r", 0 );
+         write_to_buffer( d, "Already playing... Kicking off old connection.\r\n", 0 );
+         write_to_buffer( dold, "Kicking off old connection... bye!\r\n", 0 );
          close_socket( dold, FALSE );
          /*
           * clear descriptor pointer to get rid of bug message in log 
@@ -2557,7 +2498,7 @@ bool check_playing( DESCRIPTOR_DATA * d, char *name, bool kick )
          if( ch->switched )
             do_return( ch->switched, "" );
          ch->switched = NULL;
-         send_to_char( "Reconnecting.\n\r", ch );
+         send_to_char( "Reconnecting.\r\n", ch );
          act( AT_ACTION, "$n has reconnected, kicking off old link.", ch, NULL, NULL, TO_ROOM );
          sprintf( log_buf, "%s@%s reconnected, kicking off old link.", ch->name, d->host );
          log_string_plus( log_buf, LOG_COMM, UMAX( sysdata.log_level, ch->top_level ) );
@@ -2732,7 +2673,7 @@ char *act_string( const char *format, CHAR_DATA * to, CHAR_DATA * ch, void *arg1
       while( ( *point = *i ) != '\0' )
          ++point, ++i;
    }
-   strcpy( point, "\n\r" );
+   strcpy( point, "\r\n" );
    buf[0] = UPPER( buf[0] );
    return buf;
 }
@@ -2844,7 +2785,7 @@ void do_name( CHAR_DATA * ch, char *argument )
 
    if( !NOT_AUTHED( ch ) || ch->pcdata->auth_state != 2 )
    {
-      send_to_char( "Huh?\n\r", ch );
+      send_to_char( "Huh?\r\n", ch );
       return;
    }
 
@@ -2852,13 +2793,13 @@ void do_name( CHAR_DATA * ch, char *argument )
 
    if( !check_parse_name( argument ) )
    {
-      send_to_char( "Illegal name, try another.\n\r", ch );
+      send_to_char( "Illegal name, try another.\r\n", ch );
       return;
    }
 
    if( !str_cmp( ch->name, argument ) )
    {
-      send_to_char( "That's already your name!\n\r", ch );
+      send_to_char( "That's already your name!\r\n", ch );
       return;
    }
 
@@ -2870,20 +2811,20 @@ void do_name( CHAR_DATA * ch, char *argument )
 
    if( tmp )
    {
-      send_to_char( "That name is already taken.  Please choose another.\n\r", ch );
+      send_to_char( "That name is already taken.  Please choose another.\r\n", ch );
       return;
    }
 
    sprintf( fname, "%s%c/%s", PLAYER_DIR, tolower( argument[0] ), capitalize( argument ) );
    if( stat( fname, &fst ) != -1 )
    {
-      send_to_char( "That name is already taken.  Please choose another.\n\r", ch );
+      send_to_char( "That name is already taken.  Please choose another.\r\n", ch );
       return;
    }
 
    STRFREE( ch->name );
    ch->name = STRALLOC( argument );
-   send_to_char( "Your name has been changed.  Please apply again.\n\r", ch );
+   send_to_char( "Your name has been changed.  Please apply again.\r\n", ch );
    ch->pcdata->auth_state = 0;
    return;
 }
@@ -2893,7 +2834,7 @@ char *default_prompt( CHAR_DATA * ch )
    static char buf[MAX_STRING_LENGTH];
    strcpy( buf, "" );
    if( ch->skill_level[FORCE_ABILITY] > 1 || get_trust( ch ) >= LEVEL_IMMORTAL )
-      strcat( buf, "&pForce:&P%m/&p%M  &pAlign:&P%a\n\r" );
+      strcat( buf, "&pForce:&P%m/&p%M  &pAlign:&P%a\r\n" );
    strcat( buf, "&BHealth:&C%h&B/%H  &BMovement:&C%v&B/%V" );
    strcat( buf, "&C >&w" );
    return buf;
@@ -3088,7 +3029,7 @@ bool pager_output( DESCRIPTOR_DATA * d )
    while( lines < 0 && d->pagepoint >= d->pagebuf )
       if( *( --d->pagepoint ) == '\n' )
          ++lines;
-   if( *d->pagepoint == '\n' && *( ++d->pagepoint ) == '\r' )
+   if( *d->pagepoint == '\r' && *( ++d->pagepoint ) == '\n' )
       ++d->pagepoint;
    if( d->pagepoint < d->pagebuf )
       d->pagepoint = d->pagebuf;

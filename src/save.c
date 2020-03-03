@@ -200,7 +200,7 @@ void save_char_obj( CHAR_DATA * ch )
       if( ( fp = fopen( strback, "w" ) ) == NULL )
       {
          bug( "Save_god_level: fopen", 0 );
-         perror( strsave );
+         perror( strback );
       }
       else
       {
@@ -511,8 +511,6 @@ void fwrite_char( CHAR_DATA * ch, FILE * fp )
    return;
 }
 
-
-
 /*
  * Write an object and its contents.
  */
@@ -524,7 +522,13 @@ void fwrite_obj( CHAR_DATA * ch, OBJ_DATA * obj, FILE * fp, int iNest, short os_
 
    if( iNest >= MAX_NEST )
    {
-      bug( "fwrite_obj: iNest hit MAX_NEST %d", iNest );
+      bug( "%s: iNest hit MAX_NEST %d", __FUNCTION__, iNest );
+      return;
+   }
+
+   if( !obj )
+   {
+      bug( "%s: NULL obj", __FUNCTION__ );
       return;
    }
 
@@ -571,13 +575,13 @@ void fwrite_obj( CHAR_DATA * ch, OBJ_DATA * obj, FILE * fp, int iNest, short os_
       fprintf( fp, "Nest         %d\n", iNest );
    if( obj->count > 1 )
       fprintf( fp, "Count        %d\n", obj->count );
-   if( obj->name && obj->pIndexData->name && str_cmp( obj->name, obj->pIndexData->name ) )
+   if( obj->name && ( !obj->pIndexData->name  || str_cmp( obj->name, obj->pIndexData->name ) ) )
       fprintf( fp, "Name         %s~\n", obj->name );
-   if( obj->short_descr && obj->pIndexData->short_descr && str_cmp( obj->short_descr, obj->pIndexData->short_descr ) )
+   if( obj->short_descr && ( !obj->pIndexData->short_descr || str_cmp( obj->short_descr, obj->pIndexData->short_descr ) ) )
       fprintf( fp, "ShortDescr   %s~\n", obj->short_descr );
-   if( obj->description && obj->pIndexData->description && str_cmp( obj->description, obj->pIndexData->description ) )
+   if( obj->description && ( !obj->pIndexData->description || str_cmp( obj->description, obj->pIndexData->description ) ) )
       fprintf( fp, "Description  %s~\n", obj->description );
-   if( obj->action_desc && obj->pIndexData->action_desc && str_cmp( obj->action_desc, obj->pIndexData->action_desc ) )
+   if( obj->action_desc && ( !obj->pIndexData->action_desc || str_cmp( obj->action_desc, obj->pIndexData->action_desc ) ) )
       fprintf( fp, "ActionDesc   %s~\n", obj->action_desc );
    fprintf( fp, "Vnum         %d\n", obj->pIndexData->vnum );
    if( ( os_type == OS_CORPSE || hotboot ) && obj->in_room )
@@ -885,8 +889,6 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
    return found;
 }
 
-
-
 /*
  * Read in a char.
  */
@@ -910,7 +912,13 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
    memcpy( &ch->colors, &default_set, sizeof( default_set ) );
    for( ;; )
    {
-      word = feof( fp ) ? "End" : fread_word( fp );
+      word = ( feof( fp ) ? "End" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         bug( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "End";
+      }
       fMatch = FALSE;
 
       switch ( UPPER( word[0] ) )
@@ -1053,7 +1061,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                    && ch->pcdata->clan_name[0] != '\0' && ( ch->pcdata->clan = get_clan( ch->pcdata->clan_name ) ) == NULL )
                {
                   sprintf( buf,
-                           "Warning: the organization %s no longer exists, and therefore you no longer\n\rbelong to that organization.\n\r",
+                           "Warning: the organization %s no longer exists, and therefore you no longer\r\nbelong to that organization.\r\n",
                            ch->pcdata->clan_name );
                   send_to_char( buf, ch );
                   STRFREE( ch->pcdata->clan_name );
@@ -1063,18 +1071,15 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                break;
             }
 
-            /*
-             * Load color values - Samson 9-29-98 
-             */
+            if( !str_cmp( word, "Colors" ) )
             {
                int x;
-               if( !str_cmp( word, "Colors" ) )
-               {
-                  for( x = 0; x < max_colors; x++ )
-                     ch->colors[x] = fread_number( fp );
-                  fMatch = TRUE;
-                  break;
-               }
+
+               for( x = 0; x < max_colors; x++ )
+                  ch->colors[x] = fread_number( fp );
+               fread_to_eol( fp );
+               fMatch = TRUE;
+               break;
             }
 
             if( !str_cmp( word, "Condition" ) )
@@ -1147,7 +1152,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                    && ch->pcdata->clan_name[0] != '\0' && ( ch->pcdata->clan = get_clan( ch->pcdata->clan_name ) ) == NULL )
                {
                   sprintf( buf,
-                           "Warning: the organization %s no longer exists, and therefore you no longer\n\rbelong to that organization.\n\r",
+                           "Warning: the organization %s no longer exists, and therefore you no longer\r\nbelong to that organization.\r\n",
                            ch->pcdata->clan_name );
                   send_to_char( buf, ch );
                   STRFREE( ch->pcdata->clan_name );
@@ -1244,7 +1249,15 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
          case 'M':
             KEY( "MainAbility", ch->main_ability, fread_number( fp ) );
             KEY( "MDeaths", ch->pcdata->mdeaths, fread_number( fp ) );
-            KEY( "MaxColors", max_colors, fread_number( fp ) );
+            if( !str_cmp( word, "MaxColors" ) )
+            {
+               int temp = fread_number( fp );
+
+               max_colors = UMIN( temp, MAX_COLORS );
+
+               fMatch = TRUE;
+               break;
+            }
             KEY( "Mentalstate", ch->mental_state, fread_number( fp ) );
             KEY( "MGlory", ch->pcdata->quest_accum, fread_number( fp ) );
             KEY( "Minsnoop", ch->pcdata->min_snoop, fread_number( fp ) );
@@ -1357,7 +1370,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
             {
                if( !preload && !copyover )
                {
-                  sprintf( buf, "Last connected from: %s\n\r", fread_word( fp ) );
+                  sprintf( buf, "Last connected from: %s\r\n", fread_word( fp ) );
                   send_to_char( buf, ch );
                }
                else
@@ -1549,12 +1562,6 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
             break;
 
          case 'V':
-            if( !str_cmp( word, "Vnum" ) )
-            {
-               ch->pIndexData = get_mob_index( fread_number( fp ) );
-               fMatch = TRUE;
-               break;
-            }
             KEY( "Version", file_ver, fread_number( fp ) );
             break;
 
@@ -1624,7 +1631,13 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
 
    for( ;; )
    {
-      word = feof( fp ) ? "End" : fread_word( fp );
+      word = ( feof( fp ) ? "End" : fread_word( fp ) );
+
+      if( word[0] == '\0' )
+      {
+         bug( "%s: EOF encountered reading file!", __FUNCTION__ );
+         word = "End";
+      }
       fMatch = FALSE;
 
       switch ( UPPER( word[0] ) )
@@ -1941,7 +1954,7 @@ void do_last( CHAR_DATA * ch, char *argument )
    one_argument( argument, arg );
    if( arg[0] == '\0' )
    {
-      send_to_char( "Usage: last <playername>\n\r", ch );
+      send_to_char( "Usage: last <playername>\r\n", ch );
       return;
    }
    strcpy( name, capitalize( arg ) );
@@ -1949,7 +1962,7 @@ void do_last( CHAR_DATA * ch, char *argument )
    if( stat( buf, &fst ) != -1 && check_parse_name( capitalize( name ), FALSE ) )
       sprintf( buf, "%s was last on: %s\r", name, ctime( &fst.st_mtime ) );
    else
-      sprintf( buf, "%s was not found.\n\r", name );
+      sprintf( buf, "%s was not found.\r\n", name );
    send_to_char( buf, ch );
 }
 

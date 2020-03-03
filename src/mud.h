@@ -15,7 +15,7 @@
 * Original Diku Mud copyright (C) 1990, 1991 by Sebastian Hammer,          *
 * Michael Seifert, Hans Henrik St{rfeldt, Tom Madsen, and Katja Nyboe.     *
 * ------------------------------------------------------------------------ *
-*			    Main mud header file			   *
+*                            Main mud header file                          *
 ****************************************************************************/
 
 #include <stdlib.h>
@@ -27,6 +27,7 @@ typedef int ch_ret;
 typedef int obj_ret;
 
 #define args( list )			list
+
 #define DECLARE_DO_FUN( fun )		DO_FUN    fun
 #define DECLARE_SPEC_FUN( fun )	SPEC_FUN  fun
 #define DECLARE_SPELL_FUN( fun )	SPELL_FUN fun
@@ -47,9 +48,7 @@ typedef int obj_ret;
 #define BERR 255
 #endif
 
-#ifndef __cplusplus
 typedef unsigned char bool;
-#endif
 
 #define KEY( literal, field, value )   \
 if ( !str_cmp( word, (literal) ) )     \
@@ -108,6 +107,7 @@ typedef struct social_type SOCIALTYPE;
 typedef struct cmd_type CMDTYPE;
 typedef struct killed_data KILLED_DATA;
 typedef struct wizent WIZENT;
+typedef struct specfun_list SPEC_LIST;
 
 /*
  * Function types.
@@ -994,7 +994,6 @@ struct smaug_affect
    int bitvector;
 };
 
-
 /***************************************************************************
  *                                                                         *
  *                   VALUES OF INTEREST TO AREA BUILDERS                   *
@@ -1008,14 +1007,13 @@ struct smaug_affect
  */
 #define MOB_VNUM_ANIMATED_CORPSE   5
 #define MOB_VNUM_POLY_WOLF	   10
-
 #define MOB_VNUM_STORMTROOPER	20
 #define MOB_VNUM_IMP_GUARD	21
 #define MOB_VNUM_NR_GUARD	22
 #define MOB_VNUM_NR_TROOPER	23
 #define MOB_VNUM_MERCINARY	24
 #define MOB_VNUM_BOUNCER	25
-
+#define MOB_VNUM_SUPERMOB 3
 
 /*
  * ACT bits for mobs.
@@ -1895,6 +1893,8 @@ struct mob_index_data
    char *short_descr;
    char *long_descr;
    char *description;
+   char *spec_funname;
+   char *spec_funname2;
    int vnum;
    short count;
    short killed;
@@ -1944,7 +1944,6 @@ struct mob_index_data
    short saving_spell_staff;
    int vip_flags;
 };
-
 
 struct hunt_hate_fear
 {
@@ -2000,6 +1999,8 @@ struct char_data
    HHF_DATA *hating;
    SPEC_FUN *spec_fun;
    SPEC_FUN *spec_2;
+   char *spec_funname;
+   char *spec_funname2;
    MPROG_ACT_LIST *mpact;
    int mpactnum;
    short mpscriptpos;
@@ -2112,6 +2113,8 @@ struct char_data
    short main_ability;
    short colors[MAX_COLORS];
    int home_vnum; /* hotboot tracker */
+   int resetvnum;
+   int resetnum;
 };
 
 struct killed_data
@@ -2338,6 +2341,7 @@ struct reset_data
    int arg1;
    int arg2;
    int arg3;
+   bool sreset;
 };
 
 /* Constants for arg2 of 'B' resets. */
@@ -2351,8 +2355,6 @@ struct reset_data
 #define BIT_RESET_SET			BV30
 #define BIT_RESET_TOGGLE		BV31
 #define BIT_RESET_FREEBITS	  0x3FFF0000   /* For reference */
-
-
 
 /*
  * Area definition.
@@ -2433,6 +2435,7 @@ struct system_data
    char *guild_advisor; /* guild overseer and advisor. */
    int save_flags;   /* Toggles for saving conditions */
    short save_frequency;   /* How old to autosave someone */
+   void *dlHandle;
 };
 
 
@@ -2512,8 +2515,6 @@ typedef enum
    SKILL_HERB
 } skill_types;
 
-
-
 struct timerset
 {
    int num_uses;
@@ -2522,8 +2523,6 @@ struct timerset
    struct timeval max_time;
 };
 
-
-
 /*
  * Skills include spells as a particular case.
  */
@@ -2531,7 +2530,9 @@ struct skill_type
 {
    char *name; /* Name of skill     */
    SPELL_FUN *spell_fun;   /* Spell pointer (for spells) */
-   DO_FUN *skill_fun;   /* Skill pointer (for skills) */
+   char *spell_fun_name;   /* Spell function name - Trax */
+   DO_FUN *skill_fun;      /* Skill pointer (for skills) */
+   char *skill_fun_name;   /* Skill function name - Trax */
    short target;  /* Legal targets     */
    short minimum_position; /* Position for caster / user */
    short slot; /* Slot for #OBJECT loading   */
@@ -2722,15 +2723,17 @@ extern short gsn_chadra_fan;
 extern short gsn_quarren;
 extern short gsn_duinduogwuin;
 
+// Utility macros.
+int umin( int check, int ncheck );
+int umax( int check, int ncheck );
+int urange( int mincheck, int check, int maxcheck );
 
-/*
- * Utility macros.
- */
-#define UMIN(a, b)		((a) < (b) ? (a) : (b))
-#define UMAX(a, b)		((a) > (b) ? (a) : (b))
-#define URANGE(a, b, c)		((b) < (a) ? (a) : ((b) > (c) ? (c) : (b)))
-#define LOWER(c)		((c) >= 'A' && (c) <= 'Z' ? (c)+'a'-'A' : (c))
-#define UPPER(c)		((c) >= 'a' && (c) <= 'z' ? (c)+'A'-'a' : (c))
+#define UMIN( a, b )      ( umin( (a), (b) ) )
+#define UMAX( a, b )      ( umax( (a), (b) ) )
+#define URANGE(a, b, c )  ( urange( (a), (b), (c) ) )
+#define LOWER( c )        ( (c) >= 'A' && (c) <= 'Z' ? (c) + 'a' - 'A' : (c) )
+#define UPPER( c )        ( (c) >= 'a' && (c) <= 'z' ? (c) + 'A' - 'a' : (c) )
+
 #define IS_SET(flag, bit)	((flag) & (bit))
 #define SET_BIT(var, bit)	((var) |= (bit))
 #define REMOVE_BIT(var, bit)	((var) &= ~(bit))
@@ -2921,7 +2924,7 @@ do								\
 {								\
     if ( (ch)->substate == SUB_RESTRICTED )			\
     {								\
-	send_to_char( "You cannot use this command from within another command.\n\r", ch );	\
+	send_to_char( "You cannot use this command from within another command.\r\n", ch );	\
 	return;							\
     }								\
 } while(0)
@@ -3029,8 +3032,6 @@ do								\
 #define CAN_WEAR(obj, part)	(IS_SET((obj)->wear_flags,  (part)))
 #define IS_OBJ_STAT(obj, stat)	(IS_SET((obj)->extra_flags, (stat)))
 
-
-
 /*
  * Description macros.
  */
@@ -3038,10 +3039,7 @@ do								\
 				( IS_NPC(ch) ? (ch)->short_descr	\
 				: (ch)->name ) : "someone" )
 
-
-
 #define log_string( txt )	( log_string_plus( (txt), LOG_NORMAL, LEVEL_LOG ) )
-
 
 /*
  * Structure for a command in the command lookup table.
@@ -3051,13 +3049,12 @@ struct cmd_type
    CMDTYPE *next;
    char *name;
    DO_FUN *do_fun;
+   char *fun_name;
    short position;
    short level;
    short log;
    struct timerset userec;
 };
-
-
 
 /*
  * Structure for a social in the socials table.
@@ -3075,7 +3072,12 @@ struct social_type
    char *others_auto;
 };
 
-
+struct specfun_list
+{
+   SPEC_LIST *next;
+   SPEC_LIST *prev;
+   char *name;
+};
 
 /*
  * Global constants.
@@ -3166,7 +3168,8 @@ extern SHOP_DATA *first_shop;
 extern SHOP_DATA *last_shop;
 extern REPAIR_DATA *first_repair;
 extern REPAIR_DATA *last_repair;
-
+extern SPEC_LIST *first_specfun;
+extern SPEC_LIST *last_specfun;
 extern BAN_DATA *first_ban;
 extern BAN_DATA *last_ban;
 extern CHAR_DATA *first_char;
@@ -3699,10 +3702,8 @@ DECLARE_DO_FUN( do_mpgoto );
 DECLARE_DO_FUN( do_mpjunk );
 DECLARE_DO_FUN( do_mpkill );
 DECLARE_DO_FUN( do_mpmload );
-DECLARE_DO_FUN( do_mpmset );
 DECLARE_DO_FUN( do_mpnothing );
 DECLARE_DO_FUN( do_mpoload );
-DECLARE_DO_FUN( do_mposet );
 DECLARE_DO_FUN( do_mppurge );
 DECLARE_DO_FUN( do_mpstat );
 DECLARE_DO_FUN( do_opstat );
@@ -3913,7 +3914,8 @@ char *format_obj_to_char args( ( OBJ_DATA * obj, CHAR_DATA * ch, bool fShort ) )
 void show_list_to_char args( ( OBJ_DATA * list, CHAR_DATA * ch, bool fShort, bool fShowNothing ) );
 
 /* act_move.c */
-void clear_vrooms args( ( void ) );
+ROOM_INDEX_DATA *generate_exit( ROOM_INDEX_DATA * in_room, EXIT_DATA ** pexit );
+void clear_vrooms( void );
 ED *find_door args( ( CHAR_DATA * ch, char *arg, bool quiet ) );
 ED *get_exit args( ( ROOM_INDEX_DATA * room, short dir ) );
 ED *get_exit_to args( ( ROOM_INDEX_DATA * room, short dir, int vnum ) );
@@ -4024,17 +4026,17 @@ void extract_missile args( ( MISSILE_DATA * missile ) );
 SHIP_DATA *ship_in_room args( ( ROOM_INDEX_DATA * room, char *name ) );
 
 /* comm.c */
-char *smaug_crypt( const char *pwd );
-void close_socket args( ( DESCRIPTOR_DATA * dclose, bool force ) );
-void write_to_buffer args( ( DESCRIPTOR_DATA * d, const char *txt, int length ) );
-void write_to_pager args( ( DESCRIPTOR_DATA * d, const char *txt, int length ) );
-void send_to_char args( ( const char *txt, CHAR_DATA * ch ) );
-void send_to_char_color args( ( const char *txt, CHAR_DATA * ch ) );
-void send_to_pager args( ( const char *txt, CHAR_DATA * ch ) );
-void send_to_pager_color args( ( const char *txt, CHAR_DATA * ch ) );
-void ch_printf args( ( CHAR_DATA * ch, char *fmt, ... ) );
-void pager_printf args( ( CHAR_DATA * ch, char *fmt, ... ) );
-void act args( ( short AType, const char *format, CHAR_DATA * ch, void *arg1, void *arg2, int type ) );
+void close_socket( DESCRIPTOR_DATA * dclose, bool force );
+void write_to_buffer( DESCRIPTOR_DATA * d, const char *txt, int length );
+void write_to_pager( DESCRIPTOR_DATA * d, const char *txt, int length );
+void send_to_char( const char *txt, CHAR_DATA * ch );
+void send_to_char_color( const char *txt, CHAR_DATA * ch );
+void send_to_desc_color( const char *txt, DESCRIPTOR_DATA *d );
+void send_to_pager( const char *txt, CHAR_DATA * ch );
+void send_to_pager_color( const char *txt, CHAR_DATA * ch );
+void ch_printf( CHAR_DATA * ch, char *fmt, ... );
+void pager_printf( CHAR_DATA * ch, char *fmt, ... );
+void act( short AType, const char *format, CHAR_DATA * ch, void *arg1, void *arg2, int type );
 
 /* reset.c */
 RD *make_reset args( ( char letter, int extra, int arg1, int arg2, int arg3 ) );
@@ -4043,6 +4045,7 @@ void reset_area args( ( AREA_DATA * pArea ) );
 
 /* db.c */
 void show_file args( ( CHAR_DATA * ch, char *filename ) );
+bool is_valid_filename( CHAR_DATA *ch, const char *direct, const char *filename );
 char *str_dup args( ( char const *str ) );
 void boot_db args( ( bool fCopyOver ) );
 void area_update args( ( void ) );
@@ -4153,11 +4156,11 @@ bool is_safe args( ( CHAR_DATA * ch, CHAR_DATA * victim ) );
 bool is_safe_nm args( ( CHAR_DATA * ch, CHAR_DATA * victim ) );
 bool legal_loot args( ( CHAR_DATA * ch, CHAR_DATA * victim ) );
 bool check_illegal_pk args( ( CHAR_DATA * ch, CHAR_DATA * victim ) );
-void raw_kill args( ( CHAR_DATA * ch, CHAR_DATA * victim ) );
+OBJ_DATA *raw_kill( CHAR_DATA *ch, CHAR_DATA *victim );
 bool in_arena args( ( CHAR_DATA * ch ) );
 
 /* makeobjs.c */
-void make_corpse args( ( CHAR_DATA * ch, CHAR_DATA * killer ) );
+OBJ_DATA *make_corpse( CHAR_DATA * ch, CHAR_DATA * killer );
 void make_blood args( ( CHAR_DATA * ch ) );
 void make_bloodstain args( ( CHAR_DATA * ch ) );
 void make_scraps args( ( OBJ_DATA * obj ) );
@@ -4248,7 +4251,7 @@ int apply_ac args( ( OBJ_DATA * obj, int iWear ) );
 OD *get_eq_char args( ( CHAR_DATA * ch, int iWear ) );
 void equip_char args( ( CHAR_DATA * ch, OBJ_DATA * obj, int iWear ) );
 void unequip_char args( ( CHAR_DATA * ch, OBJ_DATA * obj ) );
-int count_obj_list( RESET_DATA *pReset, OBJ_INDEX_DATA *pObjIndex, OBJ_DATA *list );
+int count_obj_list( OBJ_INDEX_DATA *pObjIndex, OBJ_DATA *list );
 void obj_from_room args( ( OBJ_DATA * obj ) );
 OD *obj_to_room args( ( OBJ_DATA * obj, ROOM_INDEX_DATA * pRoomIndex ) );
 OD *obj_to_obj args( ( OBJ_DATA * obj, OBJ_DATA * obj_to ) );
@@ -4321,7 +4324,8 @@ void economize_mobgold args( ( CHAR_DATA * mob ) );
 bool economy_has args( ( AREA_DATA * tarea, int gold ) );
 void add_kill args( ( CHAR_DATA * ch, CHAR_DATA * mob ) );
 int times_killed args( ( CHAR_DATA * ch, CHAR_DATA * mob ) );
-
+void check_switches( bool possess );
+void check_switch( CHAR_DATA *ch, bool possess );
 
 /* interp.c */
 bool check_pos args( ( CHAR_DATA * ch, short position ) );
@@ -4330,7 +4334,7 @@ bool is_number args( ( char *arg ) );
 int number_argument args( ( char *argument, char *arg ) );
 char *one_argument args( ( char *argument, char *arg_first ) );
 char *one_argument2 args( ( char *argument, char *arg_first ) );
-ST *find_social args( ( char *command ) );
+ST *find_social( const char *command );
 CMDTYPE *find_command args( ( char *command ) );
 void hash_commands( void );
 void start_timer args( ( struct timeval * sttime ) );
@@ -4383,8 +4387,7 @@ void save_home args( ( CHAR_DATA * ch ) );
 /* shops.c */
 
 /* special.c */
-SF *spec_lookup args( ( const char *name ) );
-char *lookup_spec args( ( SPEC_FUN * special ) );
+SF *spec_lookup( char *name );
 
 /* tables.c */
 int get_skill args( ( char *skilltype ) );
@@ -4451,6 +4454,7 @@ char *get_race args( ( CHAR_DATA * ch ) );
  * mudprograms stuff
  */
 extern CHAR_DATA *supermob;
+extern OBJ_DATA *supermob_obj;
 
 void oprog_speech_trigger( char *txt, CHAR_DATA * ch );
 void oprog_random_trigger( OBJ_DATA * obj );

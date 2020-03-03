@@ -35,7 +35,6 @@ extern short top_room;
 
 bool mob_snipe( CHAR_DATA * ch, CHAR_DATA * victim );
 ch_ret one_hit args( ( CHAR_DATA * ch, CHAR_DATA * victim, int dt ) );
-ROOM_INDEX_DATA *generate_exit( ROOM_INDEX_DATA * in_room, EXIT_DATA ** pexit );
 
 /* You can define or not define TRACK_THOUGH_DOORS, above, depending on
    whether or not you want track to find paths which lead through closed
@@ -212,14 +211,14 @@ void do_track( CHAR_DATA * ch, char *argument )
 
    if( !IS_NPC( ch ) && !ch->pcdata->learned[gsn_track] )
    {
-      send_to_char( "You do not know of this skill yet.\n\r", ch );
+      send_to_char( "You do not know of this skill yet.\r\n", ch );
       return;
    }
 
    one_argument( argument, arg );
    if( arg[0] == '\0' )
    {
-      send_to_char( "Whom are you trying to track?\n\r", ch );
+      send_to_char( "Whom are you trying to track?\r\n", ch );
       return;
    }
 
@@ -227,7 +226,7 @@ void do_track( CHAR_DATA * ch, char *argument )
 
    if( !( vict = get_char_world( ch, arg ) ) )
    {
-      send_to_char( "You can't find a trail of anyone like that.\n\r", ch );
+      send_to_char( "You can't find a trail of anyone like that.\r\n", ch );
       return;
    }
 
@@ -240,18 +239,18 @@ void do_track( CHAR_DATA * ch, char *argument )
    switch ( dir )
    {
       case BFS_ERROR:
-         send_to_char( "Hmm... something seems to be wrong.\n\r", ch );
+         send_to_char( "Hmm... something seems to be wrong.\r\n", ch );
          break;
       case BFS_ALREADY_THERE:
-         send_to_char( "You're already in the same room!\n\r", ch );
+         send_to_char( "You're already in the same room!\r\n", ch );
          break;
       case BFS_NO_PATH:
-         sprintf( buf, "You can't sense a trail from here.\n\r" );
+         sprintf( buf, "You can't sense a trail from here.\r\n" );
          send_to_char( buf, ch );
          learn_from_failure( ch, gsn_track );
          break;
       default:
-         ch_printf( ch, "You sense a trail %s from here...\n\r", dir_name[dir] );
+         ch_printf( ch, "You sense a trail %s from here...\r\n", dir_name[dir] );
          learn_from_success( ch, gsn_track );
          break;
    }
