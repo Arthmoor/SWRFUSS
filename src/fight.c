@@ -2246,12 +2246,13 @@ void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
 
    lch = ch->leader ? ch->leader : ch;
 
-   for( gch = ch->in_room->first_person; gch; gch = gch->next_in_room )
+   for( gch = ch->in_room->first_person; gch; gch = gch_next )
    {
       OBJ_DATA *obj;
       OBJ_DATA *obj_next;
 
       gch_next = gch->next_in_room;
+
       if( !is_same_group( gch, ch ) )
          continue;
 
@@ -2284,7 +2285,6 @@ void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
          send_to_char( buf, gch );
          gain_exp( gch, xp, LEADERSHIP_ABILITY );
       }
-
 
       for( obj = ch->first_carrying; obj; obj = obj_next )
       {

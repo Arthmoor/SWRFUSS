@@ -1670,6 +1670,7 @@ int mprog_do_command( const char *cmnd, CHAR_DATA * mob, CHAR_DATA * actor,
     */
    if( char_died( mob ) )
    {
+      bug( "Mob died while executing program, vnum %d.", vnum );
       return BERR;
    }
 
@@ -1817,7 +1818,7 @@ void mprog_time_check( CHAR_DATA * mob, CHAR_DATA * actor, OBJ_DATA * obj, void 
          continue;
       }
 
-      if( ( mprg->type & type ) && ( ( !mprg->triggered ) || ( mprg->type && HOUR_PROG ) ) )
+      if( ( mprg->type & type ) && ( ( !mprg->triggered ) || ( mprg->type == HOUR_PROG ) ) )
       {
          mprg->triggered = TRUE;
          mprog_driver( mprg->comlist, mob, actor, obj, vo, FALSE );
@@ -2170,13 +2171,10 @@ void set_supermob( OBJ_DATA * obj )
 {
    ROOM_INDEX_DATA *room;
    OBJ_DATA *in_obj;
-   CHAR_DATA *mob;
    char buf[200];
 
    if( !supermob )
       supermob = create_mobile( get_mob_index( MOB_VNUM_SUPERMOB ) );
-
-   mob = supermob;   /* debugging */
 
    if( !obj )
       return;

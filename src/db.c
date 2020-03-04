@@ -5368,11 +5368,14 @@ EXTRA_DESCR_DATA *fread_fuss_exdesc( FILE * fp )
          word = "#ENDEXDESC";
       }
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case '#':
@@ -5397,6 +5400,12 @@ EXTRA_DESCR_DATA *fread_fuss_exdesc( FILE * fp )
             KEY( "ExDescKey", ed->keyword, fread_string( fp ) );
             KEY( "ExDesc", ed->description, fread_string( fp ) );
             break;
+      }
+
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 
@@ -5457,11 +5466,14 @@ void fread_fuss_exit( FILE * fp, ROOM_INDEX_DATA * pRoomIndex )
          word = "#ENDEXIT";
       }
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case '#':
@@ -5489,6 +5501,7 @@ void fread_fuss_exit( FILE * fp, ROOM_INDEX_DATA * pRoomIndex )
                   if( fBootDb )
                      return;
                }
+               fMatch = TRUE;
                pexit = make_exit( pRoomIndex, NULL, door );
             }
             break;
@@ -5511,6 +5524,7 @@ void fread_fuss_exit( FILE * fp, ROOM_INDEX_DATA * pRoomIndex )
                   else
                      SET_BIT( pexit->exit_info, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -5523,6 +5537,12 @@ void fread_fuss_exit( FILE * fp, ROOM_INDEX_DATA * pRoomIndex )
          case 'T':
             KEY( "ToRoom", pexit->vnum, fread_number( fp ) );
             break;
+      }
+
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 
@@ -5567,11 +5587,13 @@ void rprog_file_read( ROOM_INDEX_DATA * prog_target, const char *f )
          word = "ENDFILE";
       }
 
+      fMatch = FALSE;
       if( !str_cmp( word, "ENDFILE" ) )
          break;
 
       if( !str_cmp( word, "MUDPROG" ) )
       {
+         fMatch = TRUE;
          CREATE( mprg, MPROG_DATA, 1 );
 
          for( ;; )
@@ -5614,6 +5636,7 @@ void rprog_file_read( ROOM_INDEX_DATA * prog_target, const char *f )
                         default:
                            break;
                      }
+                     fMatch = TRUE;
                      break;
                   }
                   break;
@@ -5626,11 +5649,18 @@ void rprog_file_read( ROOM_INDEX_DATA * prog_target, const char *f )
                   if( !str_cmp( word, "Progtype" ) )
                   {
                      mprg->type = mprog_name_to_type( fread_flagstring( progfile ) );
+                     fMatch = TRUE;
                      break;
                   }
                   break;
             }
          }
+      }
+
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( progfile );
       }
    }
    fclose( progfile );
@@ -5655,11 +5685,14 @@ void fread_fuss_roomprog( FILE * fp, MPROG_DATA * mprg, ROOM_INDEX_DATA * prog_t
       if( !str_cmp( word, "#ENDPROG" ) )
          return;
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case 'A':
@@ -5676,6 +5709,7 @@ void fread_fuss_roomprog( FILE * fp, MPROG_DATA * mprg, ROOM_INDEX_DATA * prog_t
                   default:
                      break;
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -5689,9 +5723,15 @@ void fread_fuss_roomprog( FILE * fp, MPROG_DATA * mprg, ROOM_INDEX_DATA * prog_t
             {
                mprg->type = mprog_name_to_type( fread_flagstring( fp ) );
                SET_BIT( prog_target->progtypes, mprg->type );
+               fMatch = TRUE;
                break;
             }
             break;
+      }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }
@@ -5715,11 +5755,14 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
          word = "#ENDROOM";
       }
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             bug( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case '#':
@@ -5742,6 +5785,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
             if( !str_cmp( word, "#EXIT" ) )
             {
                fread_fuss_exit( fp, pRoomIndex );
+               fMatch = TRUE;
                break;
             }
 
@@ -5751,6 +5795,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
 
                if( ed )
                   LINK( ed, pRoomIndex->first_extradesc, pRoomIndex->last_extradesc, next, prev );
+               fMatch = TRUE;
                break;
             }
 
@@ -5762,6 +5807,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
                fread_fuss_roomprog( fp, mprg, pRoomIndex );
                mprg->next = pRoomIndex->mudprogs;
                pRoomIndex->mudprogs = mprg;
+               fMatch = TRUE;
                break;
             }
             break;
@@ -5773,6 +5819,8 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
 
                if( af )
                   LINK( af, pRoomIndex->first_permaffect, pRoomIndex->last_permaffect, next, prev );
+
+               fMatch = TRUE;
                break;
             }
             break; */
@@ -5795,6 +5843,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pRoomIndex->room_flags, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -5807,6 +5856,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
             if( !str_cmp( word, "Reset" ) )
             {
                load_room_reset( pRoomIndex, fp );
+               fMatch = TRUE;
                break;
             }
             break;
@@ -5823,6 +5873,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
                }
 
                pRoomIndex->sector_type = sector;
+               fMatch = TRUE;
                break;
             }
 
@@ -5838,6 +5889,7 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
                pRoomIndex->tele_vnum = x2;
                pRoomIndex->tunnel = x3;
 
+               fMatch = TRUE;
                break;
             }
             break;
@@ -5890,9 +5942,15 @@ void fread_fuss_room( FILE * fp, AREA_DATA * tarea )
                   if( vnum > tarea->hi_r_vnum )
                      tarea->hi_r_vnum = vnum;
                }
+               fMatch = TRUE;
                break;
             }
             break;
+      }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }
@@ -5936,6 +5994,7 @@ void oprog_file_read( OBJ_INDEX_DATA * prog_target, const char *f )
 
       if( !str_cmp( word, "MUDPROG" ) )
       {
+         fMatch = TRUE;
          CREATE( mprg, MPROG_DATA, 1 );
 
          for( ;; )
@@ -5996,6 +6055,11 @@ void oprog_file_read( OBJ_INDEX_DATA * prog_target, const char *f )
             }
          }
       }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( progfile );
+      }
    }
    fclose( progfile );
    progfile = NULL;
@@ -6019,11 +6083,14 @@ void fread_fuss_objprog( FILE * fp, MPROG_DATA * mprg, OBJ_INDEX_DATA * prog_tar
       if( !str_cmp( word, "#ENDPROG" ) )
          return;
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case 'A':
@@ -6040,6 +6107,7 @@ void fread_fuss_objprog( FILE * fp, MPROG_DATA * mprg, OBJ_INDEX_DATA * prog_tar
                   default:
                      break;
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6053,9 +6121,14 @@ void fread_fuss_objprog( FILE * fp, MPROG_DATA * mprg, OBJ_INDEX_DATA * prog_tar
             {
                mprg->type = mprog_name_to_type( fread_flagstring( fp ) );
                SET_BIT( prog_target->progtypes, mprg->type );
+               fMatch = TRUE;
                break;
             }
             break;
+      }      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }
@@ -6078,11 +6151,14 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
          word = "#ENDOBJECT";
       }
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             bug( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case '#':
@@ -6108,6 +6184,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                EXTRA_DESCR_DATA *ed = fread_fuss_exdesc( fp );
                if( ed )
                   LINK( ed, pObjIndex->first_extradesc, pObjIndex->last_extradesc, next, prev );
+               fMatch = TRUE;
                break;
             }
 
@@ -6119,6 +6196,8 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                fread_fuss_objprog( fp, mprg, pObjIndex );
                mprg->next = pObjIndex->mudprogs;
                pObjIndex->mudprogs = mprg;
+
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6132,6 +6211,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
 
                if( af )
                   LINK( af, pObjIndex->first_affect, pObjIndex->last_affect, next, prev );
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6150,6 +6230,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pObjIndex->extra_flags, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6189,6 +6270,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                      pObjIndex->value[5] = skill_lookup( fread_word( fp ) );
                      break;
                }
+               fMatch = TRUE;
                break;
             }
 
@@ -6206,6 +6288,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                pObjIndex->level = x4;
                pObjIndex->layers = x5;
 
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6221,6 +6304,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                   value = get_otype( "trash" );
                }
                pObjIndex->item_type = value;
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6241,6 +6325,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                pObjIndex->value[4] = x5;
                pObjIndex->value[5] = x6;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6290,6 +6375,7 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                   if( vnum > tarea->hi_o_vnum )
                      tarea->hi_o_vnum = vnum;
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6308,9 +6394,15 @@ void fread_fuss_object( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pObjIndex->wear_flags, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
+      }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }
@@ -6349,12 +6441,16 @@ void mprog_file_read( MOB_INDEX_DATA * prog_target, const char *f )
          word = "ENDFILE";
       }
 
+      fMatch = FALSE;
+
       if( !str_cmp( word, "ENDFILE" ) )
          break;
 
       if( !str_cmp( word, "MUDPROG" ) )
       {
          CREATE( mprg, MPROG_DATA, 1 );
+
+         fMatch = TRUE;
 
          for( ;; )
          {
@@ -6414,6 +6510,11 @@ void mprog_file_read( MOB_INDEX_DATA * prog_target, const char *f )
             }
          }
       }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( progfile );
+      }
    }
    fclose( progfile );
    progfile = NULL;
@@ -6437,11 +6538,14 @@ void fread_fuss_mobprog( FILE * fp, MPROG_DATA * mprg, MOB_INDEX_DATA * prog_tar
       if( !str_cmp( word, "#ENDPROG" ) )
          return;
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case 'A':
@@ -6458,6 +6562,7 @@ void fread_fuss_mobprog( FILE * fp, MPROG_DATA * mprg, MOB_INDEX_DATA * prog_tar
                   default:
                      break;
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6471,9 +6576,15 @@ void fread_fuss_mobprog( FILE * fp, MPROG_DATA * mprg, MOB_INDEX_DATA * prog_tar
             {
                mprg->type = mprog_name_to_type( fread_flagstring( fp ) );
                SET_BIT( prog_target->progtypes, mprg->type );
+               fMatch = TRUE;
                break;
             }
             break;
+      }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }
@@ -6496,11 +6607,14 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
          word = "#ENDMOBILE";
       }
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case '#':
@@ -6511,6 +6625,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                fread_fuss_mobprog( fp, mprg, pMobIndex );
                mprg->next = pMobIndex->mudprogs;
                pMobIndex->mudprogs = mprg;
+               fMatch = TRUE;
                break;
             }
 
@@ -6548,6 +6663,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->act, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
 
@@ -6566,6 +6682,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->affected_by, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
 
@@ -6582,6 +6699,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->attacks, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
 
@@ -6602,6 +6720,8 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                pMobIndex->perm_lck = x7;
                pMobIndex->perm_frc = x8;
 
+               fMatch = TRUE;
+
                break;
             }
             break;
@@ -6620,6 +6740,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->xflags, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6638,6 +6759,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->defenses, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
 
@@ -6652,6 +6774,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   position = POS_STANDING;
                }
                pMobIndex->defposition = position;
+               fMatch = TRUE;
                break;
             }
 
@@ -6669,6 +6792,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   sex = SEX_NEUTRAL;
                }
                pMobIndex->sex = sex;
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6687,6 +6811,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->immune, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6710,6 +6835,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   position = POS_STANDING;
                }
                pMobIndex->position = position;
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6726,6 +6852,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                }
 
                pMobIndex->race = race;
+               fMatch = TRUE;
                break;
             }
 
@@ -6747,6 +6874,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                LINK( rShop, first_repair, last_repair, next, prev );
                ++top_repair;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6763,6 +6891,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->resistant, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6782,6 +6911,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                pMobIndex->saving_breath = x4;
                pMobIndex->saving_spell_staff = x5;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6807,6 +6937,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                LINK( pShop, first_shop, last_shop, next, prev );
                ++top_shop;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6826,6 +6957,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
 
                if( !pMobIndex->speaks )
                   pMobIndex->speaks = LANG_COMMON;
+               fMatch = TRUE;
                break;
             }
 
@@ -6845,6 +6977,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
 
                if( !pMobIndex->speaking )
                   pMobIndex->speaking = LANG_COMMON;
+               fMatch = TRUE;
                break;
             }
 
@@ -6863,6 +6996,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                }
                else
                   pMobIndex->spec_funname = STRALLOC( temp );
+               fMatch = TRUE;
                break;
             }
 
@@ -6881,6 +7015,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                }
                else
                   pMobIndex->spec_funname2 = STRALLOC( temp );
+               fMatch = TRUE;
                break;
             }
             
@@ -6899,6 +7034,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                pMobIndex->gold = x5;
                pMobIndex->exp = x6;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6913,6 +7049,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                pMobIndex->hitsizedice = x2;
                pMobIndex->hitplus = x3;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6927,6 +7064,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                pMobIndex->damsizedice = x2;
                pMobIndex->damplus = x3;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6944,6 +7082,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                pMobIndex->hitroll = x4;
                pMobIndex->damroll = x5;
 
+               fMatch = TRUE;
                break;
             }
 
@@ -6960,6 +7099,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->susceptible, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -6978,6 +7118,7 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( pMobIndex->vip_flags, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
 
@@ -7027,9 +7168,15 @@ void fread_fuss_mobile( FILE * fp, AREA_DATA * tarea )
                   if( vnum > tarea->hi_m_vnum )
                      tarea->hi_m_vnum = vnum;
                }
+               fMatch = TRUE;
                break;
             }
             break;
+      }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }
@@ -7048,11 +7195,14 @@ void fread_fuss_areadata( FILE * fp, AREA_DATA * tarea )
          word = "#ENDAREADATA";
       }
 
+      fMatch = FALSE;
+
       switch ( word[0] )
       {
          default:
             log_printf( "%s: no match: %s", __FUNCTION__, word );
             fread_to_eol( fp );
+            fMatch = TRUE;
             break;
 
          case '#':
@@ -7072,6 +7222,7 @@ void fread_fuss_areadata( FILE * fp, AREA_DATA * tarea )
             {
                tarea->high_economy = fread_number( fp );
                tarea->low_economy = fread_number( fp );
+               fMatch = TRUE;
                break;
             }
             break;
@@ -7094,6 +7245,7 @@ void fread_fuss_areadata( FILE * fp, AREA_DATA * tarea )
                   else
                      SET_BIT( tarea->flags, 1 << value );
                }
+               fMatch = TRUE;
                break;
             }
             break;
@@ -7118,6 +7270,7 @@ void fread_fuss_areadata( FILE * fp, AREA_DATA * tarea )
                tarea->low_hard_range = x3;
                tarea->hi_hard_range = x4;
 
+               fMatch = TRUE;
                break;
             }
             KEY( "ResetMsg", tarea->resetmsg, fread_string_nohash( fp ) );
@@ -7127,6 +7280,11 @@ void fread_fuss_areadata( FILE * fp, AREA_DATA * tarea )
          case 'V':
             KEY( "Version", tarea->version, fread_number( fp ) );
             break;
+      }
+      if( !fMatch )
+      {
+         bug( "%s: unknown word: %s", __func__, word );
+         fread_to_eol( fp );
       }
    }
 }

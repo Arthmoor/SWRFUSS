@@ -1586,7 +1586,6 @@ void do_dig( CHAR_DATA * ch, const char *argument )
    return;
 }
 
-
 void do_search( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -1594,7 +1593,7 @@ void do_search( CHAR_DATA * ch, const char *argument )
    OBJ_DATA *container;
    OBJ_DATA *startobj;
    int percent, door;
-   bool found, room;
+   bool found;
 
    door = -1;
    switch ( ch->substate )
@@ -1654,7 +1653,6 @@ void do_search( CHAR_DATA * ch, const char *argument )
    ch->substate = SUB_NONE;
    if( arg[0] == '\0' )
    {
-      room = TRUE;
       startobj = ch->in_room->first_content;
    }
    else
@@ -1724,7 +1722,6 @@ void do_search( CHAR_DATA * ch, const char *argument )
    learn_from_success( ch, gsn_search );
    return;
 }
-
 
 void do_steal( CHAR_DATA * ch, const char *argument )
 {
@@ -1841,7 +1838,7 @@ void do_steal( CHAR_DATA * ch, const char *argument )
       victim->gold -= amount;
       ch_printf( ch, "Aha!  You got %d credits.\r\n", amount );
       learn_from_success( ch, gsn_steal );
-      if( IS_NPC( victim ) );
+      if( IS_NPC( victim ) )
       {
          xp =
             UMIN( amount * 10,
@@ -1900,7 +1897,7 @@ void do_steal( CHAR_DATA * ch, const char *argument )
 
    send_to_char( "Ok.\r\n", ch );
    learn_from_success( ch, gsn_steal );
-   if( IS_NPC( victim ) );
+   if( IS_NPC( victim ) )
    {
       xp =
          UMIN( obj->cost * 10,
@@ -1916,7 +1913,6 @@ void do_steal( CHAR_DATA * ch, const char *argument )
 
    return;
 }
-
 
 void do_backstab( CHAR_DATA * ch, const char *argument )
 {

@@ -2108,14 +2108,12 @@ void load_plr_home( CHAR_DATA * ch )
     if( ( fph = fopen( filename, "r" ) ) != NULL )
     {
         int iNest;
-        bool found;
         OBJ_DATA *tobj, *tobj_next;
 
         rset_supermob( storeroom );
         for( iNest = 0; iNest < MAX_NEST; iNest++ )
             rgObjNest[iNest] = NULL;
 
-        found = TRUE;
         for( ;; )
         {
             char letter;

@@ -3712,7 +3712,6 @@ void do_loadup( CHAR_DATA * ch, const char *argument )
    char fname[1024];
    char name[256];
    struct stat fst;
-   bool loaded;
    DESCRIPTOR_DATA *d;
    int old_room_vnum;
    char buf[MAX_STRING_LENGTH];
@@ -3736,7 +3735,7 @@ void do_loadup( CHAR_DATA * ch, const char *argument )
       d->outsize = 2000;
       CREATE( d->outbuf, char, d->outsize );
 
-      loaded = load_char_obj( d, name, FALSE, FALSE );
+      load_char_obj( d, name, FALSE, FALSE );
       add_char( d->character );
       old_room_vnum = d->character->in_room->vnum;
       char_to_room( d->character, ch->in_room );

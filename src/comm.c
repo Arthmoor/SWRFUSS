@@ -97,8 +97,8 @@ bool write_to_descriptor( DESCRIPTOR_DATA * d, const char *txt, int length );
  * Other local functions (OS-independent).
  */
 bool check_parse_name( const char *name );
-bool check_reconnect( DESCRIPTOR_DATA * d, const char *name, bool fConn );
-bool check_playing( DESCRIPTOR_DATA * d, const char *name, bool kick );
+short check_reconnect( DESCRIPTOR_DATA * d, const char *name, bool fConn );
+short check_playing( DESCRIPTOR_DATA * d, const char *name, bool kick );
 bool check_multi( DESCRIPTOR_DATA * d, const char *name );
 int main args( ( int argc, char **argv ) );
 void nanny( DESCRIPTOR_DATA * d, const char *argument );
@@ -280,8 +280,6 @@ int init_socket( int gport )
 {
    char hostname[64];
    struct sockaddr_in sa;
-   struct hostent *hp;
-   struct servent *sp;
    int x = 1;
    int fd;
 
@@ -317,8 +315,6 @@ int init_socket( int gport )
    }
 #endif
 
-   hp = gethostbyname( hostname );
-   sp = getservbyname( "service", "mud" );
    memset( &sa, '\0', sizeof( sa ) );
    sa.sin_family = AF_INET;   /* hp->h_addrtype; */
    sa.sin_port = htons( gport );
@@ -1538,7 +1534,8 @@ void nanny_get_name( DESCRIPTOR_DATA *d, const char *orig_argument )
   CHAR_DATA *ch;
   BAN_DATA *pban;
   char buf[MAX_STRING_LENGTH];
-  bool fOld, chk;
+  bool fOld;
+  short chk;
 
   if( orig_argument[0] == '\0' )
     {
@@ -1686,14 +1683,15 @@ void nanny_get_name( DESCRIPTOR_DATA *d, const char *orig_argument )
 
 void nanny_get_old_password( DESCRIPTOR_DATA *d, const char *argument )
 {
-  CHAR_DATA *ch = d->character;
-  char buf[MAX_STRING_LENGTH];
-  bool fOld, chk;
+   CHAR_DATA *ch = d->character;
+   char buf[MAX_STRING_LENGTH];
+   bool fOld;
+   short chk;
 
-  write_to_buffer( d, "\r\n", 2 );
+   write_to_buffer( d, "\r\n", 2 );
 
-  if( str_cmp( sha256_crypt( argument ), ch->pcdata->pwd ) )
-    {
+   if( str_cmp( sha256_crypt( argument ), ch->pcdata->pwd ) )
+   {
       write_to_buffer( d, "Wrong password, disconnecting.\r\n", 0 );
       /*
        * clear descriptor pointer to get rid of bug message in log
@@ -1701,51 +1699,65 @@ void nanny_get_old_password( DESCRIPTOR_DATA *d, const char *argument )
       d->character->desc = NULL;
       close_socket( d, FALSE );
       return;
-    }
+   }
 
-  write_to_buffer( d, (const char *)echo_on_str, 0 );
+   write_to_buffer( d, (const char *)echo_on_str, 0 );
 
-  if( check_playing( d, ch->name, TRUE ) )
-    return;
+   if( check_playing( d, ch->name, TRUE ) )
+      return;
 
-  chk = check_reconnect( d, ch->name, TRUE );
+   chk = check_reconnect( d, ch->name, TRUE );
 
-  if( chk == BERR )
-    {
+   if( chk == BERR )
+   {
       if( d->character && d->character->desc )
-	d->character->desc = NULL;
+         d->character->desc = NULL;
 
       close_socket( d, FALSE );
       return;
-    }
+   }
 
-  if( chk == TRUE )
-    return;
+   if( chk == TRUE )
+      return;
 
-  if( check_multi( d, ch->name ) )
-    {
+   if( check_multi( d, ch->name ) )
+   {
       close_socket( d, FALSE );
       return;
-    }
+   }
 
-  strcpy( buf, ch->name );
-  d->character->desc = NULL;
-  free_char( d->character );
-  fOld = load_char_obj( d, buf, FALSE, FALSE );
-  ch = d->character;
-  sprintf( log_buf, "%s (%s) has connected.", ch->name, d->host );
+   strcpy( buf, ch->name );
+   d->character->desc = NULL;
+   free_char( d->character );
+   fOld = load_char_obj( d, buf, FALSE, FALSE );
+   if( !fOld )
+      bug( "%s: failed to load_char_obj for %s.", __func__, buf );
 
-  if( ch->top_level < LEVEL_DEMI )
-    {
+   if( !d->character )
+   {
+      char cbuf[MAX_STRING_LENGTH];
+
+      log_printf( "Bad player file %s@%s.", argument, d->host );
+      // snprintf( cbuf, MAX_STRING_LENGTH, "Your playerfile is corrupt... Please notify %s\r\n", sysdata.admin_email );
+      write_to_buffer( d, cbuf, 0 );
+      close_socket( d, FALSE );
+      return;
+   }
+
+   ch = d->character;
+   sprintf( log_buf, "%s (%s) has connected.", ch->name, d->host );
+
+   if( ch->top_level < LEVEL_DEMI )
+   {
       log_string_plus( log_buf, LOG_COMM, sysdata.log_level );
-    }
-  else
-    log_string_plus( log_buf, LOG_COMM, ch->top_level );
+   }
+   else
+      log_string_plus( log_buf, LOG_COMM, ch->top_level );
 
-  show_title( d );
+   show_title( d );
 
-  if( ch->pcdata->area )
-    do_loadarea( ch, "" );
+   if( ch->pcdata->area )
+      do_loadarea( ch, "" );
 }
 
 void nanny_confirm_new_name( DESCRIPTOR_DATA *d, const char *argument )
@@ -2330,14 +2342,11 @@ void nanny_read_motd( DESCRIPTOR_DATA *d, const char *argument )
       if( ( fph = fopen( filename, "r" ) ) != NULL )
 	{
 	  int iNest;
-	  bool found;
 	  OBJ_DATA *tobj, *tobj_next;
 
 	  rset_supermob( storeroom );
 	  for( iNest = 0; iNest < MAX_NEST; iNest++ )
 	    rgObjNest[iNest] = NULL;
-
-	  found = TRUE;
 
 	  for( ;; )
 	    {
@@ -2446,7 +2455,7 @@ bool check_parse_name( const char *name )
 /*
  * Look for link-dead player to reconnect.
  */
-bool check_reconnect( DESCRIPTOR_DATA * d, const char *name, bool fConn )
+short check_reconnect( DESCRIPTOR_DATA * d, const char *name, bool fConn )
 {
    CHAR_DATA *ch;
 
@@ -2546,7 +2555,7 @@ bool check_multi( DESCRIPTOR_DATA * d, const char *name )
 
 }
 
-bool check_playing( DESCRIPTOR_DATA * d, const char *name, bool kick )
+short check_playing( DESCRIPTOR_DATA * d, const char *name, bool kick )
 {
    CHAR_DATA *ch;
 
@@ -2595,8 +2604,6 @@ bool check_playing( DESCRIPTOR_DATA * d, const char *name, bool kick )
 
    return FALSE;
 }
-
-
 
 void stop_idling( CHAR_DATA * ch )
 {

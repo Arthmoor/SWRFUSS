@@ -4316,7 +4316,6 @@ ch_ret spell_area_attack( int sn, int level, CHAR_DATA * ch, void *vo )
    bool saved;
    bool affects;
    int dam;
-   bool ch_died = FALSE;
    ch_ret retcode = rNONE;
 
    send_to_char( "You feel the hatred grow within you!\r\n", ch );
@@ -4363,7 +4362,6 @@ ch_ret spell_area_attack( int sn, int level, CHAR_DATA * ch, void *vo )
          retcode = spell_affectchar( sn, level, ch, vch );
       if( retcode == rCHAR_DIED || char_died( ch ) )
       {
-         ch_died = TRUE;
          break;
       }
    }

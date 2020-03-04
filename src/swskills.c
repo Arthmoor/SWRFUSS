@@ -2852,7 +2852,7 @@ void do_torture( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-   ch->alignment = ch->alignment -= 100;
+   ch->alignment = ch->alignment - 100;
    ch->alignment = URANGE( -1000, ch->alignment, 1000 );
 
    WAIT_STATE( ch, skill_table[gsn_torture]->beats );
