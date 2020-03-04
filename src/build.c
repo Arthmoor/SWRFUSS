@@ -2866,7 +2866,7 @@ void do_oset( CHAR_DATA * ch, const char *argument )
       case SUB_OBJ_LONG:
          if( !ch->dest_buf )
          {
-            send_to_char( "Fatal error: report to www.smaugmuds.org\r\n", ch );
+            send_to_char( "Fatal error: report to smaugmuds.afkmods.com\r\n", ch );
             bug( "do_oset: sub_obj_long: NULL ch->dest_buf", 0 );
             ch->substate = SUB_NONE;
             return;
