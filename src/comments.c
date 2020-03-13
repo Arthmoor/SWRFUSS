@@ -57,13 +57,13 @@ void comment_remove( CHAR_DATA * ch, CHAR_DATA * victim, NOTE_DATA * pnote )
 {
    if( !victim->comments )
    {
-      bug( "comment remove: null board", 0 );
+      bug( "%s: null board", __func__ );
       return;
    }
 
    if( !pnote )
    {
-      bug( "comment remove: null pnote", 0 );
+      bug( "%s: null pnote", __func__ );
       return;
    }
 
@@ -86,8 +86,6 @@ void comment_remove( CHAR_DATA * ch, CHAR_DATA * victim, NOTE_DATA * pnote )
     * Rewrite entire list.
     */
    save_char_obj( victim );
-
-   return;
 }
 
 void do_comment( CHAR_DATA * ch, const char *argument )
@@ -108,7 +106,7 @@ void do_comment( CHAR_DATA * ch, const char *argument )
 
    if( !ch->desc )
    {
-      bug( "do_comment: no descriptor", 0 );
+      bug( "%s: no descriptor", __func__ );
       return;
    }
 
@@ -129,13 +127,13 @@ void do_comment( CHAR_DATA * ch, const char *argument )
       case SUB_WRITING_NOTE:
          if( !ch->pnote )
          {
-            bug( "do_comment: note got lost?", 0 );
+            bug( "%s: note got lost?", __func__ );
             send_to_char( "Your note got lost!\r\n", ch );
             stop_editing( ch );
             return;
          }
          if( ch->dest_buf != ch->pnote )
-            bug( "do_comment: sub_writing_note: ch->dest_buf != ch->pnote", 0 );
+            bug( "%s: sub_writing_note: ch->dest_buf != ch->pnote", __func__ );
          STRFREE( ch->pnote->text );
          ch->pnote->text = copy_buffer( ch );
          stop_editing( ch );
@@ -148,7 +146,6 @@ void do_comment( CHAR_DATA * ch, const char *argument )
 
    if( !str_cmp( arg, "about" ) )
    {
-
       victim = get_char_world( ch, argument );
       if( !victim )
       {
@@ -161,10 +158,7 @@ void do_comment( CHAR_DATA * ch, const char *argument )
          send_to_char( "No comments about mobs\r\n", ch );
          return;
       }
-
-
    }
-
 
    if( !str_cmp( arg, "list" ) )
    {
@@ -197,7 +191,7 @@ void do_comment( CHAR_DATA * ch, const char *argument )
       for( pnote = victim->comments; pnote; pnote = pnote->next )
       {
          vnum++;
-         sprintf( buf, "%2d) %-10s [%s] %s\r\n", vnum, pnote->sender, pnote->date, pnote->subject );
+         snprintf( buf, MAX_STRING_LENGTH, "%2d) %-10s [%s] %s\r\n", vnum, pnote->sender, pnote->date, pnote->subject );
 /* Brittany added date to comment list and whois with above change */
          send_to_char( buf, ch );
       }
@@ -238,8 +232,6 @@ void do_comment( CHAR_DATA * ch, const char *argument )
          return;
       }
 
-
-
       if( !str_cmp( argument, "all" ) )
       {
          fAll = TRUE;
@@ -262,7 +254,7 @@ void do_comment( CHAR_DATA * ch, const char *argument )
          vnum++;
          if( vnum == anum || fAll )
          {
-            sprintf( buf, "[%3d] %s: %s\r\n%s\r\nTo: %s\r\n",
+            snprintf( buf, MAX_STRING_LENGTH, "[%3d] %s: %s\r\n%s\r\nTo: %s\r\n",
                      vnum, pnote->sender, pnote->subject, pnote->date, pnote->to_list );
             send_to_char( buf, ch );
             send_to_char( pnote->text, ch );
@@ -329,8 +321,7 @@ void do_comment( CHAR_DATA * ch, const char *argument )
          return;
       }
 
-      sprintf( buf, "%s: %s\r\nTo: %s\r\n", ch->pnote->sender, ch->pnote->subject, ch->pnote->to_list );
-      send_to_char( buf, ch );
+      ch_printf( ch, "%s: %s\r\nTo: %s\r\n", ch->pnote->sender, ch->pnote->subject, ch->pnote->to_list );
       send_to_char( ch->pnote->text, ch );
       return;
    }
@@ -368,14 +359,12 @@ void do_comment( CHAR_DATA * ch, const char *argument )
       /*
        * act( AT_ACTION, "$n posts a note.", ch, NULL, NULL, TO_ROOM ); 
        */
-
       strtime = ctime( &current_time );
       strtime[strlen( strtime ) - 1] = '\0';
       ch->pnote->date = STRALLOC( strtime );
 
       pnote = ch->pnote;
       ch->pnote = NULL;
-
 
       /*
        * LIFO to make life easier 
@@ -387,23 +376,6 @@ void do_comment( CHAR_DATA * ch, const char *argument )
       victim->comments = pnote;
 
       save_char_obj( victim );
-
-
-#ifdef NOTDEFD
-      fclose( fpReserve );
-      sprintf( notefile, "%s/%s", BOARD_DIR, board->note_file );
-      if( ( fp = fopen( notefile, "a" ) ) == NULL )
-      {
-         perror( notefile );
-      }
-      else
-      {
-         fprintf( fp, "Sender  %s~\nDate    %s~\nTo      %s~\nSubject %s~\nText\n%s~\n\n",
-                  pnote->sender, pnote->date, pnote->to_list, pnote->subject, pnote->text );
-         fclose( fp );
-      }
-      fpReserve = fopen( NULL_FILE, "r" );
-#endif
 
       send_to_char( "Ok.\r\n", ch );
       return;
@@ -462,9 +434,7 @@ void do_comment( CHAR_DATA * ch, const char *argument )
    }
 
    send_to_char( "Huh?  Type 'help comment' for usage (i hope!).\r\n", ch );
-   return;
 }
-
 
 void fwrite_comments( CHAR_DATA * ch, FILE * fp )
 {
@@ -482,7 +452,6 @@ void fwrite_comments( CHAR_DATA * ch, FILE * fp )
       fprintf( fp, "subject	%s~\n", pnote->subject );
       fprintf( fp, "text\n%s~\n", pnote->text );
    }
-   return;
 }
 
 void fread_comment( CHAR_DATA * ch, FILE * fp )
@@ -533,14 +502,8 @@ void fread_comment( CHAR_DATA * ch, FILE * fp )
       return;
    }
 
-   bug( "fread_comment: bad key word. strap in!", 0 );
-   /*
-    * exit( 1 ); 
-    */
+   bug( "%s: bad key word. strap in!", __func__ );
 }
-
-
-
 
 /*
 <758hp 100m 690mv> <#10316> loadup boo

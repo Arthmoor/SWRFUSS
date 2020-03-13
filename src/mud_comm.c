@@ -150,7 +150,6 @@ void do_mpstat( CHAR_DATA * ch, const char *argument )
    for( mprg = victim->pIndexData->mudprogs; mprg; mprg = mprg->next )
       ch_printf( ch, "%s>%s %s\r\n%s\r\n", ( mprg->fileprog ? "(FILEPROG) " : "" ),
          mprog_type_to_name( mprg->type ), mprg->arglist, mprg->comlist );
-   return;
 }
 
 /* Opstat - Scryn 8/12*/
@@ -186,9 +185,6 @@ void do_opstat( CHAR_DATA * ch, const char *argument )
 
    for( mprg = obj->pIndexData->mudprogs; mprg; mprg = mprg->next )
       ch_printf( ch, ">%s %s\r\n%s\r\n", mprog_type_to_name( mprg->type ), mprg->arglist, mprg->comlist );
-
-   return;
-
 }
 
 /* Rpstat - Scryn 8/12 */
@@ -206,7 +202,6 @@ void do_rpstat( CHAR_DATA * ch, const char *argument )
 
    for( mprg = ch->in_room->mudprogs; mprg; mprg = mprg->next )
       ch_printf( ch, ">%s %s\r\n%s\r\n", mprog_type_to_name( mprg->type ), mprg->arglist, mprg->comlist );
-   return;
 }
 
 /* Prints the argument to all the rooms around the mobile */
@@ -218,7 +213,7 @@ void do_mpasound( CHAR_DATA * ch, const char *argument )
 
    if( !ch )
    {
-      bug( "Nonexistent ch in do_mpasound!", 0 );
+      bug( "%s: Nonexistent ch in do_mpasound!", __func__ );
       return;
    }
 
@@ -251,11 +246,9 @@ void do_mpasound( CHAR_DATA * ch, const char *argument )
    }
    ch->act = actflags;
    ch->in_room = was_in_room;
-   return;
 }
 
 /* lets the mobile kill any player or mobile without murder*/
-
 void do_mpkill( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -263,7 +256,7 @@ void do_mpkill( CHAR_DATA * ch, const char *argument )
 
    if( !ch )
    {
-      bug( "Nonexistent ch in do_mpkill!", 0 );
+      bug( "%s: Nonexistent ch in do_mpkill!", __func__ );
       return;
    }
 
@@ -309,14 +302,11 @@ void do_mpkill( CHAR_DATA * ch, const char *argument )
    }
 
    multi_hit( ch, victim, TYPE_UNDEFINED );
-   return;
 }
-
 
 /* lets the mobile destroy an object in its inventory
    it can also destroy a worn object and it can destroy
    items using all.xxxxx or just plain all of them */
-
 void do_mpjunk( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -363,9 +353,6 @@ void do_mpjunk( CHAR_DATA * ch, const char *argument )
             extract_obj( obj );
          }
       }
-
-   return;
-
 }
 
 /*
@@ -389,9 +376,7 @@ int get_color( const char *argument )  /* get color code from command string */
    return 0;
 }
 
-
 /* prints the message to everyone in the room other than the mob and victim */
-
 void do_mpechoaround( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -442,7 +427,6 @@ void do_mpechoaround( CHAR_DATA * ch, const char *argument )
 
    ch->act = actflags;
 }
-
 
 /* prints message only to victim */
 
@@ -497,9 +481,7 @@ void do_mpechoat( CHAR_DATA * ch, const char *argument )
    ch->act = actflags;
 }
 
-
 /* prints message to room at large. */
-
 void do_mpecho( CHAR_DATA * ch, const char *argument )
 {
    char arg1[MAX_INPUT_LENGTH];
@@ -542,11 +524,9 @@ void do_mpecho( CHAR_DATA * ch, const char *argument )
    ch->act = actflags;
 }
 
-
 /* lets the mobile load an item or mobile.  All items
 are loaded into inventory.  you can specify a level with
 the load object portion as well. */
-
 void do_mpmload( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -652,15 +632,12 @@ void do_mpoload( CHAR_DATA * ch, const char *argument )
       obj_to_char( obj, ch );
    else
       obj_to_room( obj, ch->in_room );
-
-   return;
 }
 
 /* lets the mobile purge all objects and other npcs in the room,
    or purge a specified object or mob in the room.  It can purge
    itself, but this had best be the last command in the MUDprogram
    otherwise ugly stuff will happen */
-
 void do_mppurge( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -728,11 +705,9 @@ void do_mppurge( CHAR_DATA * ch, const char *argument )
    }
 
    extract_char( victim, TRUE );
-   return;
 }
 
 /* Allow mobiles to go wizinvis with programs -- SB */
-
 void do_mpinvis( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -779,11 +754,9 @@ void do_mpinvis( CHAR_DATA * ch, const char *argument )
       act( AT_IMMORT, "$n slowly fades into thin air.", ch, NULL, NULL, TO_ROOM );
       send_to_char( "You slowly vanish into thin air.\r\n", ch );
    }
-   return;
 }
 
 /* lets the mobile goto any location it wishes that is not private */
-
 void do_mpgoto( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -816,12 +789,9 @@ void do_mpgoto( CHAR_DATA * ch, const char *argument )
 
    char_from_room( ch );
    char_to_room( ch, location );
-
-   return;
 }
 
 /* lets the mobile do a command at another location. Very useful */
-
 void do_mpat( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -868,8 +838,6 @@ void do_mpat( CHAR_DATA * ch, const char *argument )
          char_to_room( ch, original );
          break;
       }
-
-   return;
 }
 
 /* allow a mobile to advance a player's level... very dangerous */
@@ -957,12 +925,10 @@ void do_mptransfer( CHAR_DATA * ch, const char *argument )
       return;
    }
    transfer_char( ch, victim, location );
-   return;
 }
 
 /* lets the mobile force someone to do something.  must be mortal level
    and the all argument only affects those in the room with the mobile */
-
 void do_mpforce( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
@@ -1017,16 +983,11 @@ void do_mpforce( CHAR_DATA * ch, const char *argument )
 
       interpret( victim, argument );
    }
-
-   return;
 }
-
-
 
 /*
  *  Haus' toys follow:
  */
-
 /*
  * syntax:  mppractice victim spell_name max%
  *
@@ -1116,10 +1077,7 @@ void do_mp_damage( CHAR_DATA * ch, const char *argument )
       stop_fearing( ch );
       stop_hunting( ch );
    }
-
-   return;
 }
-
 
 /*
  * syntax: mprestore (character) (#hps)                Gorog
@@ -1245,7 +1203,6 @@ void do_mpgain( CHAR_DATA * ch, const char *argument )
 
    ch_printf( victim, "You gain %ld %s experience.\r\n", gexp, ability_name[ability] );
    gain_exp( victim, gexp, ability );
-   return;
 }
 
 /*
@@ -1335,15 +1292,6 @@ void do_mp_open_passage( CHAR_DATA * ch, const char *argument )
    pexit->description = STRALLOC( "" );
    pexit->key = -1;
    pexit->exit_info = EX_PASSAGE;
-
-   /*
-    * act( AT_PLAIN, "A passage opens!", ch, NULL, NULL, TO_CHAR ); 
-    */
-   /*
-    * act( AT_PLAIN, "A passage opens!", ch, NULL, NULL, TO_ROOM ); 
-    */
-
-   return;
 }
 
 /*
@@ -1422,18 +1370,7 @@ void do_mp_close_passage( CHAR_DATA * ch, const char *argument )
    }
 
    extract_exit( fromRoom, pexit );
-
-   /*
-    * act( AT_PLAIN, "A passage closes!", ch, NULL, NULL, TO_CHAR ); 
-    */
-   /*
-    * act( AT_PLAIN, "A passage closes!", ch, NULL, NULL, TO_ROOM ); 
-    */
-
-   return;
 }
-
-
 
 /*
  * Does nothing.  Used for scripts.
@@ -1448,9 +1385,7 @@ void do_mpnothing( CHAR_DATA * ch, const char *argument )
       send_to_char( "Huh?\r\n", ch );
       return;
    }
-   return;
 }
-
 
 /*
  *   Sends a message to sleeping character.  Should be fun
@@ -1484,7 +1419,6 @@ void do_mpdream( CHAR_DATA * ch, const char *argument )
       send_to_char( argument, vict );
       send_to_char( "\r\n", vict );
    }
-   return;
 }
 
 void do_mpapply( CHAR_DATA * ch, const char *argument )
@@ -1521,12 +1455,11 @@ void do_mpapply( CHAR_DATA * ch, const char *argument )
    if( victim->pcdata->auth_state >= 1 )
       return;
 
-   sprintf( log_buf, "%s@%s new %s applying for authorization...",
+   snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s new %s applying for authorization...",
             victim->name, victim->desc->host, race_table[victim->race].race_name );
    log_string( log_buf );
    to_channel( log_buf, CHANNEL_MONITOR, "Monitor", LEVEL_IMMORTAL );
    victim->pcdata->auth_state = 1;
-   return;
 }
 
 void do_mpapplyb( CHAR_DATA * ch, const char *argument )
@@ -1569,7 +1502,7 @@ void do_mpapplyb( CHAR_DATA * ch, const char *argument )
       case 1:
       default:
          send_to_char( "You attempt to regain the gods' attention.\r\n", victim );
-         sprintf( log_buf, "%s@%s new %s applying for authorization...",
+         snprintf( log_buf, MAX_STRING_LENGTH, "%s@%s new %s applying for authorization...",
                   victim->name, victim->desc->host, race_table[victim->race].race_name );
          log_string( log_buf );
          to_channel( log_buf, CHANNEL_MONITOR, "Monitor", LEVEL_IMMORTAL );
@@ -1595,8 +1528,6 @@ void do_mpapplyb( CHAR_DATA * ch, const char *argument )
          do_look( victim, "auto" );
          break;
    }
-
-   return;
 }
 
 /*
@@ -1628,7 +1559,6 @@ void do_mp_deposit( CHAR_DATA * ch, const char *argument )
    }
 }
 
-
 /*
  * Withdraw some gold from the current area's economy		-Thoric
  */
@@ -1658,15 +1588,10 @@ void do_mp_withdraw( CHAR_DATA * ch, const char *argument )
    }
 }
 
-
 void do_mppkset( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "mppkset has been zapped into the realm of useless old code.\r\n", ch );
-   return;
-
 }
-
-
 
 /*
  * Inflict damage from a mudprogram
@@ -1681,7 +1606,7 @@ ch_ret simple_damage( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
 
    if( !ch )
    {
-      bug( "Damage: null ch!", 0 );
+      bug( "%s: null ch!", __func__ );
       return rERROR;
    }
    if( !victim )
@@ -1743,7 +1668,6 @@ ch_ret simple_damage( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
    /*
     * Check for EQ damage.... ;)
     */
-
    if( dam > 10 )
    {
       /*
@@ -1813,7 +1737,7 @@ ch_ret simple_damage( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
    {
       if( !npcvict )
       {
-         sprintf( log_buf, "%s killed by %s at %d",
+         snprintf( log_buf, MAX_STRING_LENGTH, "%s killed by %s at %d",
                   victim->name, ( IS_NPC( ch ) ? ch->short_descr : ch->name ), victim->in_room->vnum );
          log_string( log_buf );
          to_channel( log_buf, CHANNEL_MONITOR, "Monitor", LEVEL_IMMORTAL );

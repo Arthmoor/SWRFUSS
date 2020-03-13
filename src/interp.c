@@ -29,7 +29,6 @@
 /*
  * Externals
  */
-
 void subtract_times( struct timeval *etime, struct timeval *sttime );
 bool check_social( CHAR_DATA * ch, const char *command, const char *argument );
 
@@ -107,7 +106,7 @@ void interpret( CHAR_DATA * ch, const char *argument )
 
    if( !ch )
    {
-      bug( "interpret: null ch!", 0 );
+      bug( "%s: null ch!", __func__ );
       return;
    }
 
@@ -119,7 +118,7 @@ void interpret( CHAR_DATA * ch, const char *argument )
       if( ( fun = ch->last_cmd ) == NULL )
       {
          ch->substate = SUB_NONE;
-         bug( "interpret: SUB_REPEATCMD with NULL last_cmd", 0 );
+         bug( "%s: SUB_REPEATCMD with NULL last_cmd", __func__ );
          return;
       }
       else
@@ -144,10 +143,10 @@ void interpret( CHAR_DATA * ch, const char *argument )
          if( !found )
          {
             cmd = NULL;
-            bug( "interpret: SUB_REPEATCMD: last_cmd invalid", 0 );
+            bug( "%s: SUB_REPEATCMD: last_cmd invalid", __func__ );
             return;
          }
-         sprintf( logline, "(%s) %s", cmd->name, argument );
+         snprintf( logline, MAX_INPUT_LENGTH, "(%s) %s", cmd->name, argument );
       }
    }
 
@@ -158,7 +157,7 @@ void interpret( CHAR_DATA * ch, const char *argument )
        */
       if( !argument || !strcmp( argument, "" ) )
       {
-         bug( "interpret: null argument!", 0 );
+         bug( "%s: null argument!", __func__ );
          return;
       }
 
@@ -190,7 +189,7 @@ void interpret( CHAR_DATA * ch, const char *argument )
        * Special parsing so ' can be a command,
        *   also no spaces needed after punctuation.
        */
-      strcpy( logline, argument );
+      mudstrlcpy( logline, argument, MAX_INPUT_LENGTH );
       if( !isalpha( argument[0] ) && !isdigit( argument[0] ) )
       {
          command[0] = argument[0];
@@ -230,10 +229,10 @@ void interpret( CHAR_DATA * ch, const char *argument )
    /*
     * Log and snoop.
     */
-   sprintf( lastplayercmd, "** %s: %s", ch->name, logline );
+   snprintf( lastplayercmd, MAX_INPUT_LENGTH * 2, "** %s: %s", ch->name, logline );
 
    if( found && cmd->log == LOG_NEVER )
-      strcpy( logline, "XXXXXXXX XXXXXXXX XXXXXXXX" );
+      mudstrlcpy( logline, "XXXXXXXX XXXXXXXX XXXXXXXX", MAX_INPUT_LENGTH );
 
    loglvl = found ? cmd->log : LOG_NORMAL;
 
@@ -245,9 +244,9 @@ void interpret( CHAR_DATA * ch, const char *argument )
        * a logged command.  Check for descriptor in case force is used. 
        */
       if( ch->desc && ch->desc->original )
-         sprintf( log_buf, "Log %s (%s): %s", ch->name, ch->desc->original->name, logline );
+         snprintf( log_buf, MAX_STRING_LENGTH, "Log %s (%s): %s", ch->name, ch->desc->original->name, logline );
       else
-         sprintf( log_buf, "Log %s: %s", ch->name, logline );
+         snprintf( log_buf, MAX_STRING_LENGTH, "Log %s: %s", ch->name, logline );
 
       /*
        * Make it so a 'log all' will send most output to the log
@@ -268,14 +267,12 @@ void interpret( CHAR_DATA * ch, const char *argument )
 
    if( ch->desc && ch->desc->snoop_by )
    {
-      sprintf( logname, "%s", ch->name );
+      snprintf( logname, MAX_INPUT_LENGTH, "%s", ch->name );
       write_to_buffer( ch->desc->snoop_by, logname, 0 );
       write_to_buffer( ch->desc->snoop_by, "% ", 2 );
       write_to_buffer( ch->desc->snoop_by, logline, 0 );
       write_to_buffer( ch->desc->snoop_by, "\r\n", 2 );
    }
-
-
 
    if( timer )
    {
@@ -369,7 +366,7 @@ void interpret( CHAR_DATA * ch, const char *argument )
     */
    if( tmptime > 1500000 )
    {
-      sprintf( log_buf, "[*****] LAG: %s: %s %s (R:%d S:%d.%06d)", ch->name,
+      snprintf( log_buf, MAX_STRING_LENGTH, "[*****] LAG: %s: %s %s (R:%d S:%d.%06d)", ch->name,
                cmd->name, ( cmd->log == LOG_NEVER ? "XXX" : argument ),
                ch->in_room ? ch->in_room->vnum : 0, ( int )( time_used.tv_sec ), ( int )( time_used.tv_usec ) );
       log_string_plus( log_buf, LOG_NORMAL, get_trust( ch ) );
@@ -521,11 +518,8 @@ bool check_social( CHAR_DATA * ch, const char *command, const char *argument )
          }
       }
    }
-
    return TRUE;
 }
-
-
 
 /*
  * Return true if an argument is completely numeric.
@@ -543,8 +537,6 @@ bool is_number( const char *arg )
 
    return TRUE;
 }
-
-
 
 /*
  * Given a string like 14.foo, return 14 and 'foo'
@@ -566,12 +558,12 @@ int number_argument( const char *argument, char *arg )
 
 	  free(numPortion);
 
-	  strcpy( arg, pdot + 1 );
+	  mudstrlcpy( arg, pdot + 1, MAX_INPUT_LENGTH );
 	  return number;
 	}
     }
 
-  strcpy( arg, argument );
+  mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
   return 1;
 }
 
@@ -700,18 +692,16 @@ void do_timecmd( CHAR_DATA * ch, const char *argument )
    send_to_char( "Timing complete.\r\n", ch );
    subtract_times( &etime, &sttime );
    ch_printf( ch, "Timing took %d.%06d seconds.\r\n", etime.tv_sec, etime.tv_usec );
-   return;
 }
 
 void start_timer( struct timeval *sttime )
 {
    if( !sttime )
    {
-      bug( "Start_timer: NULL sttime.", 0 );
+      bug( "%s: NULL sttime.", __func__ );
       return;
    }
    gettimeofday( sttime, NULL );
-   return;
 }
 
 time_t end_timer( struct timeval * sttime )
@@ -724,7 +714,7 @@ time_t end_timer( struct timeval * sttime )
    gettimeofday( &etime, NULL );
    if( !sttime || ( !sttime->tv_sec && !sttime->tv_usec ) )
    {
-      bug( "End_timer: bad sttime.", 0 );
+      bug( "%s: bad sttime.", __func__ );
       return 0;
    }
    subtract_times( &etime, sttime );
@@ -749,7 +739,6 @@ void send_timer( struct timerset *vtime, CHAR_DATA * ch )
    ch_printf( ch, "Time (in secs): min %d.%0.6d; avg: %d.%0.6d; max %d.%0.6d"
               "\r\n", vtime->min_time.tv_sec, vtime->min_time.tv_usec, ntime.tv_sec,
               ntime.tv_usec, vtime->max_time.tv_sec, vtime->max_time.tv_usec );
-   return;
 }
 
 void update_userec( struct timeval *time_used, struct timerset *userec )
@@ -772,5 +761,4 @@ void update_userec( struct timeval *time_used, struct timerset *userec )
       userec->total_time.tv_sec++;
       userec->total_time.tv_usec -= 1000000;
    }
-   return;
 }

@@ -89,7 +89,6 @@ void do_buyhome( CHAR_DATA * ch, const char *argument )
 
    ch->plr_home = room;
    do_save( ch, "" );
-
 }
 
 void do_clone( CHAR_DATA * ch, const char *argument )
@@ -148,10 +147,10 @@ void do_clone( CHAR_DATA * ch, const char *argument )
    ch->plr_home = NULL;
    if( ch->pcdata->clan_name && ch->pcdata->clan_name[0] != '\0' )
    {
-      strcpy( clanname, ch->pcdata->clan_name );
+      mudstrlcpy( clanname, ch->pcdata->clan_name, MAX_STRING_LENGTH );
       STRFREE( ch->pcdata->clan_name );
       ch->pcdata->clan_name = STRALLOC( "" );
-      strcpy( bestowments, ch->pcdata->bestowments );
+      mudstrlcpy( bestowments, ch->pcdata->bestowments, MAX_STRING_LENGTH );
       DISPOSE( ch->pcdata->bestowments );
       ch->pcdata->bestowments = str_dup( "" );
       save_clone( ch );
@@ -343,7 +342,6 @@ void do_ammo( CHAR_DATA * ch, const char *argument )
 
       ch_printf( ch, "You replace your quarrel pack.\r\nYour bowcaster is charged with %d energy bolts.\r\n", charge );
       act( AT_PLAIN, "$n replaces the quarrels in $p.", ch, wield, NULL, TO_ROOM );
-
    }
    else
    {
@@ -405,9 +403,7 @@ void do_ammo( CHAR_DATA * ch, const char *argument )
          act( AT_PLAIN, "$n tries to jam a power cell into $p.", ch, wield, NULL, TO_ROOM );
       }
    }
-
    wield->value[4] = charge;
-
 }
 
 void do_setblaster( CHAR_DATA * ch, const char *argument )
@@ -526,7 +522,6 @@ void do_setblaster( CHAR_DATA * ch, const char *argument )
    }
    else
       do_setblaster( ch, "" );
-
 }
 
 void do_use( CHAR_DATA * ch, const char *argument )
@@ -621,13 +616,10 @@ void do_use( CHAR_DATA * ch, const char *argument )
       retcode = obj_cast_spell( device->value[3], device->value[0], ch, victim, obj );
       if( retcode == rCHAR_DIED || retcode == rBOTH_DIED )
       {
-         bug( "do_use: char died", 0 );
+         bug( "%s: char died", __func__ );
          return;
       }
    }
-
-
-   return;
 }
 
 void do_takedrug( CHAR_DATA * ch, const char *argument )
@@ -779,7 +771,6 @@ void do_takedrug( CHAR_DATA * ch, const char *argument )
    if( cur_obj == obj->serial )
       global_objcode = rOBJ_EATEN;
    extract_obj( obj );
-   return;
 }
 
 void jedi_bonus( CHAR_DATA * ch )
@@ -1136,7 +1127,7 @@ void do_fill( CHAR_DATA * ch, const char *argument )
    switch ( source->item_type )
    {
       default:
-         bug( "do_fill: got bad item type: %d", source->item_type );
+         bug( "%s: got bad item type: %d", __func__, source->item_type );
          send_to_char( "Something went wrong...\r\n", ch );
          return;
       case ITEM_FOUNTAIN:
@@ -1300,7 +1291,7 @@ void do_drink( CHAR_DATA * ch, const char *argument )
 
          if( ( liquid = obj->value[2] ) >= LIQ_MAX )
          {
-            bug( "Do_drink: bad liquid number %d.", liquid );
+            bug( "%s: bad liquid number %d.", __func__, liquid );
             liquid = obj->value[2] = 0;
          }
 
@@ -1366,7 +1357,6 @@ void do_drink( CHAR_DATA * ch, const char *argument )
          break;
    }
    WAIT_STATE( ch, PULSE_PER_SECOND );
-   return;
 }
 
 void do_eat( CHAR_DATA * ch, const char *argument )
@@ -1503,7 +1493,6 @@ void do_eat( CHAR_DATA * ch, const char *argument )
    if( obj->serial == cur_obj )
       global_objcode = rOBJ_EATEN;
    extract_obj( obj );
-   return;
 }
 
 void do_quaff( CHAR_DATA * ch, const char *argument )
@@ -1576,9 +1565,7 @@ void do_quaff( CHAR_DATA * ch, const char *argument )
    if( cur_obj == obj->serial )
       global_objcode = rOBJ_QUAFFED;
    extract_obj( obj );
-   return;
 }
-
 
 void do_recite( CHAR_DATA * ch, const char *argument )
 {
@@ -1654,9 +1641,7 @@ void do_recite( CHAR_DATA * ch, const char *argument )
    if( scroll->serial == cur_obj )
       global_objcode = rOBJ_USED;
    extract_obj( scroll );
-   return;
 }
-
 
 /*
  * Function to handle the state changing of a triggerobject (lever)  -Thoric
@@ -1678,8 +1663,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
    switch ( obj->item_type )
    {
       default:
-         sprintf( buf, "You can't %s that!\r\n", pull ? "pull" : "push" );
-         send_to_char( buf, ch );
+         ch_printf( ch, "You can't %s that!\r\n", pull ? "pull" : "push" );
          return;
          break;
       case ITEM_SWITCH:
@@ -1687,15 +1671,13 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       case ITEM_PULLCHAIN:
          if( ( !pull && isup ) || ( pull && !isup ) )
          {
-            sprintf( buf, "It is already %s.\r\n", isup ? "up" : "down" );
-            send_to_char( buf, ch );
+            ch_printf( ch, "It is already %s.\r\n", isup ? "up" : "down" );
             return;
          }
       case ITEM_BUTTON:
          if( ( !pull && isup ) || ( pull & !isup ) )
          {
-            sprintf( buf, "It is already %s.\r\n", isup ? "in" : "out" );
-            send_to_char( buf, ch );
+            ch_printf( ch, "It is already %s.\r\n", isup ? "in" : "out" );
             return;
          }
          break;
@@ -1719,9 +1701,9 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
 
    if( !oprog_use_trigger( ch, obj, NULL, NULL, NULL ) )
    {
-      sprintf( buf, "$n %s $p.", pull ? "pulls" : "pushes" );
+      snprintf( buf, MAX_STRING_LENGTH, "$n %s $p.", pull ? "pulls" : "pushes" );
       act( AT_ACTION, buf, ch, obj, NULL, TO_ROOM );
-      sprintf( buf, "You %s $p.", pull ? "pull" : "push" );
+      snprintf( buf, MAX_STRING_LENGTH, "You %s $p.", pull ? "pull" : "push" );
       act( AT_ACTION, buf, ch, obj, NULL, TO_CHAR );
    }
 
@@ -1740,7 +1722,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
 
       if( ( room = get_room_index( obj->value[1] ) ) == NULL )
       {
-         bug( "PullOrPush: obj points to invalid room %d", obj->value[1] );
+         bug( "%s: obj points to invalid room %d", __func__, obj->value[1] );
          return;
       }
       flags = 0;
@@ -1761,7 +1743,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
 
       if( ( room = get_room_index( obj->value[1] ) ) == NULL )
       {
-         bug( "PullOrPush: obj points to invalid room %d", obj->value[1] );
+         bug( "%s: obj points to invalid room %d", __func__, obj->value[1] );
          return;
       }
 
@@ -1811,7 +1793,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       /* value[1] for the obj vnum */
       if( !( pObjIndex = get_obj_index( obj->value[1] ) ) )
       {
-         bug( "%s: obj points to invalid object vnum %d", __FUNCTION__, obj->value[1] );
+         bug( "%s: obj points to invalid object vnum %d", __func__, obj->value[1] );
          return;
       }
       /* Set room to NULL before the check */
@@ -1819,13 +1801,13 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       /* value[2] for the room vnum to put the object in if there is one, 0 for giving it to char or current room */
       if( obj->value[2] > 0 && !( room = get_room_index( obj->value[2] ) ) )
       {
-         bug( "%s: obj points to invalid room vnum %d", __FUNCTION__, obj->value[2] );
+         bug( "%s: obj points to invalid room vnum %d", __func__, obj->value[2] );
          return;
       }
       /* Uses value[3] for level */
       if( !( tobj = create_object( pObjIndex, URANGE( 0, obj->value[3], MAX_LEVEL ) ) ) )
       {
-         bug( "%s: obj couldnt create_obj vnum %d at level %d", __FUNCTION__, obj->value[1], obj->value[3] );
+         bug( "%s: obj couldnt create_obj vnum %d at level %d", __func__, obj->value[1], obj->value[3] );
          return;
       }
       if( room )
@@ -1849,7 +1831,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       /* value[1] for the obj vnum */
       if( !( pMobIndex = get_mob_index( obj->value[1] ) ) )
       {
-         bug( "%s: obj points to invalid mob vnum %d", __FUNCTION__, obj->value[1] );
+         bug( "%s: obj points to invalid mob vnum %d", __func__, obj->value[1] );
          return;
       }
       /* Set room to current room before the check */
@@ -1857,12 +1839,12 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       /* value[2] for the room vnum to put the object in if there is one, 0 for giving it to char or current room */
       if( obj->value[2] > 0 && !( room = get_room_index( obj->value[2] ) ) )
       {
-         bug( "%s: obj points to invalid room vnum %d", __FUNCTION__, obj->value[2] );
+         bug( "%s: obj points to invalid room vnum %d", __func__, obj->value[2] );
          return;
       }
       if( !( mob = create_mobile( pMobIndex ) ) )
       {
-         bug( "%s: obj couldnt create_mobile vnum %d", __FUNCTION__, obj->value[1] );
+         bug( "%s: obj couldnt create_mobile vnum %d", __func__, obj->value[1] );
          return;
       }
       char_to_room( mob, room );
@@ -1874,7 +1856,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
    {
       if( obj->value[1] <= 0 || !IS_VALID_SN( obj->value[1] ) )
       {
-         bug( "%s: obj points to invalid sn [%d]", __FUNCTION__, obj->value[1] );
+         bug( "%s: obj points to invalid sn [%d]", __func__, obj->value[1] );
          return;
       }
       obj_cast_spell( obj->value[1], URANGE( 1, ( obj->value[2] > 0 ) ? obj->value[2] : ch->top_level, MAX_LEVEL ), ch, ch, NULL );
@@ -1891,7 +1873,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
          room = obj->in_room;
       if( !room )
       {
-         bug( "%s: obj points to invalid room %d", __FUNCTION__, obj->value[1] );
+         bug( "%s: obj points to invalid room %d", __func__, obj->value[1] );
          return;
       }
 
@@ -1902,12 +1884,12 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       }
       if( !container )
       {
-         bug( "%s: obj points to a container [%d] thats not where it should be?", __FUNCTION__, obj->value[2] );
+         bug( "%s: obj points to a container [%d] thats not where it should be?", __func__, obj->value[2] );
          return;
       }
       if( container->item_type != ITEM_CONTAINER )
       {
-         bug( "%s: obj points to object [%d], but it isn't a container.", __FUNCTION__, obj->value[2] );
+         bug( "%s: obj points to object [%d], but it isn't a container.", __func__, obj->value[2] );
          return;
       }
       /* Could toss in some messages. Limit how it is handled etc... I'll leave that to each one to do */
@@ -1931,7 +1913,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
          room = obj->in_room;
       if( !room )
       {
-         bug( "PullOrPush: obj points to invalid room %d", obj->value[1] );
+         bug( "%s: obj points to invalid room %d", __func__, obj->value[1] );
          return;
       }
       if( IS_SET( obj->value[0], TRIG_D_NORTH ) )
@@ -1966,7 +1948,7 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       }
       else
       {
-         bug( "PullOrPush: door: no direction flag set.", 0 );
+         bug( "%s: door: no direction flag set.", __func__ );
          return;
       }
       pexit = get_exit( room, edir );
@@ -1974,13 +1956,13 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       {
          if( !IS_SET( obj->value[0], TRIG_PASSAGE ) )
          {
-            bug( "PullOrPush: obj points to non-exit %d", obj->value[1] );
+            bug( "%s: obj points to non-exit %d", __func__, obj->value[1] );
             return;
          }
          to_room = get_room_index( obj->value[2] );
          if( !to_room )
          {
-            bug( "PullOrPush: dest points to invalid room %d", obj->value[2] );
+            bug( "%s: dest points to invalid room %d", __func__, obj->value[2] );
             return;
          }
          pexit = make_exit( room, to_room, edir );
@@ -2041,7 +2023,6 @@ void pullorpush( CHAR_DATA * ch, OBJ_DATA * obj, bool pull )
       }
    }
 }
-
 
 void do_pull( CHAR_DATA * ch, const char *argument )
 {
@@ -2179,7 +2160,7 @@ void do_smoke( CHAR_DATA * ch, const char *argument )
             return;
       }
       else
-         bug( "do_smoke: bad herb type %d", pipe->value[2] );
+         bug( "%s: bad herb type %d", __func__, pipe->value[2] );
 
       SET_BIT( pipe->value[3], PIPE_HOT );
       if( --pipe->value[1] < 1 )
@@ -2411,8 +2392,6 @@ void do_apply( CHAR_DATA * ch, const char *argument )
 
    if( !obj_extracted( obj ) && obj->value[1] <= 0 )
       extract_obj( obj );
-
-   return;
 }
 
 void actiondesc( CHAR_DATA * ch, OBJ_DATA * obj, void *vo )
@@ -2495,13 +2474,6 @@ void actiondesc( CHAR_DATA * ch, OBJ_DATA * obj, void *vo )
    *charptr = '\0';
    *roomptr = '\0';
 
-/*
-sprintf( buf, "Charbuf: %s", charbuf );
-log_string_plus( buf, LOG_HIGH, LEVEL_LESSER ); 
-sprintf( buf, "Roombuf: %s", roombuf );
-log_string_plus( buf, LOG_HIGH, LEVEL_LESSER ); 
-*/
-
    switch ( obj->item_type )
    {
       case ITEM_BLOOD:
@@ -2534,7 +2506,6 @@ log_string_plus( buf, LOG_HIGH, LEVEL_LESSER );
       default:
          return;
    }
-   return;
 }
 
 void do_hail( CHAR_DATA * ch, const char *argument )
@@ -2608,7 +2579,6 @@ void do_hail( CHAR_DATA * ch, const char *argument )
    act( AT_ACTION, "$n $T", ch, NULL, "arrives on a speederbike, gets off and pays the driver before it leaves.", TO_ROOM );
 
    do_look( ch, "auto" );
-
 }
 
 void do_train( CHAR_DATA * ch, const char *argument )
@@ -2621,7 +2591,7 @@ void do_train( CHAR_DATA * ch, const char *argument )
    if( IS_NPC( ch ) )
       return;
 
-   strcpy( arg, argument );
+   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    switch ( ch->substate )
    {
@@ -2731,7 +2701,7 @@ void do_train( CHAR_DATA * ch, const char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         strcpy( arg, ( const char* ) ch->dest_buf );
+         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -2827,7 +2797,6 @@ void do_train( CHAR_DATA * ch, const char *argument )
       ch->perm_cha++;
       return;
    }
-
 }
 
 void do_suicide( CHAR_DATA * ch, const char *argument )
@@ -2849,7 +2818,7 @@ void do_suicide( CHAR_DATA * ch, const char *argument )
    if( strcmp( sha256_crypt( argument ), ch->pcdata->pwd ) )
    {
       send_to_char( "Sorry wrong password.\r\n", ch );
-      sprintf( logbuf, "%s attempting to commit suicide... WRONG PASSWORD!", ch->name );
+      snprintf( logbuf, MAX_STRING_LENGTH, "%s attempting to commit suicide... WRONG PASSWORD!", ch->name );
       log_string( logbuf );
       return;
    }
@@ -2859,7 +2828,6 @@ void do_suicide( CHAR_DATA * ch, const char *argument )
 
    set_cur_char( ch );
    raw_kill( ch, ch );
-
 }
 
 void do_bank( CHAR_DATA * ch, const char *argument )

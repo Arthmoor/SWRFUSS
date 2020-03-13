@@ -63,7 +63,6 @@ const char *const crystal_table[8] = {
    "non-adegan", "kathracite", "relacite", "danite", "mephite", "ponite", "illum", "corusca"
 };
 
-
 const char *const ex_flags[] = {
    "isdoor", "closed", "locked", "secret", "swim", "pickproof", "fly", "climb",
    "dig", "r1", "nopassdoor", "hidden", "passage", "portal", "r2", "r3",
@@ -250,7 +249,6 @@ const char *const mprog_flags[] = {
    "speechiw", "pull", "push", "sleep", "rest", "leave", "script", "use"
 };
 
-
 const char *flag_string( int bitvector, const char *const flagarray[] )
 {
    static char buf[MAX_STRING_LENGTH];
@@ -260,15 +258,14 @@ const char *flag_string( int bitvector, const char *const flagarray[] )
    for( x = 0; x < 32; x++ )
       if( IS_SET( bitvector, 1 << x ) )
       {
-         strcat( buf, flagarray[x] );
-         strcat( buf, " " );
+         mudstrlcat( buf, flagarray[x], MAX_STRING_LENGTH );
+         mudstrlcat( buf, " ", MAX_STRING_LENGTH );
       }
    if( ( x = strlen( buf ) ) > 0 )
       buf[--x] = '\0';
 
    return buf;
 }
-
 
 bool can_rmodify( CHAR_DATA * ch, ROOM_INDEX_DATA * room )
 {
@@ -332,7 +329,6 @@ bool can_oedit( CHAR_DATA * ch, OBJ_INDEX_DATA * obj )
    send_to_char( "That object is not in your allocated range.\r\n", ch );
    return FALSE;
 }
-
 
 bool can_mmodify( CHAR_DATA * ch, CHAR_DATA * mob )
 {
@@ -669,30 +665,29 @@ int get_npc_sex( const char *sex )
    return -1;
 }
 
-
-
 /*
  * Remove carriage returns from a line
  */
 char *strip_cr( const char *str )
 {
-  static char newstr[MAX_STRING_LENGTH];
-  int i, j;
+   static char newstr[MAX_STRING_LENGTH];
+   int i, j;
 
-  if( !str || str[0] == '\0' )
-    {
+   if( !str || str[0] == '\0' )
+   {
       newstr[0] = '\0';
       return newstr;
-    }
+   }
 
-  for( i = j = 0; str[i] != '\0'; i++ )
-    if( str[i] != '\r' )
+   for( i = j = 0; str[i] != '\0'; i++ )
+   {
+      if( str[i] != '\r' )
       {
 	newstr[j++] = str[i];
       }
-
-  newstr[j] = '\0';
-  return newstr;
+   }
+   newstr[j] = '\0';
+   return newstr;
 }
 
 /*
@@ -719,10 +714,7 @@ void smush_tilde( char *str )
    }
    if( len )
       strptr[len - 1] = last;
-
-   return;
 }
-
 
 void start_editing( CHAR_DATA * ch, const char *data )
 {
@@ -732,11 +724,11 @@ void start_editing( CHAR_DATA * ch, const char *data )
 
    if( !ch->desc )
    {
-      bug( "Fatal: start_editing: no desc", 0 );
+      bug( "%s: Fatal: start_editing: no desc", __func__ );
       return;
    }
    if( ch->substate == SUB_RESTRICTED )
-      bug( "NOT GOOD: start_editing: ch->substate == SUB_RESTRICTED", 0 );
+      bug( "%s: NOT GOOD: start_editing: ch->substate == SUB_RESTRICTED", __func__ );
 
    set_char_color( AT_GREEN, ch );
    send_to_char( "Begin entering your text (/? =help /s =save /c =clear /l =list /f =format)\r\n", ch );
@@ -752,7 +744,7 @@ void start_editing( CHAR_DATA * ch, const char *data )
    lpos = 0;
    lines = 0;
    if( !data )
-      bug( "editor: data is NULL!\r\n", 0 );
+      bug( "%s: data is NULL!", __func__ );
    else
       for( ;; )
       {
@@ -792,27 +784,27 @@ const char *copy_buffer( CHAR_DATA * ch )
 
    if( !ch )
    {
-      bug( "%s: null ch", __FUNCTION__ );
+      bug( "%s: null ch", __func__ );
       return STRALLOC( "" );
    }
 
    if( !ch->editor )
    {
-      bug( "%s: null editor", __FUNCTION__ );
+      bug( "%s: null editor", __func__ );
       return STRALLOC( "" );
    }
 
    buf[0] = '\0';
    for( x = 0; x < ch->editor->numlines; x++ )
    {
-      strcpy( tmp, ch->editor->line[x] );
+      mudstrlcpy( tmp, ch->editor->line[x], 100 );
       smush_tilde( tmp );
       len = strlen( tmp );
       if( tmp[len - 1] == '~' )
          tmp[len - 1] = '\0';
       else
-         strcat( tmp, "\n" );
-      strcat( buf, tmp );
+         mudstrlcat( tmp, "\n", 100 );
+      mudstrlcat( buf, tmp, MAX_STRING_LENGTH );
    }
    return STRALLOC( buf );
 }
@@ -828,7 +820,7 @@ void stop_editing( CHAR_DATA * ch )
    ch->substate = SUB_NONE;
    if( !ch->desc )
    {
-      bug( "Fatal: stop_editing: no desc", 0 );
+      bug( "Fatal: %s: no desc", __func__ );
       return;
    }
    ch->desc->connected = CON_PLAYING;
@@ -887,7 +879,7 @@ void do_goto( CHAR_DATA * ch, const char *argument )
       location = make_room( vnum, ch->pcdata->area );
       if( !location )
       {
-         bug( "Goto: make_room failed", 0 );
+         bug( "%s: make_room failed", __func__ );
          return;
       }
       location->area = ch->pcdata->area;
@@ -974,7 +966,6 @@ void do_goto( CHAR_DATA * ch, const char *argument )
          do_goto( fch, argument );
       }
    }
-   return;
 }
 
 void do_mset( CHAR_DATA * ch, const char *argument )
@@ -1012,7 +1003,7 @@ void do_mset( CHAR_DATA * ch, const char *argument )
          if( !ch->dest_buf )
          {
             send_to_char( "Fatal error: report to Thoric.\r\n", ch );
-            bug( "do_mset: sub_mob_desc: NULL ch->dest_buf", 0 );
+            bug( "%s: sub_mob_desc: NULL ch->dest_buf", __func__ );
             ch->substate = SUB_NONE;
             return;
          }
@@ -1070,16 +1061,16 @@ void do_mset( CHAR_DATA * ch, const char *argument )
    if( victim )
    {
       lockvictim = TRUE;
-      strcpy( arg1, victim->name );
+      mudstrlcpy( arg1, victim->name, MAX_INPUT_LENGTH );
       argument = one_argument( argument, arg2 );
-      strcpy( arg3, argument );
+      mudstrlcpy( arg3, argument, MAX_INPUT_LENGTH );
    }
    else
    {
       lockvictim = FALSE;
       argument = one_argument( argument, arg1 );
       argument = one_argument( argument, arg2 );
-      strcpy( arg3, argument );
+      mudstrlcpy( arg3, argument, MAX_INPUT_LENGTH );
    }
 
    if( !str_cmp( arg1, "on" ) )
@@ -1174,9 +1165,9 @@ void do_mset( CHAR_DATA * ch, const char *argument )
          if( ch->pcdata->subprompt )
             STRFREE( ch->pcdata->subprompt );
          if( IS_NPC( victim ) )
-            sprintf( buf, "<&CMset &W#%d&w> %%i", victim->pIndexData->vnum );
+            snprintf( buf, MAX_STRING_LENGTH, "<&CMset &W#%d&w> %%i", victim->pIndexData->vnum );
          else
-            sprintf( buf, "<&CMset &W%s&w> %%i", victim->name );
+            snprintf( buf, MAX_STRING_LENGTH, "<&CMset &W%s&w> %%i", victim->name );
          ch->pcdata->subprompt = STRALLOC( buf );
       }
       RelCreate( relMSET_ON, ch, victim );
@@ -1467,17 +1458,17 @@ void do_mset( CHAR_DATA * ch, const char *argument )
          victim->pIndexData->hitroll = victim->hitroll;
          victim->pIndexData->damroll = victim->damroll;
       }
-      sprintf( outbuf, "%s damnumdie %d", arg1, value / 10 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s damnumdie %d", arg1, value / 10 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s damsizedie %d", arg1, 4 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s damsizedie %d", arg1, 4 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s damplus %d", arg1, 2 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s damplus %d", arg1, 2 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s hitnumdie %d", arg1, value / 5 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s hitnumdie %d", arg1, value / 5 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s hitsizedie %d", arg1, 10 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s hitsizedie %d", arg1, 10 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s hitplus %d", arg1, value * 10 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s hitplus %d", arg1, value * 10 );
       do_mset( ch, outbuf );
 
       return;
@@ -1892,8 +1883,8 @@ void do_mset( CHAR_DATA * ch, const char *argument )
    if( !str_cmp( arg2, "long" ) )
    {
       STRFREE( victim->long_descr );
-      strcpy( buf, arg3 );
-      strcat( buf, "\r\n" );
+      mudstrlcpy( buf, arg3, MAX_STRING_LENGTH );
+      mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
       victim->long_descr = STRALLOC( buf );
       if( IS_NPC( victim ) && IS_SET( victim->act, ACT_PROTOTYPE ) )
       {
@@ -2167,7 +2158,6 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-
    if( !str_cmp( arg2, "affected" ) )
    {
       if( !IS_NPC( victim ) && get_trust( ch ) < LEVEL_LESSER )
@@ -2210,7 +2200,7 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       if( !can_mmodify( ch, victim ) )
          return;
 
-      sprintf( outbuf, "%s resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s resistant %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2225,7 +2215,7 @@ void do_mset( CHAR_DATA * ch, const char *argument )
          return;
 
 
-      sprintf( outbuf, "%s immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s immune %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2239,7 +2229,7 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       if( !can_mmodify( ch, victim ) )
          return;
 
-      sprintf( outbuf, "%s susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s susceptible %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2253,9 +2243,9 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       if( !can_mmodify( ch, victim ) )
          return;
 
-      sprintf( outbuf, "%s resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s resistant %s", arg1, arg3 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s immune %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2270,9 +2260,9 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       if( !can_mmodify( ch, victim ) )
          return;
 
-      sprintf( outbuf, "%s resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s resistant %s", arg1, arg3 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s susceptible %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2286,9 +2276,9 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       if( !can_mmodify( ch, victim ) )
          return;
 
-      sprintf( outbuf, "%s immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s immune %s", arg1, arg3 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s susceptible %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2302,11 +2292,11 @@ void do_mset( CHAR_DATA * ch, const char *argument )
       if( !can_mmodify( ch, victim ) )
          return;
 
-      sprintf( outbuf, "%s resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s resistant %s", arg1, arg3 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s immune %s", arg1, arg3 );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s susceptible %s", arg1, arg3 );
       do_mset( ch, outbuf );
       return;
    }
@@ -2538,16 +2528,17 @@ void do_mset( CHAR_DATA * ch, const char *argument )
          return;
 
       sscanf( arg3, "%d %c %d %c %d", &num, &char1, &size, &char2, &plus );
-      sprintf( outbuf, "%s hitnumdie %d", arg1, num );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s hitnumdie %d", arg1, num );
       do_mset( ch, outbuf );
 
-      sprintf( outbuf, "%s hitsizedie %d", arg1, size );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s hitsizedie %d", arg1, size );
       do_mset( ch, outbuf );
 
-      sprintf( outbuf, "%s hitplus %d", arg1, plus );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s hitplus %d", arg1, plus );
       do_mset( ch, outbuf );
       return;
    }
+
    /*
     * save some more finger-leather
     */
@@ -2562,11 +2553,11 @@ void do_mset( CHAR_DATA * ch, const char *argument )
          return;
 
       sscanf( arg3, "%d %c %d %c %d", &num, &char1, &size, &char2, &plus );
-      sprintf( outbuf, "%s damnumdie %d", arg1, num );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s damnumdie %d", arg1, num );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s damsizedie %d", arg1, size );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s damsizedie %d", arg1, size );
       do_mset( ch, outbuf );
-      sprintf( outbuf, "%s damplus %d", arg1, plus );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s damplus %d", arg1, plus );
       do_mset( ch, outbuf );
       return;
    }
@@ -2810,7 +2801,6 @@ void do_mset( CHAR_DATA * ch, const char *argument )
    }
    else
       do_mset( ch, "" );
-   return;
 }
 
 void do_oset( CHAR_DATA * ch, const char *argument )
@@ -2844,7 +2834,7 @@ void do_oset( CHAR_DATA * ch, const char *argument )
          if( !ch->dest_buf )
          {
             send_to_char( "Fatal error: report to www.fusproject.org\r\n", ch );
-            bug( "do_oset: sub_obj_extra: NULL ch->dest_buf", 0 );
+            bug( "%s: sub_obj_extra: NULL ch->dest_buf", __func__ );
             ch->substate = SUB_NONE;
             return;
          }
@@ -2867,7 +2857,7 @@ void do_oset( CHAR_DATA * ch, const char *argument )
          if( !ch->dest_buf )
          {
             send_to_char( "Fatal error: report to smaugmuds.afkmods.com\r\n", ch );
-            bug( "do_oset: sub_obj_long: NULL ch->dest_buf", 0 );
+            bug( "%s: sub_obj_long: NULL ch->dest_buf", __func__ );
             ch->substate = SUB_NONE;
             return;
          }
@@ -2927,16 +2917,16 @@ void do_oset( CHAR_DATA * ch, const char *argument )
    if( obj )
    {
       lockobj = TRUE;
-      strcpy( arg1, obj->name );
+      mudstrlcpy( arg1, obj->name, MAX_INPUT_LENGTH );
       argument = one_argument( argument, arg2 );
-      strcpy( arg3, argument );
+      mudstrlcpy( arg3, argument, MAX_INPUT_LENGTH );
    }
    else
    {
       lockobj = FALSE;
       argument = one_argument( argument, arg1 );
       argument = one_argument( argument, arg2 );
-      strcpy( arg3, argument );
+      mudstrlcpy( arg3, argument, MAX_INPUT_LENGTH );
    }
 
    if( !str_cmp( arg1, "on" ) )
@@ -3013,7 +3003,7 @@ void do_oset( CHAR_DATA * ch, const char *argument )
       {
          if( ch->pcdata->subprompt )
             STRFREE( ch->pcdata->subprompt );
-         sprintf( buf, "<&COset &W#%d&w> %%i", obj->pIndexData->vnum );
+         snprintf( buf, MAX_STRING_LENGTH, "<&COset &W#%d&w> %%i", obj->pIndexData->vnum );
          ch->pcdata->subprompt = STRALLOC( buf );
       }
       RelCreate( relOSET_ON, ch, obj );
@@ -3256,7 +3246,6 @@ void do_oset( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-
    if( !str_cmp( arg2, "short" ) )
    {
       STRFREE( obj->short_descr );
@@ -3275,7 +3264,7 @@ void do_oset( CHAR_DATA * ch, const char *argument )
       {
          if( str_infix( "rename", obj->name ) )
          {
-            sprintf( buf, "%s %s", obj->name, "rename" );
+            snprintf( buf, MAX_STRING_LENGTH, "%s %s", obj->name, "rename" );
             STRFREE( obj->name );
             obj->name = STRALLOC( buf );
          }
@@ -3575,58 +3564,58 @@ void do_oset( CHAR_DATA * ch, const char *argument )
     */
    if( !str_cmp( arg2, "ris" ) )
    {
-      sprintf( outbuf, "%s affect resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect resistant %s", arg1, arg3 );
       do_oset( ch, outbuf );
-      sprintf( outbuf, "%s affect immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect immune %s", arg1, arg3 );
       do_oset( ch, outbuf );
-      sprintf( outbuf, "%s affect susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect susceptible %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
 
    if( !str_cmp( arg2, "r" ) )
    {
-      sprintf( outbuf, "%s affect resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect resistant %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
 
    if( !str_cmp( arg2, "i" ) )
    {
-      sprintf( outbuf, "%s affect immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect immune %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
    if( !str_cmp( arg2, "s" ) )
    {
-      sprintf( outbuf, "%s affect susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect susceptible %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
 
    if( !str_cmp( arg2, "ri" ) )
    {
-      sprintf( outbuf, "%s affect resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect resistant %s", arg1, arg3 );
       do_oset( ch, outbuf );
-      sprintf( outbuf, "%s affect immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect immune %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
 
    if( !str_cmp( arg2, "rs" ) )
    {
-      sprintf( outbuf, "%s affect resistant %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect resistant %s", arg1, arg3 );
       do_oset( ch, outbuf );
-      sprintf( outbuf, "%s affect susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect susceptible %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
 
    if( !str_cmp( arg2, "is" ) )
    {
-      sprintf( outbuf, "%s affect immune %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect immune %s", arg1, arg3 );
       do_oset( ch, outbuf );
-      sprintf( outbuf, "%s affect susceptible %s", arg1, arg3 );
+      snprintf( outbuf, MAX_STRING_LENGTH, "%s affect susceptible %s", arg1, arg3 );
       do_oset( ch, outbuf );
       return;
    }
@@ -3816,9 +3805,7 @@ void do_oset( CHAR_DATA * ch, const char *argument )
    }
    else
       do_oset( ch, "" );
-   return;
 }
-
 
 /*
  * Obsolete Merc room editing routine
@@ -3835,7 +3822,7 @@ void do_rset( CHAR_DATA * ch, const char *argument )
    argument = smash_tilde_static( argument );
    argument = one_argument( argument, arg1 );
    argument = one_argument( argument, arg2 );
-   strcpy( arg3, argument );
+   mudstrlcpy( arg3, argument, MAX_INPUT_LENGTH );
 
    if( arg1[0] == '\0' || arg2[0] == '\0' || arg3[0] == '\0' )
    {
@@ -3890,7 +3877,6 @@ void do_rset( CHAR_DATA * ch, const char *argument )
     * Generate usage message.
     */
    do_rset( ch, "" );
-   return;
 }
 
 /*
@@ -4015,7 +4001,7 @@ void do_redit( CHAR_DATA * ch, const char *argument )
 	location = ( ROOM_INDEX_DATA* ) ch->dest_buf;
          if( !location )
          {
-            bug( "redit: sub_room_desc: NULL ch->dest_buf", 0 );
+            bug( "%s: sub_room_desc: NULL ch->dest_buf", __func__ );
             location = ch->in_room;
          }
          STRFREE( location->description );
@@ -4027,7 +4013,7 @@ void do_redit( CHAR_DATA * ch, const char *argument )
 	ed = ( EXTRA_DESCR_DATA* ) ch->dest_buf;
          if( !ed )
          {
-            bug( "redit: sub_room_extra: NULL ch->dest_buf", 0 );
+            bug( "%s: sub_room_extra: NULL ch->dest_buf", __func__ );
             stop_editing( ch );
             return;
          }
@@ -4355,16 +4341,16 @@ void do_redit( CHAR_DATA * ch, const char *argument )
       }
       if( argument[0] == '\0' )
       {
-         sprintf( buf, "Flags for exit direction: %d  Keywords: %s  Key: %d\r\n[ ", xit->vdir, xit->keyword, xit->key );
+         snprintf( buf, MAX_STRING_LENGTH, "Flags for exit direction: %d  Keywords: %s  Key: %d\r\n[ ", xit->vdir, xit->keyword, xit->key );
          for( value = 0; value <= MAX_EXFLAG; value++ )
          {
             if( IS_SET( xit->exit_info, 1 << value ) )
             {
-               strcat( buf, ex_flags[value] );
-               strcat( buf, " " );
+               mudstrlcat( buf, ex_flags[value], MAX_STRING_LENGTH );
+               mudstrlcat( buf, " ", MAX_STRING_LENGTH );
             }
          }
-         strcat( buf, "]\r\n" );
+         mudstrlcat( buf, "]\r\n", MAX_STRING_LENGTH );
          send_to_char( buf, ch );
          return;
       }
@@ -4505,7 +4491,7 @@ void do_redit( CHAR_DATA * ch, const char *argument )
    if( !str_cmp( arg, "bexit" ) )
    {
       EXIT_DATA *nxit, *rxit;
-      char tmpcmd[MAX_INPUT_LENGTH];
+      char tmpcmd[MAX_STRING_LENGTH];
       ROOM_INDEX_DATA *tmploc;
       int vnum, exnum;
       char rvnum[MAX_INPUT_LENGTH];
@@ -4549,13 +4535,13 @@ void do_redit( CHAR_DATA * ch, const char *argument )
       {
          vnum = nxit->vnum;
          if( arg3[0] != '\0' )
-            sprintf( rvnum, "%d", tmploc->vnum );
+            snprintf( rvnum, MAX_INPUT_LENGTH, "%d", tmploc->vnum );
          if( nxit->to_room )
             rxit = get_exit( nxit->to_room, rev_dir[edir] );
          else
             rxit = NULL;
       }
-      sprintf( tmpcmd, "exit %s %s %s", arg2, arg3, argument );
+      snprintf( tmpcmd, MAX_STRING_LENGTH, "exit %s %s %s", arg2, arg3, argument );
       do_redit( ch, tmpcmd );
       if( numnotdir )
          nxit = get_exit_num( tmploc, exnum );
@@ -4565,7 +4551,7 @@ void do_redit( CHAR_DATA * ch, const char *argument )
       {
          vnum = nxit->vnum;
          if( arg3[0] != '\0' )
-            sprintf( rvnum, "%d", tmploc->vnum );
+            snprintf( rvnum, MAX_INPUT_LENGTH, "%d", tmploc->vnum );
          if( nxit->to_room )
             rxit = get_exit( nxit->to_room, rev_dir[edir] );
          else
@@ -4573,7 +4559,7 @@ void do_redit( CHAR_DATA * ch, const char *argument )
       }
       if( vnum )
       {
-         sprintf( tmpcmd, "%d redit exit %d %s %s", vnum, rev_dir[edir], rvnum, argument );
+         snprintf( tmpcmd, MAX_STRING_LENGTH, "%d redit exit %d %s %s", vnum, rev_dir[edir], rvnum, argument );
          do_at( ch, tmpcmd );
       }
       return;
@@ -4634,7 +4620,7 @@ void do_redit( CHAR_DATA * ch, const char *argument )
             xit->description = STRALLOC( "" );
          else
          {
-            sprintf( buf, "%s\r\n", argument );
+            snprintf( buf, MAX_STRING_LENGTH, "%s\r\n", argument );
             xit->description = STRALLOC( buf );
          }
          send_to_char( "Done.\r\n", ch );
@@ -4656,7 +4642,6 @@ void do_redit( CHAR_DATA * ch, const char *argument )
    }
    else
       do_redit( ch, "" );
-   return;
 }
 
 void do_ocreate( CHAR_DATA * ch, const char *argument )
@@ -4817,7 +4802,6 @@ void do_mcreate( CHAR_DATA * ch, const char *argument )
    act( AT_IMMORT, "You wave your arms about, and $N appears at your command!", ch, NULL, mob, TO_CHAR );
 }
 
-
 /*
  * Simple but nice and handle line editor.			-Thoric
  */
@@ -4840,14 +4824,14 @@ void edit_buffer( CHAR_DATA * ch, char *argument )
    if( d->connected != CON_EDITING )
    {
       send_to_char( "You can't do that!\r\n", ch );
-      bug( "%s: d->connected != CON_EDITING", __FUNCTION__ );
+      bug( "%s: d->connected != CON_EDITING", __func__ );
       return;
    }
 
    if( ch->substate <= SUB_PAUSE )
    {
       send_to_char( "You can't do that!\r\n", ch );
-      bug( "%s: illegal ch->substate (%d)", __FUNCTION__, ch->substate );
+      bug( "%s: illegal ch->substate (%d)", __func__, ch->substate );
       d->connected = CON_PLAYING;
       return;
    }
@@ -4855,7 +4839,7 @@ void edit_buffer( CHAR_DATA * ch, char *argument )
    if( !ch->editor )
    {
       send_to_char( "You can't do that!\r\n", ch );
-      bug( "%s: null editor", __FUNCTION__ );
+      bug( "%s: null editor", __func__ );
       d->connected = CON_PLAYING;
       return;
    }
@@ -5159,7 +5143,7 @@ void assign_area( CHAR_DATA * ch )
 {
    char buf[MAX_STRING_LENGTH];
    char buf2[MAX_STRING_LENGTH];
-   char taf[1024];
+   char taf[256];
    AREA_DATA *tarea, *tmp;
    bool created = FALSE;
 
@@ -5168,7 +5152,7 @@ void assign_area( CHAR_DATA * ch )
    if( get_trust( ch ) >= LEVEL_AVATAR && ch->pcdata->r_range_lo && ch->pcdata->r_range_hi )
    {
       tarea = ch->pcdata->area;
-      sprintf( taf, "%s.are", capitalize( ch->name ) );
+      snprintf( taf, 256, "%s.are", capitalize( ch->name ) );
       if( !tarea )
       {
          for( tmp = first_build; tmp; tmp = tmp->next )
@@ -5180,15 +5164,15 @@ void assign_area( CHAR_DATA * ch )
       }
       if( !tarea )
       {
-         sprintf( buf, "Creating area entry for %s", ch->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Creating area entry for %s", ch->name );
          log_string_plus( buf, LOG_NORMAL, ch->top_level );
          CREATE( tarea, AREA_DATA, 1 );
          LINK( tarea, first_build, last_build, next, prev );
          tarea->first_room = tarea->last_room = NULL;
-         sprintf( buf, "{PROTO} %s's area in progress", ch->name );
+         snprintf( buf, MAX_STRING_LENGTH, "{PROTO} %s's area in progress", ch->name );
          tarea->name = str_dup( buf );
          tarea->filename = str_dup( taf );
-         sprintf( buf2, "%s", ch->name );
+         snprintf( buf2, MAX_STRING_LENGTH, "%s", ch->name );
          tarea->author = STRALLOC( buf2 );
          tarea->age = 0;
          tarea->nplayer = 0;
@@ -5196,7 +5180,7 @@ void assign_area( CHAR_DATA * ch )
       }
       else
       {
-         sprintf( buf, "Updating area entry for %s", ch->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Updating area entry for %s", ch->name );
          log_string_plus( buf, LOG_NORMAL, ch->top_level );
       }
       tarea->low_r_vnum = ch->pcdata->r_range_lo;
@@ -5236,7 +5220,7 @@ void do_aassign( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-   sprintf( buf, "%s", argument );
+   snprintf( buf, MAX_STRING_LENGTH, "%s", argument );
    tarea = NULL;
 
 /*	if ( get_trust(ch) >= sysdata.level_modify_proto )   */
@@ -5277,9 +5261,7 @@ void do_aassign( CHAR_DATA * ch, const char *argument )
    }
    ch->pcdata->area = tarea;
    ch_printf( ch, "Assigning you: %s\r\n", tarea->name );
-   return;
 }
-
 
 EXTRA_DESCR_DATA *SetRExtra( ROOM_INDEX_DATA * room, const char *keywords )
 {
@@ -5816,7 +5798,7 @@ void fold_area( AREA_DATA * tarea, const char *fname, bool install )
    rename( fname, buf );
    if( !( fpout = fopen( fname, "w" ) ) )
    {
-      bug( "%s: fopen", __FUNCTION__ );
+      bug( "%s: fopen", __func__ );
       perror( fname );
       return;
    }
@@ -5851,7 +5833,6 @@ void fold_area( AREA_DATA * tarea, const char *fname, bool install )
    fprintf( fpout, "%s", "#ENDAREA\n" );
    fclose( fpout );
    fpout = NULL;
-   return;
 }
 
 void old_fold_area( AREA_DATA * tarea, const char *filename, bool install )
@@ -5867,19 +5848,20 @@ void old_fold_area( AREA_DATA * tarea, const char *filename, bool install )
    SHOP_DATA *pShop;
    REPAIR_DATA *pRepair;
    char buf[MAX_STRING_LENGTH];
+   char fname[256];
    FILE *fpout;
    int vnum;
    int val0, val1, val2, val3, val4, val5;
    bool complexmob;
 
-   sprintf( buf, "Saving %s...", tarea->filename );
+   snprintf( buf, MAX_STRING_LENGTH, "Saving %s...", tarea->filename );
    log_string_plus( buf, LOG_NORMAL, LEVEL_GREATER );
 
-   sprintf( buf, "%s.bak", filename );
-   rename( filename, buf );
+   snprintf( fname, 256, "%s.bak", filename );
+   rename( filename, fname );
    if( ( fpout = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "fold_area: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( filename );
       return;
    }
@@ -6307,7 +6289,6 @@ void old_fold_area( AREA_DATA * tarea, const char *filename, bool install )
     */
    fprintf( fpout, "#$\n" );
    fclose( fpout );
-   return;
 }
 
 void do_savearea( CHAR_DATA * ch, const char *argument )
@@ -6358,7 +6339,7 @@ void do_savearea( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-   sprintf( filename, "%s%s", BUILD_DIR, tarea->filename );
+   snprintf( filename, 256, "%s%s", BUILD_DIR, tarea->filename );
    fold_area( tarea, filename, FALSE );
    send_to_char( "Done.\r\n", ch );
 }
@@ -6411,7 +6392,7 @@ void do_loadarea( CHAR_DATA * ch, const char *argument )
       send_to_char( "Your area is already loaded.\r\n", ch );
       return;
    }
-   sprintf( filename, "%s%s", BUILD_DIR, tarea->filename );
+   snprintf( filename, 256, "%s%s", BUILD_DIR, tarea->filename );
    send_to_char( "Loading...\r\n", ch );
    load_area_file( tarea, filename );
    send_to_char( "Linking exits...\r\n", ch );
@@ -6450,9 +6431,7 @@ void do_unfoldarea( CHAR_DATA * ch, const char *argument )
    fBootDb = TRUE;
    load_area_file( last_area, argument );
    fBootDb = FALSE;
-   return;
 }
-
 
 void do_foldarea( CHAR_DATA * ch, const char *argument )
 {
@@ -6490,7 +6469,6 @@ void do_foldarea( CHAR_DATA * ch, const char *argument )
       }
    }
    send_to_char( "No such area exists.\r\n", ch );
-   return;
 }
 
 extern int top_area;
@@ -6503,7 +6481,7 @@ void write_area_list( void )
    fpout = fopen( AREA_LIST, "w" );
    if( !fpout )
    {
-      bug( "FATAL: cannot open area.lst for writing!\r\n", 0 );
+      bug( "%s: FATAL: cannot open area.lst for writing!\r\n", __func__ );
       return;
    }
    fprintf( fpout, "help.are\n" );
@@ -6520,8 +6498,8 @@ void write_area_list( void )
 void do_installarea( CHAR_DATA * ch, const char *argument )
 {
    AREA_DATA *tarea;
-   char arg[MAX_INPUT_LENGTH];
-   char buf[MAX_STRING_LENGTH];
+   char arg[256];
+   char buf[256];
    int num;
    DESCRIPTOR_DATA *d;
 
@@ -6573,6 +6551,7 @@ void do_installarea( CHAR_DATA * ch, const char *argument )
           * Fix up author if online 
           */
          for( d = first_descriptor; d; d = d->next )
+         {
             if( d->character && d->character->pcdata && d->character->pcdata->area == tarea )
             {
                /*
@@ -6589,6 +6568,7 @@ void do_installarea( CHAR_DATA * ch, const char *argument )
                d->character->pcdata->m_range_lo = 0;
                d->character->pcdata->m_range_hi = 0;
             }
+         }
 
          top_area++;
          send_to_char( "Writing area.lst...\r\n", ch );
@@ -6599,22 +6579,20 @@ void do_installarea( CHAR_DATA * ch, const char *argument )
          reset_area( tarea );
          tarea->nplayer = num;
          send_to_char( "Renaming author's building file.\r\n", ch );
-         sprintf( buf, "%s%s.installed", BUILD_DIR, tarea->filename );
-         sprintf( arg, "%s%s", BUILD_DIR, tarea->filename );
+         snprintf( buf, 256, "%s%s.installed", BUILD_DIR, tarea->filename );
+         snprintf( arg, 256, "%s%s", BUILD_DIR, tarea->filename );
          rename( arg, buf );
          send_to_char( "Done.\r\n", ch );
          return;
       }
    }
    send_to_char( "No such area exists.\r\n", ch );
-   return;
 }
 
 void do_astat( CHAR_DATA * ch, const char *argument )
 {
    AREA_DATA *tarea;
    bool proto, found;
-
 
    found = FALSE;
    proto = FALSE;
@@ -7026,9 +7004,7 @@ void do_aset( CHAR_DATA * ch, const char *argument )
    }
 
    do_aset( ch, "" );
-   return;
 }
-
 
 void do_rlist( CHAR_DATA * ch, const char *argument )
 {
@@ -7080,7 +7056,6 @@ void do_rlist( CHAR_DATA * ch, const char *argument )
          continue;
       ch_printf( ch, "%5d) %s\r\n", vnum, room->name );
    }
-   return;
 }
 
 void do_olist( CHAR_DATA * ch, const char *argument )
@@ -7135,7 +7110,6 @@ void do_olist( CHAR_DATA * ch, const char *argument )
          continue;
       ch_printf( ch, "%5d) %-20s (%s)\r\n", vnum, obj->name, obj->short_descr );
    }
-   return;
 }
 
 void do_mlist( CHAR_DATA * ch, const char *argument )
@@ -7205,7 +7179,6 @@ void mpedit( CHAR_DATA * ch, MPROG_DATA * mprg, int mptype,
    if( !mprg->comlist )
       mprg->comlist = STRALLOC( "" );
    start_editing( ch, mprg->comlist );
-   return;
 }
 
 /*
@@ -7243,8 +7216,8 @@ void do_mpedit( CHAR_DATA * ch, const char *argument )
       case SUB_MPROG_EDIT:
          if( !ch->dest_buf )
          {
-            send_to_char( "Fatal error: report to Thoric.\r\n", ch );
-            bug( "do_mpedit: sub_mprog_edit: NULL ch->dest_buf", 0 );
+            send_to_char( "Fatal error: report to smaugmuds.afkmods.com.\r\n", ch );
+            bug( "%s: sub_mprog_edit: NULL ch->dest_buf", __func__ );
             ch->substate = SUB_NONE;
             return;
          }
@@ -7524,8 +7497,8 @@ void do_opedit( CHAR_DATA * ch, const char *argument )
       case SUB_MPROG_EDIT:
          if( !ch->dest_buf )
          {
-            send_to_char( "Fatal error: report to Thoric.\r\n", ch );
-            bug( "do_opedit: sub_oprog_edit: NULL ch->dest_buf", 0 );
+            send_to_char( "Fatal error: report to smaugmuds.afkmods.com.\r\n", ch );
+            bug( "%s: sub_oprog_edit: NULL ch->dest_buf", __func__ );
             ch->substate = SUB_NONE;
             return;
          }
@@ -7770,8 +7743,6 @@ void do_opedit( CHAR_DATA * ch, const char *argument )
    do_opedit( ch, "" );
 }
 
-
-
 /*
  * RoomProg Support
  */
@@ -7790,7 +7761,6 @@ void rpedit( CHAR_DATA * ch, MPROG_DATA * mprg, int mptype,
    if( !mprg->comlist )
       mprg->comlist = STRALLOC( "" );
    start_editing( ch, mprg->comlist );
-   return;
 }
 
 void do_rpedit( CHAR_DATA * ch, const char *argument )
@@ -7823,8 +7793,8 @@ void do_rpedit( CHAR_DATA * ch, const char *argument )
       case SUB_MPROG_EDIT:
          if( !ch->dest_buf )
          {
-            send_to_char( "Fatal error: report to Thoric.\r\n", ch );
-            bug( "do_opedit: sub_oprog_edit: NULL ch->dest_buf", 0 );
+            send_to_char( "Fatal error: report to smaugmuds.afkmods.com.\r\n", ch );
+            bug( "%s: sub_oprog_edit: NULL ch->dest_buf", __func__ );
             ch->substate = SUB_NONE;
             return;
          }
@@ -8084,7 +8054,6 @@ void do_rdelete( CHAR_DATA * ch, const char *argument )
    delete_room( location );
    fix_exits(); /* Need to call this to solve a crash */
    ch_printf( ch, "Room %s has been deleted.\r\n", argument );
-   return;
 }
 
 void do_odelete( CHAR_DATA * ch, const char *argument )
@@ -8132,7 +8101,6 @@ void do_odelete( CHAR_DATA * ch, const char *argument )
    }
    delete_obj( obj );
    ch_printf( ch, "Object %d has been deleted.\r\n", vnum );
-   return;
 }
 
 void do_mdelete( CHAR_DATA * ch, const char *argument )
@@ -8180,7 +8148,6 @@ void do_mdelete( CHAR_DATA * ch, const char *argument )
    }
    delete_mob( mob );
    ch_printf( ch, "Mob %d has been deleted.\r\n", vnum );
-   return;
 }
 
 /*
@@ -8193,23 +8160,23 @@ void RelCreate( relation_type tp, void *actor, void *subject )
 
    if( tp < relMSET_ON || tp > relOSET_ON )
    {
-      bug( "RelCreate: invalid type (%d)", tp );
+      bug( "%s: invalid type (%d)", __func__, tp );
       return;
    }
    if( !actor )
    {
-      bug( "RelCreate: NULL actor" );
+      bug( "%s: NULL actor", __func__ );
       return;
    }
    if( !subject )
    {
-      bug( "RelCreate: NULL subject" );
+      bug( "%s: NULL subject", __func__ );
       return;
    }
    for( tmp = first_relation; tmp; tmp = tmp->next )
       if( tmp->Type == tp && tmp->Actor == actor && tmp->Subject == subject )
       {
-         bug( "RelCreate: duplicated relation" );
+         bug( "%s: duplicated relation", __func__ );
          return;
       }
    CREATE( tmp, REL_DATA, 1 );
@@ -8218,7 +8185,6 @@ void RelCreate( relation_type tp, void *actor, void *subject )
    tmp->Subject = subject;
    LINK( tmp, first_relation, last_relation, next, prev );
 }
-
 
 /*
  * Relations created to fix a crash bug with oset on and rset on
@@ -8230,17 +8196,17 @@ void RelDestroy( relation_type tp, void *actor, void *subject )
 
    if( tp < relMSET_ON || tp > relOSET_ON )
    {
-      bug( "RelDestroy: invalid type (%d)", tp );
+      bug( "%s: invalid type (%d)", __func__, tp );
       return;
    }
    if( !actor )
    {
-      bug( "RelDestroy: NULL actor" );
+      bug( "%s: NULL actor", __func__ );
       return;
    }
    if( !subject )
    {
-      bug( "RelDestroy: NULL subject" );
+      bug( "%s: NULL subject", __func__ );
       return;
    }
    for( rq = first_relation; rq; rq = rq->next )
@@ -8265,7 +8231,7 @@ bool is_valid_vnum( int vnum, short type )
 
    if( (type < VCHECK_ROOM) || (type > VCHECK_MOB) )
    {
-       bug( "is_valid_vnum: bad type %d", type );
+       bug( "%s: bad type %d", __func__, type );
        return FALSE;
    }
    for( area = first_area; area; area = area->next )
@@ -8318,4 +8284,3 @@ bool is_valid_vnum( int vnum, short type )
    }
    return isValid;
 }
-

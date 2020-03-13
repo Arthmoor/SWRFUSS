@@ -34,13 +34,12 @@
 extern short top_room;
 
 bool mob_snipe( CHAR_DATA * ch, CHAR_DATA * victim );
-ch_ret one_hit args( ( CHAR_DATA * ch, CHAR_DATA * victim, int dt ) );
+ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt );
 
 /* You can define or not define TRACK_THOUGH_DOORS, above, depending on
    whether or not you want track to find paths which lead through closed
    or hidden doors.
 */
-
 struct bfs_queue_struct
 {
    ROOM_INDEX_DATA *room;
@@ -94,7 +93,6 @@ void bfs_enqueue( ROOM_INDEX_DATA * room, char dir )
       queue_head = queue_tail = curr;
 }
 
-
 void bfs_dequeue( void )
 {
    struct bfs_queue_struct *curr;
@@ -105,7 +103,6 @@ void bfs_dequeue( void )
       queue_tail = NULL;
    DISPOSE( curr );
 }
-
 
 void bfs_clear_queue( void )
 {
@@ -137,14 +134,13 @@ void clean_room_queue( void )
    room_queue = NULL;
 }
 
-
 int find_first_step( ROOM_INDEX_DATA * src, ROOM_INDEX_DATA * target, int maxdist )
 {
    int curr_dir, count;
 
    if( !src || !target )
    {
-      bug( "Illegal value passed to find_first_step (track.c)", 0 );
+      bug( "%s: Illegal value passed to find_first_step (track.c)", __func__ );
       return BFS_ERROR;
    }
 
@@ -201,12 +197,10 @@ int find_first_step( ROOM_INDEX_DATA * src, ROOM_INDEX_DATA * target, int maxdis
    return BFS_NO_PATH;
 }
 
-
 void do_track( CHAR_DATA * ch, const char *argument )
 {
    CHAR_DATA *vict;
    char arg[MAX_INPUT_LENGTH];
-   char buf[MAX_STRING_LENGTH];
    int dir, maxdist;
 
    if( !IS_NPC( ch ) && !ch->pcdata->learned[gsn_track] )
@@ -245,8 +239,7 @@ void do_track( CHAR_DATA * ch, const char *argument )
          send_to_char( "You're already in the same room!\r\n", ch );
          break;
       case BFS_NO_PATH:
-         sprintf( buf, "You can't sense a trail from here.\r\n" );
-         send_to_char( buf, ch );
+         send_to_char( "You can't sense a trail from here.\r\n", ch );
          learn_from_failure( ch, gsn_track );
          break;
       default:
@@ -256,33 +249,30 @@ void do_track( CHAR_DATA * ch, const char *argument )
    }
 }
 
-
 void found_prey( CHAR_DATA * ch, CHAR_DATA * victim )
 {
    char buf[MAX_STRING_LENGTH];
-   char victname[MAX_STRING_LENGTH];
-
-
+   char victname[MAX_INPUT_LENGTH];
 
    if( victim == NULL )
    {
-      bug( "Found_prey: null victim", 0 );
+      bug( "%s: null victim", __func__ );
       return;
    }
 
    if( ch == NULL )
    {
-      bug( "Found_prey: null ch", 0 );
+      bug( "%s: null ch", __func__ );
       return;
    }
 
    if( victim->in_room == NULL )
    {
-      bug( "Found_prey: null victim->in_room", 0 );
+      bug( "%s: null victim->in_room", __func__ );
       return;
    }
 
-   strcpy( victname, IS_NPC( victim ) ? victim->short_descr : victim->name );
+   mudstrlcpy( victname, IS_NPC( victim ) ? victim->short_descr : victim->name, MAX_INPUT_LENGTH );
 
    if( !can_see( ch, victim ) )
    {
@@ -291,18 +281,17 @@ void found_prey( CHAR_DATA * ch, CHAR_DATA * victim )
       switch ( number_bits( 2 ) )
       {
          case 0:
-            sprintf( buf, "Don't make me find you, %s!", victname );
+            snprintf( buf, MAX_STRING_LENGTH, "Don't make me find you, %s!", victname );
             do_say( ch, buf );
             break;
          case 1:
             act( AT_ACTION, "$n sniffs around the room for $N.", ch, NULL, victim, TO_NOTVICT );
             act( AT_ACTION, "You sniff around the room for $N.", ch, NULL, victim, TO_CHAR );
             act( AT_ACTION, "$n sniffs around the room for you.", ch, NULL, victim, TO_VICT );
-            sprintf( buf, "I can smell your blood!" );
-            do_say( ch, buf );
+            do_say( ch, "I can smell your blood!" );
             break;
          case 2:
-            sprintf( buf, "I'm going to tear %s apart!", victname );
+            snprintf( buf, MAX_STRING_LENGTH, "I'm going to tear %s apart!", victname );
             do_yell( ch, buf );
             break;
          case 3:
@@ -320,15 +309,15 @@ void found_prey( CHAR_DATA * ch, CHAR_DATA * victim )
       {
          case 0:
             do_say( ch, "C'mon out, you coward!" );
-            sprintf( buf, "%s is a bloody coward!", victname );
+            snprintf( buf, MAX_STRING_LENGTH, "%s is a bloody coward!", victname );
             do_yell( ch, buf );
             break;
          case 1:
-            sprintf( buf, "Let's take this outside, %s", victname );
+            snprintf( buf, MAX_STRING_LENGTH, "Let's take this outside, %s", victname );
             do_say( ch, buf );
             break;
          case 2:
-            sprintf( buf, "%s is a yellow-bellied wimp!", victname );
+            snprintf( buf, MAX_STRING_LENGTH, "%s is a yellow-bellied wimp!", victname );
             do_yell( ch, buf );
             break;
          case 3:
@@ -343,15 +332,15 @@ void found_prey( CHAR_DATA * ch, CHAR_DATA * victim )
    switch ( number_bits( 2 ) )
    {
       case 0:
-         sprintf( buf, "Your blood is mine, %s!", victname );
+         snprintf( buf, MAX_STRING_LENGTH, "Your blood is mine, %s!", victname );
          do_yell( ch, buf );
          break;
       case 1:
-         sprintf( buf, "Alas, we meet again, %s!", victname );
+         snprintf( buf, MAX_STRING_LENGTH, "Alas, we meet again, %s!", victname );
          do_say( ch, buf );
          break;
       case 2:
-         sprintf( buf, "What do you want on your tombstone, %s?", victname );
+         snprintf( buf, MAX_STRING_LENGTH, "What do you want on your tombstone, %s?", victname );
          do_say( ch, buf );
          break;
       case 3:
@@ -362,7 +351,6 @@ void found_prey( CHAR_DATA * ch, CHAR_DATA * victim )
    stop_hunting( ch );
    set_fighting( ch, victim );
    multi_hit( ch, victim, TYPE_UNDEFINED );
-   return;
 }
 
 void hunt_victim( CHAR_DATA * ch )
@@ -440,10 +428,7 @@ void hunt_victim( CHAR_DATA * ch )
       {
          if( !ch->in_room )
          {
-            char buf[MAX_STRING_LENGTH];
-            sprintf( buf, "Hunt_victim: no ch->in_room!  Mob #%d, name: %s.  Placing mob in limbo.",
-                     ch->pIndexData->vnum, ch->name );
-            bug( buf, 0 );
+            bug( "%s: no ch->in_room!  Mob #%d, name: %s.  Placing mob in limbo.", __func__, ch->pIndexData->vnum, ch->name );
             char_to_room( ch, get_room_index( ROOM_VNUM_LIMBO ) );
             return;
          }
@@ -563,10 +548,10 @@ bool mob_snipe( CHAR_DATA * ch, CHAR_DATA * victim )
       char_from_room( ch );
       char_to_room( ch, victim->in_room );
 
-      sprintf( buf, "A blaster shot fires at you from the %s.", dir_name[dir] );
+      snprintf( buf, MAX_STRING_LENGTH, "A blaster shot fires at you from the %s.", dir_name[dir] );
       act( AT_ACTION, buf, victim, NULL, ch, TO_CHAR );
       act( AT_ACTION, "You fire at $N.", ch, NULL, victim, TO_CHAR );
-      sprintf( buf, "A blaster shot fires at $N from the %s.", dir_name[dir] );
+      snprintf( buf, MAX_STRING_LENGTH, "A blaster shot fires at $N from the %s.", dir_name[dir] );
       act( AT_ACTION, buf, ch, NULL, victim, TO_NOTVICT );
 
       one_hit( ch, victim, TYPE_UNDEFINED );

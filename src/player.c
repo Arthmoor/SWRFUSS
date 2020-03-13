@@ -34,16 +34,13 @@ void do_gold( CHAR_DATA * ch, const char *argument )
 {
    set_char_color( AT_GOLD, ch );
    ch_printf( ch, "You have %d credits.\r\n", ch->gold );
-   return;
 }
-
 
 /*
  * New score command by Haus
  */
 void do_score( CHAR_DATA * ch, const char *argument )
 {
-   char buf[MAX_STRING_LENGTH];
    AFFECT_DATA *paf;
    int iLang, drug;
 
@@ -80,7 +77,6 @@ void do_score( CHAR_DATA * ch, const char *argument )
               get_curr_str( ch ), get_curr_dex( ch ), get_curr_con( ch ), get_curr_int( ch ), get_curr_wis( ch ),
               get_curr_cha( ch ) );
 
-
    send_to_char( "----------------------------------------------------------------------------\r\n", ch );
 
    {
@@ -98,8 +94,6 @@ void do_score( CHAR_DATA * ch, const char *argument )
 
    send_to_char( "----------------------------------------------------------------------------\r\n", ch );
 
-
-
    ch_printf( ch, "CREDITS: %-10d   BANK: %-10d    Pkills: %-5.5d   Mkills: %-5.5d\r\n",
               ch->gold, ch->pcdata->bank, ch->pcdata->pkills, ch->pcdata->mkills );
 
@@ -114,40 +108,38 @@ void do_score( CHAR_DATA * ch, const char *argument )
    switch ( ch->position )
    {
       case POS_DEAD:
-         sprintf( buf, "You are slowly decomposing. " );
+         send_to_char( "You are slowly decomposing. ", ch );
          break;
       case POS_MORTAL:
-         sprintf( buf, "You are mortally wounded. " );
+         send_to_char( "You are mortally wounded. ", ch );
          break;
       case POS_INCAP:
-         sprintf( buf, "You are incapacitated. " );
+         send_to_char( "You are incapacitated. ", ch );
          break;
       case POS_STUNNED:
-         sprintf( buf, "You are stunned. " );
+         send_to_char( "You are stunned. ", ch );
          break;
       case POS_SLEEPING:
-         sprintf( buf, "You are sleeping. " );
+         send_to_char( "You are sleeping. ", ch );
          break;
       case POS_RESTING:
-         sprintf( buf, "You are resting. " );
+         send_to_char( "You are resting. ", ch );
          break;
       case POS_STANDING:
-         sprintf( buf, "You are standing. " );
+         send_to_char( "You are standing. ", ch );
          break;
       case POS_FIGHTING:
-         sprintf( buf, "You are fighting. " );
+         send_to_char( "You are fighting. ", ch );
          break;
       case POS_MOUNTED:
-         sprintf( buf, "You are mounted. " );
+         send_to_char( "You are mounted. ", ch );
          break;
       case POS_SITTING:
-         sprintf( buf, "You are sitting. " );
+         send_to_char( "You are sitting. ", ch );
          break;
       default:
-         sprintf( buf, "Unknown " );
+         send_to_char( "Unknown ", ch );
    }
-
-   send_to_char( buf, ch );
 
    if( !IS_NPC( ch ) && ch->pcdata->condition[COND_DRUNK] > 10 )
       send_to_char( "You are drunk.\r\n", ch );
@@ -326,7 +318,6 @@ void do_score( CHAR_DATA * ch, const char *argument )
       }
    }
    send_to_char( "\r\n", ch );
-   return;
 }
 
 /*
@@ -470,7 +461,7 @@ const char *tiny_affect_loc_name( int location )
          return " BLOOD ";
    }
 
-   bug( "Affect_location_name: unknown location %d.", location );
+   bug( "%s: unknown location %d.", __func__, location );
    return "(?)";
 }
 
@@ -728,8 +719,6 @@ void do_oldscore( CHAR_DATA * ch, const char *argument )
       if( ch->pcdata->m_range_lo && ch->pcdata->m_range_hi )
          ch_printf( ch, "Mob Range : %d - %d\r\n", ch->pcdata->m_range_lo, ch->pcdata->m_range_hi );
    }
-
-   return;
 }
 
 /*								-Thoric
@@ -748,7 +737,6 @@ void do_level( CHAR_DATA * ch, const char *argument )
          ch_printf( ch, "%-15s   Level: %-3d   Max: ???   Exp: ???          Next: ???\r\n",
                     ability_name[ability], ch->skill_level[ability], ch->experience[ability] );
 }
-
 
 void do_affected( CHAR_DATA * ch, const char *argument )
 {
@@ -820,7 +808,6 @@ void do_affected( CHAR_DATA * ch, const char *argument )
             ch_printf( ch, "%-18s\r\n", skill->name );
          }
    }
-   return;
 }
 
 void do_inventory( CHAR_DATA * ch, const char *argument )
@@ -828,7 +815,6 @@ void do_inventory( CHAR_DATA * ch, const char *argument )
    set_char_color( AT_RED, ch );
    send_to_char( "You are carrying:\r\n", ch );
    show_list_to_char( ch->first_carrying, ch, TRUE, TRUE );
-   return;
 }
 
 void do_equipment( CHAR_DATA * ch, const char *argument )
@@ -851,7 +837,7 @@ void do_equipment( CHAR_DATA * ch, const char *argument )
             if( can_see_obj( ch, obj ) )
             {
                send_to_char( format_obj_to_char( obj, ch, TRUE ), ch );
-               strcpy( buf, "" );
+               mudstrlcpy( buf, "", MAX_STRING_LENGTH );
                switch ( obj->item_type )
                {
                   default:
@@ -864,34 +850,34 @@ void do_equipment( CHAR_DATA * ch, const char *argument )
                         obj->value[1] = 1;
                      dam = ( short )( ( obj->value[0] * 10 ) / obj->value[1] );
                      if( dam >= 10 )
-                        strcat( buf, " (superb) " );
+                        mudstrlcat( buf, " (superb) ", MAX_STRING_LENGTH );
                      else if( dam >= 7 )
-                        strcat( buf, " (good) " );
+                        mudstrlcat( buf, " (good) ", MAX_STRING_LENGTH );
                      else if( dam >= 5 )
-                        strcat( buf, " (worn) " );
+                        mudstrlcat( buf, " (worn) ", MAX_STRING_LENGTH );
                      else if( dam >= 3 )
-                        strcat( buf, " (poor) " );
+                        mudstrlcat( buf, " (poor) ", MAX_STRING_LENGTH );
                      else if( dam >= 1 )
-                        strcat( buf, " (awful) " );
+                        mudstrlcat( buf, " (awful) ", MAX_STRING_LENGTH );
                      else if( dam == 0 )
-                        strcat( buf, " (broken) " );
+                        mudstrlcat( buf, " (broken) ", MAX_STRING_LENGTH );
                      send_to_char( buf, ch );
                      break;
 
                   case ITEM_WEAPON:
                      dam = INIT_WEAPON_CONDITION - obj->value[0];
                      if( dam < 2 )
-                        strcat( buf, " (superb) " );
+                        mudstrlcat( buf, " (superb) ", MAX_STRING_LENGTH );
                      else if( dam < 4 )
-                        strcat( buf, " (good) " );
+                        mudstrlcat( buf, " (good) ", MAX_STRING_LENGTH );
                      else if( dam < 7 )
-                        strcat( buf, " (worn) " );
+                        mudstrlcat( buf, " (worn) ", MAX_STRING_LENGTH );
                      else if( dam < 10 )
-                        strcat( buf, " (poor) " );
+                        mudstrlcat( buf, " (poor) ", MAX_STRING_LENGTH );
                      else if( dam < 12 )
-                        strcat( buf, " (awful) " );
+                        mudstrlcat( buf, " (awful) ", MAX_STRING_LENGTH );
                      else if( dam == 12 )
-                        strcat( buf, " (broken) " );
+                        mudstrlcat( buf, " (broken) ", MAX_STRING_LENGTH );
                      send_to_char( buf, ch );
                      if( obj->value[3] == WEAPON_BLASTER )
                      {
@@ -927,11 +913,7 @@ void do_equipment( CHAR_DATA * ch, const char *argument )
 
    if( !found )
       send_to_char( "Nothing.\r\n", ch );
-
-   return;
 }
-
-
 
 void set_title( CHAR_DATA * ch, const char *title )
 {
@@ -939,24 +921,21 @@ void set_title( CHAR_DATA * ch, const char *title )
 
    if( IS_NPC( ch ) )
    {
-      bug( "Set_title: NPC.", 0 );
+      bug( "%s: NPC.", __func__ );
       return;
    }
 
    if( isalpha( title[0] ) || isdigit( title[0] ) )
    {
       buf[0] = ' ';
-      strcpy( buf + 1, title );
+      mudstrlcpy( buf + 1, title, MAX_STRING_LENGTH );
    }
    else
-      strcpy( buf, title );
+      mudstrlcpy( buf, title, MAX_STRING_LENGTH );
 
    STRFREE( ch->pcdata->title );
    ch->pcdata->title = STRALLOC( buf );
-   return;
 }
-
-
 
 void do_title( CHAR_DATA * ch, const char *argument )
 {
@@ -968,7 +947,6 @@ void do_title( CHAR_DATA * ch, const char *argument )
       send_to_char( "You try but the Force resists you.\r\n", ch );
       return;
    }
-
 
    if( argument[0] == '\0' )
    {
@@ -986,7 +964,6 @@ void do_title( CHAR_DATA * ch, const char *argument )
    set_title( ch, argument );
    send_to_char( "Ok.\r\n", ch );
 }
-
 
 void do_homepage( CHAR_DATA * ch, const char *argument )
 {
@@ -1013,9 +990,9 @@ void do_homepage( CHAR_DATA * ch, const char *argument )
    }
 
    if( strstr( argument, "://" ) )
-      strcpy( buf, argument );
+      mudstrlcpy( buf, argument, MAX_STRING_LENGTH );
    else
-      sprintf( buf, "http://%s", argument );
+      snprintf( buf, MAX_STRING_LENGTH, "http://%s", argument );
    if( strlen( buf ) > 70 )
       buf[70] = '\0';
 
@@ -1025,8 +1002,6 @@ void do_homepage( CHAR_DATA * ch, const char *argument )
    ch->pcdata->homepage = str_dup( buf );
    send_to_char( "Homepage set.\r\n", ch );
 }
-
-
 
 /*
  * Set your personal description				-Thoric
@@ -1041,14 +1016,14 @@ void do_description( CHAR_DATA * ch, const char *argument )
 
    if( !ch->desc )
    {
-      bug( "do_description: no descriptor", 0 );
+      bug( "%s: no descriptor", __func__ );
       return;
    }
 
    switch ( ch->substate )
    {
       default:
-         bug( "do_description: illegal substate", 0 );
+         bug( "%s: illegal substate", __func__ );
          return;
 
       case SUB_RESTRICTED:
@@ -1080,14 +1055,14 @@ void do_bio( CHAR_DATA * ch, const char *argument )
 
    if( !ch->desc )
    {
-      bug( "do_bio: no descriptor", 0 );
+      bug( "%s: no descriptor", __func__ );
       return;
    }
 
    switch ( ch->substate )
    {
       default:
-         bug( "do_bio: illegal substate", 0 );
+         bug( "%s: illegal substate", __func__ );
          return;
 
       case SUB_RESTRICTED:
@@ -1108,8 +1083,6 @@ void do_bio( CHAR_DATA * ch, const char *argument )
    }
 }
 
-
-
 void do_report( CHAR_DATA * ch, const char *argument )
 {
    char buf[MAX_INPUT_LENGTH];
@@ -1120,15 +1093,11 @@ void do_report( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-
    ch_printf( ch, "You report: %d/%d hp %d/%d mv.\r\n", ch->hit, ch->max_hit, ch->move, ch->max_move );
 
-
-   sprintf( buf, "$n reports: %d/%d hp %d/%d.", ch->hit, ch->max_hit, ch->move, ch->max_move );
+   snprintf( buf, MAX_INPUT_LENGTH, "$n reports: %d/%d hp %d/%d.", ch->hit, ch->max_hit, ch->move, ch->max_move );
 
    act( AT_REPORT, buf, ch, NULL, NULL, TO_ROOM );
-
-   return;
 }
 
 void do_prompt( CHAR_DATA * ch, const char *argument )
@@ -1162,5 +1131,4 @@ void do_prompt( CHAR_DATA * ch, const char *argument )
    else
       ch->pcdata->prompt = STRALLOC( prompt );
    send_to_char( "Ok.\r\n", ch );
-   return;
 }

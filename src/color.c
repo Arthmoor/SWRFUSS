@@ -188,7 +188,6 @@ void show_colorthemes( CHAR_DATA * ch )
 
    if( col % 6 != 0 )
       send_to_pager( "\r\n", ch );
-   return;
 }
 
 void show_colors( CHAR_DATA * ch )
@@ -233,7 +232,6 @@ void show_colors( CHAR_DATA * ch )
    }
    send_to_pager( "\r\n", ch );
    show_colorthemes( ch );
-   return;
 }
 
 void reset_colors( CHAR_DATA * ch )
@@ -632,14 +630,13 @@ void do_color( CHAR_DATA* ch, const char* argument)
       else
          ch_printf( ch, "Display %s set to color %s.\r\n", pc_displays[count], valid_color[y] );
    }
-   return;
 }
 
 const char *color_str( short AType, CHAR_DATA * ch )
 {
    if( !ch )
    {
-      bug( "%s", "color_str: NULL ch!" );
+      bug( "%s: NULL ch!", __func__ );
       return ( "" );
    }
 
@@ -1384,7 +1381,7 @@ char *colorize( const char *txt, DESCRIPTOR_DATA * d )
          {
             if( ( MAX_STRING_LENGTH - ( reslen = strlen( result ) ) ) <= ( colstr - prevstr ) )
             {
-               bug( "%s: OVERFLOW in internal MAX_STRING_LENGTH buffer!", __PRETTY_FUNCTION__ );
+               bug( "%s: OVERFLOW in internal MAX_STRING_LENGTH buffer!", __func__ );
                break;
             }
             strncat( result, prevstr, ( colstr - prevstr ) );  /* Leave this one alone! BAD THINGS(TM) will happen if you don't! */
@@ -1432,7 +1429,7 @@ void set_char_color( short AType, CHAR_DATA * ch )
    write_to_buffer( ch->desc, color_str( AType, ch ), 0 );
    if( !ch->desc )
    {
-      bug( "set_char_color: NULL descriptor after WTB! CH: %s", ch->name ? ch->name : "Unknown?!?" );
+      bug( "%s: NULL descriptor after WTB! CH: %s", __func__, ch->name ? ch->name : "Unknown?!?" );
       return;
    }
    ch->desc->pagecolor = ch->colors[AType];
@@ -1470,7 +1467,7 @@ void write_to_pager( DESCRIPTOR_DATA * d, const char *txt, size_t length )
    {
       if( d->pagesize > MAX_STRING_LENGTH * 16 )
       {
-         bug( "%s", "Pager overflow.  Ignoring.\r\n" );
+         bug( "%s: Pager overflow.  Ignoring.", __func__ );
          d->pagetop = 0;
          d->pagepoint = NULL;
          DISPOSE( d->pagebuf );
@@ -1497,7 +1494,7 @@ void set_pager_color( short AType, CHAR_DATA * ch )
    write_to_pager( ch->desc, color_str( AType, ch ), 0 );
    if( !ch->desc )
    {
-      bug( "%s: NULL descriptor after WTP! CH: %s", __FUNCTION__, ch->name ? ch->name : "Unknown?!?" );
+      bug( "%s: NULL descriptor after WTP! CH: %s", __func__, ch->name ? ch->name : "Unknown?!?" );
       return;
    }
    ch->desc->pagecolor = ch->colors[AType];
@@ -1508,7 +1505,7 @@ void send_to_desc_color( const char *txt, DESCRIPTOR_DATA * d )
 {
    if( !d )
    {
-      bug( "%s: NULL *d", __FUNCTION__ );
+      bug( "%s: NULL *d", __func__ );
       return;
    }
 
@@ -1525,7 +1522,7 @@ void send_to_char( const char *txt, CHAR_DATA * ch )
 {
    if( !ch )
    {
-      bug( "%s: NULL ch!", __FUNCTION__ );
+      bug( "%s: NULL ch!", __func__ );
       return;
    }
 
@@ -1537,7 +1534,7 @@ void send_to_pager( const char *txt, CHAR_DATA * ch )
 {
    if( !ch )
    {
-      bug( "%s: NULL ch!", __FUNCTION__ );
+      bug( "%s: NULL ch!", __func__ );
       return;
    }
 

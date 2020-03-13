@@ -17,7 +17,7 @@
  * Original DikuMUD code by: Hans Staerfeldt, Katja Nyboe, Tom Madsen,      *
  * Michael Seifert, and Sebastian Hammer.                                   *
  ****************************************************************************
- *			 External DNS Resolver Module			                *
+ *                       External DNS Resolver Module                       *
  ****************************************************************************/
 
 /***************************************************************************
@@ -71,7 +71,7 @@ int main( int argc, char *argv[] )
    if( argc != 2 )
    {
       printf( "unknown.host\r\n" );
-    	exit( 0 );
+      exit( 0 );
    }
     
    ip = atoi( argv[1] );

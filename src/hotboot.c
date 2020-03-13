@@ -147,7 +147,6 @@ void write_ship( FILE * fp, SHIP_DATA * ship )
    if( ship->starsystem )
       fprintf( fp, "Starsystem %s~\n", ship->starsystem->name );
    fprintf( fp, "%s", "EndShip\n\n" );
-   return;
 }
 
 SHIP_DATA *load_ship( FILE * fp )
@@ -176,7 +175,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
       if( ship == NULL )
       {
-         bug( "%s: No ship data for filename %s", __FUNCTION__, name );
+         bug( "%s: No ship data for filename %s", __func__, name );
          DISPOSE( name );
          return NULL;
 
@@ -197,7 +196,7 @@ SHIP_DATA *load_ship( FILE * fp )
          if( !str_cmp( word, "EndShip" ) )
             break;
       }
-      bug( "%s: shipfname not found", __FUNCTION__ );
+      bug( "%s: shipfname not found", __func__ );
       return NULL;
    }
 
@@ -351,7 +350,7 @@ SHIP_DATA *load_ship( FILE * fp )
 
       }
       if( !fMatch && str_cmp( word, "End" ) )
-         bug( "%s: no match: %s", __FUNCTION__, word );
+         bug( "%s: no match: %s", __func__, word );
    }
    return NULL;
 }
@@ -427,7 +426,6 @@ void save_mobile( FILE * fp, CHAR_DATA * mob )
    re_equip_char( mob );
 
    fprintf( fp, "%s", "EndMobile\n\n" );
-   return;
 }
 
 void save_world( CHAR_DATA * ch )
@@ -447,7 +445,7 @@ void save_world( CHAR_DATA * ch )
    snprintf( filename, 256, "%s%s", SYSTEM_DIR, MOB_FILE );
    if( ( mobfp = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "%s", "save_world: fopen mob file" );
+      bug( "%s: fopen mob file", __func__ );
       perror( filename );
    }
    else
@@ -456,7 +454,7 @@ void save_world( CHAR_DATA * ch )
    snprintf( filename, 256, "%s%s", SYSTEM_DIR, SHIP_FILE );
    if( ( shipfp = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "%s", "save_world: fopen ship file" );
+      bug( "%s: fopen ship file", __func__ );
       perror( filename );
    }
    else
@@ -476,7 +474,7 @@ void save_world( CHAR_DATA * ch )
             snprintf( filename, 256, "%s%d", HOTBOOT_DIR, pRoomIndex->vnum );
             if( ( objfp = fopen( filename, "w" ) ) == NULL )
             {
-               bug( "save_world: fopen %d", pRoomIndex->vnum );
+               bug( "%s: fopen %d", __func__, pRoomIndex->vnum );
                perror( filename );
                continue;
             }
@@ -511,7 +509,6 @@ void save_world( CHAR_DATA * ch )
       fprintf( shipfp, "%s", "#END\n" );
       FCLOSE( shipfp );
    }
-   return;
 }
 
 CHAR_DATA *load_mobile( FILE * fp )
@@ -530,7 +527,7 @@ CHAR_DATA *load_mobile( FILE * fp )
       vnum = fread_number( fp );
       if( get_mob_index( vnum ) == NULL )
       {
-         bug( "%s: No index data for vnum %d", __FUNCTION__, vnum );
+         bug( "%s: No index data for vnum %d", __func__, vnum );
          return NULL;
       }
       mob = create_mobile( get_mob_index( vnum ) );
@@ -546,7 +543,7 @@ CHAR_DATA *load_mobile( FILE * fp )
             if( !str_cmp( word, "EndMobile" ) )
                break;
          }
-         bug( "%s: Unable to create mobile for vnum %d", __FUNCTION__, vnum );
+         bug( "%s: Unable to create mobile for vnum %d", __func__, vnum );
          return NULL;
       }
    }
@@ -563,7 +560,7 @@ CHAR_DATA *load_mobile( FILE * fp )
             break;
       }
       extract_char( mob, TRUE );
-      bug( "%s: Vnum not found", __FUNCTION__ );
+      bug( "%s: Vnum not found", __func__ );
       return NULL;
    }
 
@@ -604,7 +601,7 @@ CHAR_DATA *load_mobile( FILE * fp )
                   if( ( sn = skill_lookup( sname ) ) < 0 )
                   {
                      if( ( sn = herb_lookup( sname ) ) < 0 )
-                        bug( "%s", "load_mobile: unknown skill." );
+                        bug( "%s: unknown skill.", __func__ );
                      else
                         sn += TYPE_HERB;
                   }
@@ -745,7 +742,7 @@ CHAR_DATA *load_mobile( FILE * fp )
             break;
       }
       if( !fMatch && str_cmp( word, "End" ) )
-         bug( "%s: no match: %s", __FUNCTION__, word );
+         bug( "%s: no match: %s", __func__, word );
    }
    return NULL;
 }
@@ -761,7 +758,7 @@ void read_obj_file( char *dirname, char *filename )
 
    if( ( room = get_room_index( vnum ) ) == NULL )
    {
-      bug( "read_obj_file: ARGH! Missing room index for %d!", vnum );
+      bug( "%s: ARGH! Missing room index for %d!", __func__, vnum );
       return;
    }
 
@@ -789,7 +786,7 @@ void read_obj_file( char *dirname, char *filename )
 
          if( letter != '#' )
          {
-            bug( "%s", "read_obj_file: # not found." );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -800,7 +797,7 @@ void read_obj_file( char *dirname, char *filename )
             break;
          else
          {
-            bug( "read_obj_file: bad section: %s", word );
+            bug( "%s: bad section: %s", __func__, word );
             break;
          }
       }
@@ -833,8 +830,6 @@ void read_obj_file( char *dirname, char *filename )
    }
    else
       log_string( "Cannot open obj file" );
-
-   return;
 }
 
 void load_obj_files( void )
@@ -862,7 +857,6 @@ void load_obj_files( void )
       dentry = readdir( dp );
    }
    closedir( dp );
-   return;
 }
 
 void load_world( CHAR_DATA * ch )
@@ -879,7 +873,7 @@ void load_world( CHAR_DATA * ch )
    snprintf( file1, 256, "%s%s", SYSTEM_DIR, MOB_FILE );
    if( ( mobfp = fopen( file1, "r" ) ) == NULL )
    {
-      bug( "%s", "load_world: fopen mob file" );
+      bug( "%s: fopen mob file", __func__ );
       perror( file1 );
    }
    else
@@ -888,7 +882,7 @@ void load_world( CHAR_DATA * ch )
    snprintf( file2, 256, "%s%s", SYSTEM_DIR, SHIP_FILE );
    if( ( shipfp = fopen( file2, "r" ) ) == NULL )
    {
-      bug( "%s", "load_world: fopen ship file" );
+      bug( "%s: fopen ship file", __func__ );
       perror( file1 );
    }
    else
@@ -940,7 +934,6 @@ void load_world( CHAR_DATA * ch )
     */
    unlink( file1 );
    unlink( file2 );
-   return;
 }
 
 /*  Warm reboot stuff, gotta make sure to thank Erwin for this :) */
@@ -988,7 +981,7 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-   sprintf( log_buf, "Hotboot initiated by %s.", ch->name );
+   snprintf( log_buf, MAX_STRING_LENGTH, "Hotboot initiated by %s.", ch->name );
    log_string( log_buf );
 
    fp = fopen( HOTBOOT_FILE, "w" );
@@ -996,7 +989,7 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
    if( !fp )
    {
       send_to_char( "Hotboot file not writeable, aborted.\r\n", ch );
-      bug( "Could not write to hotboot file: %s. Hotboot aborted.", HOTBOOT_FILE );
+      bug( "%s: Could not write to hotboot file: %s. Hotboot aborted.", __func__, HOTBOOT_FILE );
       perror( "do_copyover:fopen" );
       return;
    }
@@ -1019,7 +1012,7 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
    log_string( "Saving player files and connection states...." );
    if( ch && ch->desc )
       write_to_descriptor( ch->desc, "\033[0m", 0 );
-   sprintf( buf, "\r\nYou feel a great disturbance in the Force." );
+   mudstrlcpy( buf, "\r\nYou feel a great disturbance in the Force.", 100 );
    /*
     * For each playing descriptor, save its state 
     */
@@ -1090,10 +1083,10 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
    sysdata.dlHandle = dlopen( NULL, RTLD_LAZY );
    if( !sysdata.dlHandle )
    {
-	bug( "%s", "FATAL ERROR: Unable to reopen system executable handle!" );
+	bug( "%s: FATAL ERROR: Unable to reopen system executable handle!", __func__ );
 	exit( 1 );
    }
-   bug( "%s", "Hotboot execution failed!!" );
+   bug( "%s: Hotboot execution failed!!", __func__ );
    send_to_char( "Hotboot FAILED!\r\n", ch );
 }
 
@@ -1112,7 +1105,7 @@ void hotboot_recover( void )
    if( !fp )   /* there are some descriptors open which will hang forever then ? */
    {
       perror( "hotboot_recover: fopen" );
-      bug( "%s", "Hotboot file not found. Exitting." );
+      bug( "%s: Hotboot file not found. Exitting.", __func__ );
       exit( 1 );
    }
 
@@ -1203,5 +1196,4 @@ void hotboot_recover( void )
    if( maxp > sysdata.maxplayers )
       sysdata.maxplayers = maxp;
    log_string( "Hotboot recovery complete." );
-   return;
 }

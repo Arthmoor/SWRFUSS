@@ -143,7 +143,6 @@ const char *const room_sents[SECT_MAX][25] = {
 
    {
     "You stand in a lengthy tunnel of rock."}
-
 };
 
 int wherehome( CHAR_DATA * ch )
@@ -231,8 +230,8 @@ char *wordwrap( char *txt, short wrap )
    bufp = buf;
    if( txt != NULL )
    {
-      char line[MAX_STRING_LENGTH];
-      char temp[MAX_STRING_LENGTH];
+      char line[MAX_INPUT_LENGTH];
+      char temp[MAX_INPUT_LENGTH];
       char *ptr, *p;
       int ln, x;
 
@@ -247,28 +246,28 @@ char *wordwrap( char *txt, short wrap )
          if( ( ln + x + 1 ) < wrap )
          {
             if( line[ln - 1] == '.' )
-               strcat( line, "  " );
+               mudstrlcat( line, "  ", MAX_INPUT_LENGTH );
             else
-               strcat( line, " " );
-            strcat( line, temp );
+               mudstrlcat( line, " ", MAX_INPUT_LENGTH );
+            mudstrlcat( line, temp, MAX_INPUT_LENGTH );
             p = strchr( line, '\n' );
             if( !p )
                p = strchr( line, '\r' );
             if( p )
             {
-               strcat( buf, line );
+               mudstrlcat( buf, line, MAX_STRING_LENGTH );
                line[0] = '\0';
             }
          }
          else
          {
-            strcat( line, "\r\n" );
-            strcat( buf, line );
-            strcpy( line, temp );
+            mudstrlcat( line, "\r\n", MAX_INPUT_LENGTH );
+            mudstrlcat( buf, line, MAX_STRING_LENGTH );
+            mudstrlcpy( line, temp, MAX_INPUT_LENGTH );
          }
       }
       if( line[0] != '\0' )
-         strcat( buf, line );
+         mudstrlcat( buf, line, MAX_STRING_LENGTH );
    }
    return bufp;
 }
@@ -312,18 +311,18 @@ void decorate_room( ROOM_INDEX_DATA * room )
          previous[iRand] = x;
 
          len = strlen( buf );
-         sprintf( buf2, "%s", room_sents[sector][x] );
+         snprintf( buf2, MAX_STRING_LENGTH, "%s", room_sents[sector][x] );
          if( len > 5 && buf[len - 1] == '.' )
          {
-            strcat( buf, "  " );
+            mudstrlcat( buf, "  ", MAX_STRING_LENGTH );
             buf2[0] = UPPER( buf2[0] );
          }
          else if( len == 0 )
             buf2[0] = UPPER( buf2[0] );
-         strcat( buf, buf2 );
+         mudstrlcat( buf, buf2, MAX_STRING_LENGTH );
       }
    }
-   sprintf( buf2, "%s\r\n", wordwrap( buf, 78 ) );
+   snprintf( buf2, MAX_STRING_LENGTH, "%s\r\n", wordwrap( buf, 78 ) );
    room->description = STRALLOC( buf2 );
 }
 
@@ -373,7 +372,7 @@ EXIT_DATA *get_exit( ROOM_INDEX_DATA * room, short dir )
 
    if( !room )
    {
-      bug( "Get_exit: NULL room", 0 );
+      bug( "%s: NULL room", __func__ );
       return NULL;
    }
 
@@ -392,7 +391,7 @@ EXIT_DATA *get_exit_to( ROOM_INDEX_DATA * room, short dir, int vnum )
 
    if( !room )
    {
-      bug( "Get_exit: NULL room", 0 );
+      bug( "%s: NULL room", __func__ );
       return NULL;
    }
 
@@ -412,7 +411,7 @@ EXIT_DATA *get_exit_num( ROOM_INDEX_DATA * room, short count )
 
    if( !room )
    {
-      bug( "Get_exit: NULL room", 0 );
+      bug( "%s: NULL room", __func__ );
       return NULL;
    }
 
@@ -459,7 +458,7 @@ bool will_fall( CHAR_DATA * ch, int fall )
    {
       if( fall > 80 )
       {
-         bug( "Falling (in a loop?) more than 80 rooms: vnum %d", ch->in_room->vnum );
+         bug( "%s: Falling (in a loop?) more than 80 rooms: vnum %d", __func__, ch->in_room->vnum );
          char_from_room( ch );
          char_to_room( ch, get_room_index( wherehome( ch ) ) );
          fall = 0;
@@ -588,7 +587,7 @@ ch_ret move_char( CHAR_DATA * ch, EXIT_DATA * pexit, int fall )
 
 #ifdef DEBUG
    if( pexit )
-      bug( "%s: %s to door %d", __FUNCTION__, ch->name, pexit->vdir );
+      bug( "%s: %s to door %d", __func__, ch->name, pexit->vdir );
 #endif
 
    retcode = rNONE;
@@ -947,12 +946,12 @@ ch_ret move_char( CHAR_DATA * ch, EXIT_DATA * pexit, int fall )
       }
       if( ch->mount )
       {
-         sprintf( buf, "$n %s %s upon $N.", txt, dir_name[door] );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %s %s upon $N.", txt, dir_name[door] );
          act( AT_ACTION, buf, ch, NULL, ch->mount, TO_NOTVICT );
       }
       else
       {
-         sprintf( buf, "$n %s $T.", txt );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %s $T.", txt );
          act( AT_ACTION, buf, ch, NULL, dir_name[door], TO_ROOM );
       }
    }
@@ -1059,12 +1058,12 @@ ch_ret move_char( CHAR_DATA * ch, EXIT_DATA * pexit, int fall )
       }
       if( ch->mount )
       {
-         sprintf( buf, "$n %s from %s upon $N.", txt, dtxt );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %s from %s upon $N.", txt, dtxt );
          act( AT_ACTION, buf, ch, NULL, ch->mount, TO_ROOM );
       }
       else
       {
-         sprintf( buf, "$n %s from %s.", txt, dtxt );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %s from %s.", txt, dtxt );
          act( AT_ACTION, buf, ch, NULL, NULL, TO_ROOM );
       }
    }
@@ -1086,7 +1085,6 @@ ch_ret move_char( CHAR_DATA * ch, EXIT_DATA * pexit, int fall )
    do_look( ch, "auto" );
    if( brief )
       SET_BIT( ch->act, PLR_BRIEF );
-
 
    /*
     * BIG ugly looping problem here when the character is mptransed back
@@ -1163,73 +1161,55 @@ ch_ret move_char( CHAR_DATA * ch, EXIT_DATA * pexit, int fall )
    return retcode;
 }
 
-
 void do_north( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_NORTH ), 0 );
-   return;
 }
-
 
 void do_east( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_EAST ), 0 );
-   return;
 }
-
 
 void do_south( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_SOUTH ), 0 );
-   return;
 }
-
 
 void do_west( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_WEST ), 0 );
-   return;
 }
-
 
 void do_up( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_UP ), 0 );
-   return;
 }
-
 
 void do_down( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_DOWN ), 0 );
-   return;
 }
 
 void do_northeast( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_NORTHEAST ), 0 );
-   return;
 }
 
 void do_northwest( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_NORTHWEST ), 0 );
-   return;
 }
 
 void do_southeast( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_SOUTHEAST ), 0 );
-   return;
 }
 
 void do_southwest( CHAR_DATA * ch, const char *argument )
 {
    move_char( ch, get_exit( ch->in_room, DIR_SOUTHWEST ), 0 );
-   return;
 }
-
-
 
 EXIT_DATA *find_door( CHAR_DATA * ch, const char *arg, bool quiet )
 {
@@ -1296,7 +1276,6 @@ EXIT_DATA *find_door( CHAR_DATA * ch, const char *arg, bool quiet )
 
    return pexit;
 }
-
 
 void toggle_bexit_flag( EXIT_DATA * pexit, int flag )
 {
@@ -1424,10 +1403,7 @@ void do_open( CHAR_DATA * ch, const char *argument )
    }
 
    do_openhatch( ch, arg );
-   return;
 }
-
-
 
 void do_close( CHAR_DATA * ch, const char *argument )
 {
@@ -1517,9 +1493,7 @@ void do_close( CHAR_DATA * ch, const char *argument )
    }
 
    do_closehatch( ch, arg );
-   return;
 }
-
 
 bool has_key( CHAR_DATA * ch, int key )
 {
@@ -1531,7 +1505,6 @@ bool has_key( CHAR_DATA * ch, int key )
 
    return FALSE;
 }
-
 
 void do_lock( CHAR_DATA * ch, const char *argument )
 {
@@ -1552,7 +1525,6 @@ void do_lock( CHAR_DATA * ch, const char *argument )
       /*
        * 'lock door' 
        */
-
       if( !IS_SET( pexit->exit_info, EX_ISDOOR ) )
       {
          send_to_char( "You can't do that.\r\n", ch );
@@ -1626,10 +1598,7 @@ void do_lock( CHAR_DATA * ch, const char *argument )
    }
 
    ch_printf( ch, "You see no %s here.\r\n", arg );
-   return;
 }
-
-
 
 void do_unlock( CHAR_DATA * ch, const char *argument )
 {
@@ -1724,7 +1693,6 @@ void do_unlock( CHAR_DATA * ch, const char *argument )
    }
 
    ch_printf( ch, "You see no %s here.\r\n", arg );
-   return;
 }
 
 void do_bashdoor( CHAR_DATA * ch, const char *argument )
@@ -1821,9 +1789,7 @@ void do_bashdoor( CHAR_DATA * ch, const char *argument )
       damage( ch, ch, ( ch->max_hit / 20 ) + 10, gsn_bashdoor );
       learn_from_failure( ch, gsn_bashdoor );
    }
-   return;
 }
-
 
 void do_stand( CHAR_DATA * ch, const char *argument )
 {
@@ -1861,10 +1827,7 @@ void do_stand( CHAR_DATA * ch, const char *argument )
          send_to_char( "You are already fighting!\r\n", ch );
          break;
    }
-
-   return;
 }
-
 
 void do_sit( CHAR_DATA * ch, const char *argument )
 {
@@ -1904,10 +1867,7 @@ void do_sit( CHAR_DATA * ch, const char *argument )
          send_to_char( "You are already sitting - on your mount.\r\n", ch );
          return;
    }
-
-   return;
 }
-
 
 void do_rest( CHAR_DATA * ch, const char *argument )
 {
@@ -1950,9 +1910,7 @@ void do_rest( CHAR_DATA * ch, const char *argument )
    }
 
    rprog_rest_trigger( ch );
-   return;
 }
-
 
 void do_sleep( CHAR_DATA * ch, const char *argument )
 {
@@ -2010,9 +1968,7 @@ void do_sleep( CHAR_DATA * ch, const char *argument )
    }
 
    rprog_sleep_trigger( ch );
-   return;
 }
-
 
 void do_wake( CHAR_DATA * ch, const char *argument )
 {
@@ -2053,9 +2009,7 @@ void do_wake( CHAR_DATA * ch, const char *argument )
    act( AT_ACTION, "You wake $M.", ch, NULL, victim, TO_CHAR );
    victim->position = POS_STANDING;
    act( AT_ACTION, "$n wakes you.", ch, NULL, victim, TO_VICT );
-   return;
 }
-
 
 /*
  * teleport a character to another room
@@ -2081,7 +2035,7 @@ void teleport( CHAR_DATA * ch, int room, int flags )
    pRoomIndex = get_room_index( room );
    if( !pRoomIndex )
    {
-      bug( "teleport: bad room vnum %d", room );
+      bug( "%s: bad room vnum %d", __func__, room );
       return;
    }
 
@@ -2126,7 +2080,6 @@ void do_climb( CHAR_DATA * ch, const char *argument )
       return;
    }
    send_to_char( "You cannot climb there.\r\n", ch );
-   return;
 }
 
 /*
@@ -2154,7 +2107,6 @@ void do_enter( CHAR_DATA * ch, const char *argument )
       return;
    }
    do_board( ch, argument );
-   return;
 }
 
 /*
@@ -2182,5 +2134,4 @@ void do_leave( CHAR_DATA * ch, const char *argument )
       return;
    }
    do_leaveship( ch, "" );
-   return;
 }

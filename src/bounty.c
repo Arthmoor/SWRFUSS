@@ -27,12 +27,10 @@
 #include <time.h>
 #include "mud.h"
 
-
 BOUNTY_DATA *first_bounty;
 BOUNTY_DATA *last_bounty;
 BOUNTY_DATA *first_disintigration;
 BOUNTY_DATA *last_disintigration;
-
 
 void disintigration args( ( CHAR_DATA * ch, CHAR_DATA * victim, long amount ) );
 void nodisintigration args( ( CHAR_DATA * ch, CHAR_DATA * victim, long amount ) );
@@ -44,11 +42,11 @@ void save_disintigrations(  )
    FILE *fpout;
    char filename[256];
 
-   sprintf( filename, "%s%s", SYSTEM_DIR, DISINTIGRATION_LIST );
+   snprintf( filename, 256, "%s%s", SYSTEM_DIR, DISINTIGRATION_LIST );
    fpout = fopen( filename, "w" );
    if( !fpout )
    {
-      bug( "FATAL: cannot open disintigration.lst for writing!\r\n", 0 );
+      bug( "%s: FATAL: cannot open disintigration.lst for writing!\r\n", __func__ );
       return;
    }
    for( tbounty = first_disintigration; tbounty; tbounty = tbounty->next )
@@ -58,9 +56,7 @@ void save_disintigrations(  )
    }
    fprintf( fpout, "$\n" );
    fclose( fpout );
-
 }
-
 
 bool is_disintigration( CHAR_DATA * victim )
 {
@@ -95,7 +91,7 @@ void load_bounties(  )
 
    log_string( "Loading disintigrations..." );
 
-   sprintf( bountylist, "%s%s", SYSTEM_DIR, DISINTIGRATION_LIST );
+   snprintf( bountylist, 256, "%s%s", SYSTEM_DIR, DISINTIGRATION_LIST );
    if( ( fpList = fopen( bountylist, "r" ) ) == NULL )
    {
       perror( bountylist );
@@ -115,7 +111,6 @@ void load_bounties(  )
    }
    fclose( fpList );
    log_string( " Done bounties " );
-   return;
 }
 
 void do_bounties( CHAR_DATA * ch, const char *argument )
@@ -169,9 +164,8 @@ void disintigration( CHAR_DATA * ch, CHAR_DATA * victim, long amount )
    bounty->amount = bounty->amount + amount;
    save_disintigrations(  );
 
-   sprintf( buf, "%s has added %ld credits to the bounty on %s.", ch->name, amount, victim->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s has added %ld credits to the bounty on %s.", ch->name, amount, victim->name );
    echo_to_all( AT_RED, buf, 0 );
-
 }
 
 void do_addbounty( CHAR_DATA * ch, const char *argument )
@@ -295,10 +289,9 @@ void claim_disintigration( CHAR_DATA * ch, CHAR_DATA * victim )
          SET_BIT( ch->act, PLR_KILLER );
          ch_printf( ch, "You are now wanted for the murder of %s.\r\n", victim->name );
       }
-      sprintf( buf, "%s is Dead!", victim->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s is Dead!", victim->name );
       echo_to_all( AT_RED, buf, 0 );
       return;
-
    }
 
    ch->gold += bounty->amount;
@@ -312,9 +305,9 @@ void claim_disintigration( CHAR_DATA * ch, CHAR_DATA * victim )
    ch_printf( ch, "You receive %ld experience and %ld credits,\r\n from the bounty on %s\r\n", gexp, bounty->amount,
               bounty->target );
 
-   sprintf( buf, "%s has claimed the disintigration bounty on %s!", ch->name, victim->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s has claimed the disintigration bounty on %s!", ch->name, victim->name );
    echo_to_all( AT_RED, buf, 0 );
-   sprintf( buf, "%s is Dead!", victim->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s is Dead!", victim->name );
    echo_to_all( AT_RED, buf, 0 );
 
    if( !IS_SET( victim->act, PLR_KILLER ) )

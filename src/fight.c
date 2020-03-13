@@ -99,7 +99,6 @@ bool is_wielding_poisoned( CHAR_DATA * ch )
       return TRUE;
 
    return FALSE;
-
 }
 
 /*
@@ -137,7 +136,6 @@ void stop_hunting( CHAR_DATA * ch )
       DISPOSE( ch->hunting );
       ch->hunting = NULL;
    }
-   return;
 }
 
 void stop_hating( CHAR_DATA * ch )
@@ -148,7 +146,6 @@ void stop_hating( CHAR_DATA * ch )
       DISPOSE( ch->hating );
       ch->hating = NULL;
    }
-   return;
 }
 
 void stop_fearing( CHAR_DATA * ch )
@@ -159,7 +156,6 @@ void stop_fearing( CHAR_DATA * ch )
       DISPOSE( ch->fearing );
       ch->fearing = NULL;
    }
-   return;
 }
 
 void start_hunting( CHAR_DATA * ch, CHAR_DATA * victim )
@@ -170,7 +166,6 @@ void start_hunting( CHAR_DATA * ch, CHAR_DATA * victim )
    CREATE( ch->hunting, HHF_DATA, 1 );
    ch->hunting->name = QUICKLINK( victim->name );
    ch->hunting->who = victim;
-   return;
 }
 
 void start_hating( CHAR_DATA * ch, CHAR_DATA * victim )
@@ -181,7 +176,6 @@ void start_hating( CHAR_DATA * ch, CHAR_DATA * victim )
    CREATE( ch->hating, HHF_DATA, 1 );
    ch->hating->name = QUICKLINK( victim->name );
    ch->hating->who = victim;
-   return;
 }
 
 void start_fearing( CHAR_DATA * ch, CHAR_DATA * victim )
@@ -192,9 +186,7 @@ void start_fearing( CHAR_DATA * ch, CHAR_DATA * victim )
    CREATE( ch->fearing, HHF_DATA, 1 );
    ch->fearing->name = QUICKLINK( victim->name );
    ch->fearing->who = victim;
-   return;
 }
-
 
 int max_fight( CHAR_DATA * ch )
 {
@@ -228,7 +220,7 @@ void violence_update( void )
 
       if( ch == first_char && ch->prev )
       {
-         bug( "ERROR: first_char->prev != NULL, fixing...", 0 );
+         bug( "%s: ERROR: first_char->prev != NULL, fixing...", __func__ );
          ch->prev = NULL;
       }
 
@@ -236,9 +228,7 @@ void violence_update( void )
 
       if( gch_prev && gch_prev->next != ch )
       {
-         sprintf( buf, "FATAL: violence_update: %s->prev->next doesn't point to ch.", ch->name );
-         bug( buf, 0 );
-         bug( "Short-cutting here", 0 );
+         bug( "FATAL: %s: %s->prev->next doesn't point to ch.\r\nShort-cutting here", __func__, ch->name );
          ch->prev = NULL;
          gch_prev = NULL;
          do_shout( ch, "Thoric says, 'Prepare for the worst!'" );
@@ -260,15 +250,15 @@ void violence_update( void )
       if( !ch->in_room || !ch->name )
       {
          log_string( "violence_update: bad ch record!  (Shortcutting.)" );
-         sprintf( buf, "ch: %ld  ch->in_room: %ld  ch->prev: %ld  ch->next: %ld",
+         snprintf( buf, MAX_STRING_LENGTH, "ch: %ld  ch->in_room: %ld  ch->prev: %ld  ch->next: %ld",
                   ( long )ch, ( long )ch->in_room, ( long )ch->prev, ( long )ch->next );
          log_string( buf );
          log_string( lastplayercmd );
          if( lst_ch )
-            sprintf( buf, "lst_ch: %ld  lst_ch->prev: %ld  lst_ch->next: %ld",
+            snprintf( buf, MAX_STRING_LENGTH, "lst_ch: %ld  lst_ch->prev: %ld  lst_ch->next: %ld",
                      ( long )lst_ch, ( long )lst_ch->prev, ( long )lst_ch->next );
          else
-            strcpy( buf, "lst_ch: NULL" );
+            mudstrlcpy( buf, "lst_ch: NULL", MAX_STRING_LENGTH );
          log_string( buf );
          gch_prev = NULL;
          continue;
@@ -347,7 +337,7 @@ void violence_update( void )
 
       if( IS_SET( ch->in_room->room_flags, ROOM_SAFE ) )
       {
-         sprintf( buf, "violence_update: %s fighting %s in a SAFE room.", ch->name, victim->name );
+         snprintf( buf, MAX_STRING_LENGTH, "violence_update: %s fighting %s in a SAFE room.", ch->name, victim->name );
          log_string( buf );
          stop_fighting( ch, TRUE );
       }
@@ -425,11 +415,7 @@ void violence_update( void )
          }
       }
    }
-
-   return;
 }
-
-
 
 /*
  * Do one group of attacks.
@@ -546,7 +532,6 @@ ch_ret multi_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
    return retcode;
 }
 
-
 /*
  * Weapon types, haus
  */
@@ -662,14 +647,12 @@ ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
    bool fail;
    AFFECT_DATA af;
 
-
    /*
     * Can't beat a dead char!
     * Guard against weird room-leavings.
     */
    if( victim->position == POS_DEAD || ch->in_room != victim->in_room )
       return rVICT_DIED;
-
 
    /*
     * Figure out the weapon doing the damage         -Thoric
@@ -800,7 +783,6 @@ ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
     * Hit.
     * Calc damage.
     */
-
    if( !wield )   /* dice formula fixed by Thoric */
       dam = number_range( ch->barenumdie, ch->baresizedie * ch->barenumdie ) + ch->damplus;
    else
@@ -815,13 +797,11 @@ ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
    if( prof_bonus )
       dam *= ( 1 + prof_bonus / 100 );
 
-
    if( !IS_NPC( ch ) && ch->pcdata->learned[gsn_enhanced_damage] > 0 )
    {
       dam += ( int )( dam * ch->pcdata->learned[gsn_enhanced_damage] / 120 );
       learn_from_success( ch, gsn_enhanced_damage );
    }
-
 
    if( !IS_AWAKE( victim ) )
       dam *= 2;
@@ -903,7 +883,6 @@ ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt )
    /*
     * check to see if weapon is charged 
     */
-
    if( dt == ( TYPE_HIT + WEAPON_BLASTER ) && wield && wield->item_type == ITEM_WEAPON )
    {
       if( wield->value[4] < 1 )
@@ -1201,12 +1180,12 @@ ch_ret damage( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
 
    if( !ch )
    {
-      bug( "Damage: null ch!", 0 );
+      bug( "%s: null ch!", __func__ );
       return rERROR;
    }
    if( !victim )
    {
-      bug( "Damage: null victim!", 0 );
+      bug( "%s: null victim!", __func__ );
       return rVICT_DIED;
    }
 
@@ -1608,7 +1587,6 @@ ch_ret damage( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
       }
 
       add_timer( victim, TIMER_RECENTFIGHT, 100, NULL, 0 );
-
    }
 
    /*
@@ -1623,7 +1601,7 @@ ch_ret damage( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
 
       if( !npcvict )
       {
-         sprintf( log_buf, "%s killed by %s at %d",
+         snprintf( log_buf, MAX_STRING_LENGTH, "%s killed by %s at %d",
                   victim->name, ( IS_NPC( ch ) ? ch->short_descr : ch->name ), victim->in_room->vnum );
          log_string( log_buf );
          to_channel( log_buf, CHANNEL_MONITOR, "Monitor", LEVEL_IMMORTAL );
@@ -1749,20 +1727,16 @@ bool is_safe( CHAR_DATA * ch, CHAR_DATA * victim )
    if( IS_NPC( ch ) || IS_NPC( victim ) )
       return FALSE;
 
-
    return FALSE;
-
 }
 
 /* checks is_safe but without the output 
    cuts out imms and safe rooms as well 
    for info only */
-
 bool is_safe_nm( CHAR_DATA * ch, CHAR_DATA * victim )
 {
    return FALSE;
 }
-
 
 /*
  * just verify that a corpse looting is legal
@@ -1787,10 +1761,8 @@ bool legal_loot( CHAR_DATA * ch, CHAR_DATA * victim )
 see if an attack justifies a KILLER flag --- edited so that none do but can't 
 murder a no pk person. --- edited again for planetary wanted flags -- well will be soon :p
  */
-
 void check_killer( CHAR_DATA * ch, CHAR_DATA * victim )
 {
-
    int x;
 
    /*
@@ -1800,10 +1772,7 @@ void check_killer( CHAR_DATA * ch, CHAR_DATA * victim )
    {
       if( !ch->master )
       {
-         char buf[MAX_STRING_LENGTH];
-
-         sprintf( buf, "Check_killer: %s bad AFF_CHARM", IS_NPC( ch ) ? ch->short_descr : ch->name );
-         bug( buf, 0 );
+         bug( "%s: %s bad AFF_CHARM", __func__, IS_NPC( ch ) ? ch->short_descr : ch->name );
          affect_strip( ch, gsn_charm_person );
          REMOVE_BIT( ch->affected_by, AFF_CHARM );
          return;
@@ -1846,15 +1815,10 @@ void check_killer( CHAR_DATA * ch, CHAR_DATA * victim )
          victim->pcdata->clan->pdeaths++;
    }
 
-
    if( IS_NPC( ch ) )
       if( !IS_NPC( victim ) )
          victim->in_room->area->mdeaths++;
-
-   return;
 }
-
-
 
 /*
  * Set position of a victim.
@@ -1863,7 +1827,7 @@ void update_pos( CHAR_DATA * victim )
 {
    if( !victim )
    {
-      bug( "update_pos: null victim", 0 );
+      bug( "%s: null victim", __func__ );
       return;
    }
 
@@ -1904,9 +1868,7 @@ void update_pos( CHAR_DATA * victim )
       REMOVE_BIT( victim->mount->act, ACT_MOUNTED );
       victim->mount = NULL;
    }
-   return;
 }
-
 
 /*
  * Start fights.
@@ -1917,10 +1879,7 @@ void set_fighting( CHAR_DATA * ch, CHAR_DATA * victim )
 
    if( ch->fighting )
    {
-      char buf[MAX_STRING_LENGTH];
-
-      sprintf( buf, "Set_fighting: %s -> %s (already fighting %s)", ch->name, victim->name, ch->fighting->who->name );
-      bug( buf, 0 );
+      bug( "%s: %s -> %s (already fighting %s)", __func__, ch->name, victim->name, ch->fighting->who->name );
       return;
    }
 
@@ -1951,15 +1910,13 @@ void set_fighting( CHAR_DATA * ch, CHAR_DATA * victim )
       send_to_char( "You are disturbed!\r\n", victim->switched );
       do_return( victim->switched, "" );
    }
-   return;
 }
-
 
 CHAR_DATA *who_fighting( CHAR_DATA * ch )
 {
    if( !ch )
    {
-      bug( "who_fighting: null ch", 0 );
+      bug( "%s: null ch", __func__ );
       return NULL;
    }
    if( !ch->fighting )
@@ -1971,7 +1928,7 @@ void free_fight( CHAR_DATA * ch )
 {
    if( !ch )
    {
-      bug( "Free_fight: null ch!", 0 );
+      bug( "%s: null ch!", __func__ );
       return;
    }
    if( ch->fighting )
@@ -1995,9 +1952,7 @@ void free_fight( CHAR_DATA * ch )
       send_to_char( skill_table[gsn_berserk]->msg_off, ch );
       send_to_char( "\r\n", ch );
    }
-   return;
 }
-
 
 /*
  * Stop fights.
@@ -2020,7 +1975,6 @@ void stop_fighting( CHAR_DATA * ch, bool fBoth )
          update_pos( fch );
       }
    }
-   return;
 }
 
 void death_cry( CHAR_DATA * ch )
@@ -2040,11 +1994,11 @@ OBJ_DATA *raw_kill( CHAR_DATA * ch, CHAR_DATA * victim )
 
    if( !victim )
    {
-      bug( "%s: null victim!", __FUNCTION__ );
+      bug( "%s: null victim!", __func__ );
       return NULL;
    }
 
-   strcpy( arg, victim->name );
+   mudstrlcpy( arg, victim->name, MAX_STRING_LENGTH );
 
    stop_fighting( victim, TRUE );
 
@@ -2202,13 +2156,13 @@ OBJ_DATA *raw_kill( CHAR_DATA * ch, CHAR_DATA * victim )
             save_equipment[x][y] = NULL;
    }
 
-   sprintf( buf, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
-   sprintf( buf2, "%s%c/%s", BACKUP_DIR, tolower( arg[0] ), capitalize( arg ) );
+   snprintf( buf, MAX_STRING_LENGTH, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
+   snprintf( buf2, MAX_STRING_LENGTH, "%s%c/%s", BACKUP_DIR, tolower( arg[0] ), capitalize( arg ) );
 
    rename( buf, buf2 );
 
-   sprintf( buf, "%s%c/%s.clone", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
-   sprintf( buf2, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
+   snprintf( buf, MAX_STRING_LENGTH, "%s%c/%s.clone", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
+   snprintf( buf2, MAX_STRING_LENGTH, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
 
    rename( buf, buf2 );
 
@@ -2217,7 +2171,6 @@ OBJ_DATA *raw_kill( CHAR_DATA * ch, CHAR_DATA * victim )
 
 void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
 {
-   char buf[MAX_STRING_LENGTH];
    CHAR_DATA *gch, *gch_next;
    CHAR_DATA *lch;
    int xp;
@@ -2240,7 +2193,7 @@ void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
 
    if( members == 0 )
    {
-      bug( "Group_gain: members.", members );
+      bug( "%s: members = 0", __func__, members );
       members = 1;
    }
 
@@ -2264,13 +2217,11 @@ void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
           && !str_cmp( gch->pcdata->clan->name, victim->mob_clan ) )
       {
          xp = 0;
-         sprintf( buf, "You receive no experience for killing your organizations resources.\r\n" );
-         send_to_char( buf, gch );
+         send_to_char( "You receive no experience for killing your organizations resources.\r\n", gch );
       }
       else
       {
-         sprintf( buf, "You receive %d combat experience.\r\n", xp );
-         send_to_char( buf, gch );
+         ch_printf( gch, "You receive %d combat experience.\r\n", xp );
       }
 
       gain_exp( gch, xp, COMBAT_ABILITY );
@@ -2281,8 +2232,7 @@ void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
             URANGE( members, xp * members,
                     ( exp_level( gch->skill_level[LEADERSHIP_ABILITY] + 1 ) -
                       exp_level( gch->skill_level[LEADERSHIP_ABILITY] ) / 10 ) );
-         sprintf( buf, "You get %d leadership experience for leading your group to victory.\r\n", xp );
-         send_to_char( buf, gch );
+         ch_printf( gch, "You get %d leadership experience for leading your group to victory.\r\n", xp );
          gain_exp( gch, xp, LEADERSHIP_ABILITY );
       }
 
@@ -2307,10 +2257,7 @@ void group_gain( CHAR_DATA * ch, CHAR_DATA * victim )
          }
       }
    }
-
-   return;
 }
-
 
 int align_compute( CHAR_DATA * gch, CHAR_DATA * victim )
 {
@@ -2334,9 +2281,7 @@ int align_compute( CHAR_DATA * gch, CHAR_DATA * victim )
 make it simple instead */
 
    return URANGE( -1000, ( int )( gch->alignment - victim->alignment / 5 ), 1000 );
-
 }
-
 
 /*
  * Calculate how much XP gch should gain for killing victim
@@ -2531,33 +2476,31 @@ void dam_message( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
       char sound[MAX_STRING_LENGTH];
       int vol = number_range( 20, 80 );
 
-      sprintf( sound, "!!SOUND(blaster V=%d)", vol );
+      snprintf( sound, MAX_STRING_LENGTH, "!!SOUND(blaster V=%d)", vol );
       sound_to_room( ch->in_room, sound );
    }
 
    if( dt == TYPE_HIT || dam == 0 )
    {
-      sprintf( buf1, "$n %s $N%c", vp, punct );
-      sprintf( buf2, "You %s $N%c", vs, punct );
-      sprintf( buf3, "$n %s you%c", vp, punct );
+      snprintf( buf1, 256, "$n %s $N%c", vp, punct );
+      snprintf( buf2, 256, "You %s $N%c", vs, punct );
+      snprintf( buf3, 256, "$n %s you%c", vp, punct );
    }
    else if( dt > TYPE_HIT && is_wielding_poisoned( ch ) )
    {
-     // Slightly less than beautiful cast here.
-     if( dt < TYPE_HIT + (int)( sizeof( attack_table ) / sizeof( attack_table[0] ) ) )
-       {
+      // Slightly less than beautiful cast here.
+      if( dt < TYPE_HIT + (int)( sizeof( attack_table ) / sizeof( attack_table[0] ) ) )
          attack = attack_table[dt - TYPE_HIT];
-       }
-     else
-       {
-	 bug( "Dam_message: bad dt %d.", dt );
+      else
+      {
+         bug( "%s: bad dt %d.", __func__, dt );
 	 dt = TYPE_HIT;
 	 attack = attack_table[0];
-       }
+      }
 
-     sprintf( buf1, "$n's poisoned %s %s $N%c", attack, vp, punct );
-     sprintf( buf2, "Your poisoned %s %s $N%c", attack, vp, punct );
-     sprintf( buf3, "$n's poisoned %s %s you%c", attack, vp, punct );
+      snprintf( buf1, 256, "$n's poisoned %s %s $N%c", attack, vp, punct );
+      snprintf( buf2, 256, "Your poisoned %s %s $N%c", attack, vp, punct );
+      snprintf( buf3, 256, "$n's poisoned %s %s you%c", attack, vp, punct );
    }
    else
    {
@@ -2602,28 +2545,30 @@ void dam_message( CHAR_DATA * ch, CHAR_DATA * victim, int dam, int dt )
          attack = attack_table[dt - TYPE_HIT];
       else
       {
-         bug( "Dam_message: bad dt %d.", dt );
+         bug( "%s: bad dt %d.", __func__, dt );
          dt = TYPE_HIT;
          attack = attack_table[0];
       }
 
-      sprintf( buf1, "$n's %s %s $N%c", attack, vp, punct );
-      sprintf( buf2, "Your %s %s $N%c", attack, vp, punct );
-      sprintf( buf3, "$n's %s %s you%c", attack, vp, punct );
+      snprintf( buf1, 256, "$n's %s %s $N%c", attack, vp, punct );
+      snprintf( buf2, 256, "Your %s %s $N%c", attack, vp, punct );
+      snprintf( buf3, 256, "$n's %s %s you%c", attack, vp, punct );
    }
 
    if( ch->skill_level[COMBAT_ABILITY] >= 100 )
-      sprintf( buf2, "%s You do %d points of damage.", buf2, dam );
+   {
+      char tmp[MAX_INPUT_LENGTH];
+
+      snprintf( tmp, MAX_INPUT_LENGTH, "%s You do %d points of damage.", buf2, dam );
+      mudstrlcpy( buf2, tmp, 256 );
+   }
 
    act( AT_ACTION, buf1, ch, NULL, victim, TO_NOTVICT );
    if( !gcflag )
       act( AT_HIT, buf2, ch, NULL, victim, TO_CHAR );
    if( !gvflag )
       act( AT_HITME, buf3, ch, NULL, victim, TO_VICT );
-
-   return;
 }
-
 
 void do_kill( CHAR_DATA * ch, const char *argument )
 {
@@ -2690,13 +2635,11 @@ void do_kill( CHAR_DATA * ch, const char *argument )
 
    WAIT_STATE( ch, 1 * PULSE_VIOLENCE );
    multi_hit( ch, victim, TYPE_UNDEFINED );
-   return;
 }
 
 void do_murde( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "If you want to MURDER, spell it out.\r\n", ch );
-   return;
 }
 
 void do_murder( CHAR_DATA * ch, const char *argument )
@@ -2752,7 +2695,6 @@ void do_murder( CHAR_DATA * ch, const char *argument )
 
    WAIT_STATE( ch, 1 * PULSE_VIOLENCE );
    multi_hit( ch, victim, TYPE_UNDEFINED );
-   return;
 }
 
 bool in_arena( CHAR_DATA * ch )
@@ -2767,12 +2709,10 @@ bool in_arena( CHAR_DATA * ch )
    return TRUE;
 }
 
-
 void do_flee( CHAR_DATA * ch, const char *argument )
 {
    ROOM_INDEX_DATA *was_in;
    ROOM_INDEX_DATA *now_in;
-   char buf[MAX_STRING_LENGTH];
    int attempt;
    short door;
    EXIT_DATA *pexit;
@@ -2826,16 +2766,13 @@ void do_flee( CHAR_DATA * ch, const char *argument )
       act( AT_FLEE, "$n runs for cover!", ch, NULL, NULL, TO_ROOM );
       ch->in_room = now_in;
       act( AT_FLEE, "$n glances around for signs of pursuit.", ch, NULL, NULL, TO_ROOM );
-      sprintf( buf, "You run for cover!" );
-      send_to_char( buf, ch );
+      send_to_char( "You run for cover!\r\n", ch );
 
       stop_fighting( ch, TRUE );
       return;
    }
 
-   sprintf( buf, "You attempt to run for cover!" );
-   send_to_char( buf, ch );
-   return;
+   send_to_char( "You attempt to run for cover!\r\n", ch );
 }
 
 bool get_cover( CHAR_DATA * ch )
@@ -2881,19 +2818,13 @@ bool get_cover( CHAR_DATA * ch )
 
       return TRUE;
    }
-
    return FALSE;
 }
-
-
 
 void do_sla( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "If you want to SLAY, spell it out.\r\n", ch );
-   return;
 }
-
-
 
 void do_slay( CHAR_DATA * ch, const char *argument )
 {
@@ -2986,5 +2917,4 @@ void do_slay( CHAR_DATA * ch, const char *argument )
 
    set_cur_char( victim );
    raw_kill( ch, victim );
-   return;
 }

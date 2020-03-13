@@ -18,7 +18,6 @@
 *			   Player communication module     		   *
 ****************************************************************************/
 
-
 #include <sys/types.h>
 #include <ctype.h>
 #include <stdio.h>
@@ -42,7 +41,6 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
 char *scramble( const char *argument, int modifier );
 const char *drunk_speech( const char *argument, CHAR_DATA * ch );
 
-
 void sound_to_room( ROOM_INDEX_DATA * room, const char *argument )
 {
    CHAR_DATA *vic;
@@ -55,7 +53,6 @@ void sound_to_room( ROOM_INDEX_DATA * room, const char *argument )
          send_to_char( argument, vic );
 
 }
-
 
 void do_beep( CHAR_DATA * ch, const char *argument )
 {
@@ -234,8 +231,7 @@ char *scramble( const char *argument, int modifier )
 }
 
 /* I'll rewrite this later if its still needed.. -- Altrag */
-const char *translate( CHAR_DATA * ch, CHAR_DATA * victim,
-		       const char *argument )
+const char *translate( CHAR_DATA * ch, CHAR_DATA * victim, const char *argument )
 {
    return "";
 }
@@ -251,7 +247,7 @@ const char *drunk_speech( const char *argument, CHAR_DATA * ch )
 
    if( IS_NPC( ch ) || !ch->pcdata )
    {
-      strcpy( buf, argument );
+      mudstrlcpy( buf, argument, MAX_INPUT_LENGTH * 2 );
       return buf;
    }
 
@@ -259,7 +255,7 @@ const char *drunk_speech( const char *argument, CHAR_DATA * ch )
 
    if( drunk <= 0 )
    {
-      strcpy( buf, argument );
+      mudstrlcpy( buf, argument, MAX_INPUT_LENGTH * 2 );
       return buf;
    }
 
@@ -268,7 +264,7 @@ const char *drunk_speech( const char *argument, CHAR_DATA * ch )
 
    if( !argument )
    {
-      bug( "Drunk_speech: NULL argument", 0 );
+      bug( "%s: NULL argument", __func__ );
       return "";
    }
 
@@ -467,7 +463,7 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
 
    if( argument[0] == '\0' )
    {
-      sprintf( buf, "%s what?\r\n", verb );
+      snprintf( buf, MAX_STRING_LENGTH, "%s what?\r\n", verb );
       buf[0] = UPPER( buf[0] );
       send_to_char( buf, ch );   /* where'd this line go? */
       return;
@@ -486,43 +482,43 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
       default:
          set_char_color( AT_GOSSIP, ch );
          ch_printf( ch, "You %s over the public network, '%s'\r\n", verb, argument );
-         sprintf( buf, "$n %ss over the public network, '$t'", verb );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %ss over the public network, '$t'", verb );
          break;
       case CHANNEL_CLANTALK:
          set_char_color( AT_CLAN, ch );
          ch_printf( ch, "Over the organizations private network you say, '%s'\r\n", argument );
-         sprintf( buf, "$n speaks over the organizations network, '$t'" );
+         snprintf( buf, MAX_STRING_LENGTH, "$n speaks over the organizations network, '$t'" );
          break;
       case CHANNEL_SHIP:
          set_char_color( AT_SHIP, ch );
          ch_printf( ch, "You tell the ship, '%s'\r\n", argument );
-         sprintf( buf, "$n says over the ships com system, '$t'" );
+         snprintf( buf, MAX_STRING_LENGTH, "$n says over the ships com system, '$t'" );
          break;
       case CHANNEL_SYSTEM:
       case CHANNEL_SPACE:
          set_char_color( AT_GOSSIP, ch );
          ch_printf( ch, "You %s, '%s'\r\n", verb, argument );
-         sprintf( buf, "$n %ss, '$t'", verb );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %ss, '$t'", verb );
          break;
       case CHANNEL_YELL:
       case CHANNEL_SHOUT:
          set_char_color( AT_GOSSIP, ch );
          ch_printf( ch, "You %s, '%s'\r\n", verb, argument );
-         sprintf( buf, "$n %ss, '$t'", verb );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %ss, '$t'", verb );
          break;
       case CHANNEL_ASK:
          set_char_color( AT_OOC, ch );
          ch_printf( ch, "(OOC) You %s, '%s'\r\n", verb, argument );
-         sprintf( buf, "(OOC) $n %ss, '$t'", verb );
+         snprintf( buf, MAX_STRING_LENGTH, "(OOC) $n %ss, '$t'", verb );
          break;
       case CHANNEL_NEWBIE:
          set_char_color( AT_OOC, ch );
          ch_printf( ch, "(NEWBIE) %s: %s\r\n", ch->name, argument );
-         sprintf( buf, "(NEWBIE) $n: $t" );
+         snprintf( buf, MAX_STRING_LENGTH, "(NEWBIE) $n: $t" );
          break;
       case CHANNEL_OOC:
          set_char_color( AT_OOC, ch );
-         sprintf( buf, "(OOC) $n: $t" );
+         snprintf( buf, MAX_STRING_LENGTH, "(OOC) $n: $t" );
          position = ch->position;
          ch->position = POS_STANDING;
          act( AT_OOC, buf, ch, argument, NULL, TO_CHAR );
@@ -531,7 +527,7 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
       case CHANNEL_WARTALK:
          set_char_color( AT_WARTALK, ch );
          ch_printf( ch, "You %s '%s'\r\n", verb, argument );
-         sprintf( buf, "$n %ss '$t'", verb );
+         snprintf( buf, MAX_STRING_LENGTH, "$n %ss '$t'", verb );
          break;
       case CHANNEL_AVTALK:
       case CHANNEL_IMMTALK:
@@ -539,15 +535,15 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
       case CHANNEL_104:
       case CHANNEL_105:
          if( channel == CHANNEL_AVTALK )
-            sprintf( buf, "$n: $t" );
+            mudstrlcat( buf, "$n: $t", MAX_STRING_LENGTH );
          else if( channel == CHANNEL_IMMTALK )
-            sprintf( buf, "$n> $t" );
+            mudstrlcat( buf, "$n> $t", MAX_STRING_LENGTH );
          else if( channel == CHANNEL_103 )
-            sprintf( buf, "(i103) $n> $t" );
+            mudstrlcat( buf, "(i103) $n> $t", MAX_STRING_LENGTH );
          else if( channel == CHANNEL_104 )
-            sprintf( buf, "(i104) $n> $t" );
+            mudstrlcat( buf, "(i104) $n> $t", MAX_STRING_LENGTH );
          else if( channel == CHANNEL_105 )
-            sprintf( buf, "(i105) $n> $t" );
+            mudstrlcat( buf, "(i105) $n> $t", MAX_STRING_LENGTH );
          position = ch->position;
          ch->position = POS_STANDING;
          act( channel == CHANNEL_AVTALK ? AT_AVATAR : AT_IMMORT, buf, ch, argument, NULL, TO_CHAR );
@@ -557,7 +553,7 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
 
    if( IS_SET( ch->in_room->room_flags, ROOM_LOGSPEECH ) )
    {
-      sprintf( buf2, "%s: %s (%s)", IS_NPC( ch ) ? ch->short_descr : ch->name, argument, verb );
+      snprintf( buf2, MAX_STRING_LENGTH, "%s: %s (%s)", IS_NPC( ch ) ? ch->short_descr : ch->name, argument, verb );
       append_to_file( LOG_FILE, buf2 );
    }
 
@@ -680,8 +676,6 @@ void talk_channel( CHAR_DATA * ch, const char *argument, int channel, const char
          vch->position = position;
       }
    }
-
-   return;
 }
 
 void to_channel( const char *argument, int channel, const char *verb, short level )
@@ -692,7 +686,7 @@ void to_channel( const char *argument, int channel, const char *verb, short leve
    if( !first_descriptor || argument[0] == '\0' )
       return;
 
-   sprintf( buf, "%s: %s\r\n", verb, argument );
+   snprintf( buf, MAX_STRING_LENGTH, "%s: %s\r\n", verb, argument );
 
    for( d = first_descriptor; d; d = d->next )
    {
@@ -715,10 +709,7 @@ void to_channel( const char *argument, int channel, const char *verb, short leve
          send_to_char( buf, vch );
       }
    }
-
-   return;
 }
-
 
 void do_chat( CHAR_DATA * ch, const char *argument )
 {
@@ -731,7 +722,6 @@ void do_chat( CHAR_DATA * ch, const char *argument )
    ch->gold -= 1;
 
    talk_channel( ch, argument, CHANNEL_CHAT, "chat" );
-   return;
 }
 
 void do_shiptalk( CHAR_DATA * ch, const char *argument )
@@ -744,7 +734,6 @@ void do_shiptalk( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_SHIP, "shiptalk" );
-   return;
 }
 
 void do_systemtalk( CHAR_DATA * ch, const char *argument )
@@ -757,7 +746,6 @@ void do_systemtalk( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_SYSTEM, "systemtalk" );
-   return;
 }
 
 void do_spacetalk( CHAR_DATA * ch, const char *argument )
@@ -770,13 +758,11 @@ void do_spacetalk( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_SPACE, "spacetalk" );
-   return;
 }
 
 void do_ooc( CHAR_DATA * ch, const char *argument )
 {
    talk_channel( ch, argument, CHANNEL_OOC, "ooc" );
-   return;
 }
 
 void do_clantalk( CHAR_DATA * ch, const char *argument )
@@ -828,7 +814,6 @@ void do_music( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_MUSIC, "sing" );
-   return;
 }
 
 
@@ -840,7 +825,6 @@ void do_quest( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_QUEST, "quest" );
-   return;
 }
 
 void do_ask( CHAR_DATA * ch, const char *argument )
@@ -851,10 +835,7 @@ void do_ask( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_ASK, "ask" );
-   return;
 }
-
-
 
 void do_answer( CHAR_DATA * ch, const char *argument )
 {
@@ -864,10 +845,7 @@ void do_answer( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_ASK, "answer" );
-   return;
 }
-
-
 
 void do_shout( CHAR_DATA * ch, const char *argument )
 {
@@ -878,10 +856,7 @@ void do_shout( CHAR_DATA * ch, const char *argument )
    }
    talk_channel( ch, drunk_speech( argument, ch ), CHANNEL_SHOUT, "shout" );
    WAIT_STATE( ch, 12 );
-   return;
 }
-
-
 
 void do_yell( CHAR_DATA * ch, const char *argument )
 {
@@ -891,10 +866,7 @@ void do_yell( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, drunk_speech( argument, ch ), CHANNEL_YELL, "yell" );
-   return;
 }
-
-
 
 void do_immtalk( CHAR_DATA * ch, const char *argument )
 {
@@ -904,9 +876,7 @@ void do_immtalk( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_IMMTALK, "immtalk" );
-   return;
 }
-
 
 void do_i103( CHAR_DATA * ch, const char *argument )
 {
@@ -916,7 +886,6 @@ void do_i103( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_103, "i103" );
-   return;
 }
 
 void do_i104( CHAR_DATA * ch, const char *argument )
@@ -927,7 +896,6 @@ void do_i104( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_104, "i104" );
-   return;
 }
 
 void do_i105( CHAR_DATA * ch, const char *argument )
@@ -938,9 +906,7 @@ void do_i105( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_105, "i105" );
-   return;
 }
-
 
 void do_avtalk( CHAR_DATA * ch, const char *argument )
 {
@@ -950,9 +916,7 @@ void do_avtalk( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, drunk_speech( argument, ch ), CHANNEL_AVTALK, "avtalk" );
-   return;
 }
-
 
 void do_say( CHAR_DATA * ch, const char *argument )
 {
@@ -995,7 +959,7 @@ void do_say( CHAR_DATA * ch, const char *argument )
    act( AT_SAY, "You say '$T'", ch, NULL, drunk_speech( argument, ch ), TO_CHAR );
    if( IS_SET( ch->in_room->room_flags, ROOM_LOGSPEECH ) )
    {
-      sprintf( buf, "%s: %s", IS_NPC( ch ) ? ch->short_descr : ch->name, argument );
+      snprintf( buf, MAX_STRING_LENGTH, "%s: %s", IS_NPC( ch ) ? ch->short_descr : ch->name, argument );
       append_to_file( LOG_FILE, buf );
    }
    mprog_speech_trigger( argument, ch );
@@ -1005,10 +969,7 @@ void do_say( CHAR_DATA * ch, const char *argument )
    if( char_died( ch ) )
       return;
    rprog_speech_trigger( argument, ch );
-   return;
 }
-
-
 
 void do_tell( CHAR_DATA * ch, const char *argument )
 {
@@ -1172,15 +1133,12 @@ void do_tell( CHAR_DATA * ch, const char *argument )
    victim->reply = ch;
    if( IS_SET( ch->in_room->room_flags, ROOM_LOGSPEECH ) )
    {
-      sprintf( buf, "%s: %s (tell to) %s.",
+      snprintf( buf, MAX_STRING_LENGTH, "%s: %s (tell to) %s.",
                IS_NPC( ch ) ? ch->short_descr : ch->name, argument, IS_NPC( victim ) ? victim->short_descr : victim->name );
       append_to_file( LOG_FILE, buf );
    }
    mprog_speech_trigger( argument, ch );
-   return;
 }
-
-
 
 void do_reply( CHAR_DATA * ch, const char *argument )
 {
@@ -1254,16 +1212,12 @@ void do_reply( CHAR_DATA * ch, const char *argument )
    victim->reply = ch;
    if( IS_SET( ch->in_room->room_flags, ROOM_LOGSPEECH ) )
    {
-      sprintf( buf, "%s: %s (reply to) %s.",
+      snprintf( buf, MAX_STRING_LENGTH, "%s: %s (reply to) %s.",
                IS_NPC( ch ) ? ch->short_descr : ch->name, argument, IS_NPC( victim ) ? victim->short_descr : victim->name );
       append_to_file( LOG_FILE, buf );
    }
    mprog_speech_trigger( argument, ch );
-
-   return;
 }
-
-
 
 void do_emote( CHAR_DATA * ch, const char *argument )
 {
@@ -1289,9 +1243,9 @@ void do_emote( CHAR_DATA * ch, const char *argument )
    for( plast = argument; *plast != '\0'; plast++ )
       ;
 
-   strcpy( buf, argument );
+   mudstrlcpy( buf, argument, MAX_STRING_LENGTH );
    if( isalpha( plast[-1] ) )
-      strcat( buf, "." );
+      mudstrlcat( buf, ".", MAX_STRING_LENGTH );
 
    MOBtrigger = FALSE;
    act( AT_ACTION, "$n $T", ch, NULL, buf, TO_ROOM );
@@ -1300,10 +1254,9 @@ void do_emote( CHAR_DATA * ch, const char *argument )
    ch->act = actflags;
    if( IS_SET( ch->in_room->room_flags, ROOM_LOGSPEECH ) )
    {
-      sprintf( buf, "%s %s (emote)", IS_NPC( ch ) ? ch->short_descr : ch->name, argument );
+      snprintf( buf, MAX_STRING_LENGTH, "%s %s (emote)", IS_NPC( ch ) ? ch->short_descr : ch->name, argument );
       append_to_file( LOG_FILE, buf );
    }
-   return;
 }
 
 void do_bug( CHAR_DATA * ch, const char *argument )
@@ -1315,7 +1268,6 @@ void do_bug( CHAR_DATA * ch, const char *argument )
    }
    append_file( ch, BUG_FILE, argument );
    send_to_char( "Ok.  Thanks.\r\n", ch );
-   return;
 }
 
 void do_ide( CHAR_DATA * ch, const char *argument )
@@ -1323,7 +1275,6 @@ void do_ide( CHAR_DATA * ch, const char *argument )
    send_to_char( "If you want to send an idea, type 'idea <message>'.\r\n", ch );
    send_to_char( "If you want to identify an object and have the identify spell,\r\n", ch );
    send_to_char( "Type 'cast identify <object>'.\r\n", ch );
-   return;
 }
 
 void do_idea( CHAR_DATA * ch, const char *argument )
@@ -1335,7 +1286,6 @@ void do_idea( CHAR_DATA * ch, const char *argument )
    }
    append_file( ch, IDEA_FILE, argument );
    send_to_char( "Ok.  Thanks.\r\n", ch );
-   return;
 }
 
 void do_typo( CHAR_DATA * ch, const char *argument )
@@ -1347,30 +1297,22 @@ void do_typo( CHAR_DATA * ch, const char *argument )
    }
    append_file( ch, TYPO_FILE, argument );
    send_to_char( "Ok.  Thanks.\r\n", ch );
-   return;
 }
 
 void do_rent( CHAR_DATA * ch, const char *argument )
 {
    set_char_color( AT_WHITE, ch );
    send_to_char( "There is no rent here.  Just save and quit.\r\n", ch );
-   return;
 }
 
 void do_qui( CHAR_DATA * ch, const char *argument )
 {
    set_char_color( AT_RED, ch );
    send_to_char( "If you want to QUIT, you have to spell it out.\r\n", ch );
-   return;
 }
 
 void do_quit( CHAR_DATA * ch, const char *argument )
 {
-   /*
-    * OBJ_DATA *obj; 
-    *//*
-    * Unused 
-    */
    int x, y;
    int level;
 
@@ -1419,7 +1361,7 @@ void do_quit( CHAR_DATA * ch, const char *argument )
    act( AT_BYE, "$n has left the game.", ch, NULL, NULL, TO_ROOM );
    set_char_color( AT_GREY, ch );
 
-   sprintf( log_buf, "%s has quit.", ch->name );
+   snprintf( log_buf, MAX_STRING_LENGTH, "%s has quit.", ch->name );
    quitting_char = ch;
    save_char_obj( ch );
    save_home( ch );
@@ -1434,16 +1376,8 @@ void do_quit( CHAR_DATA * ch, const char *argument )
       for( y = 0; y < MAX_LAYERS; y++ )
          save_equipment[x][y] = NULL;
 
-   /*
-    * don't show who's logging off to leaving player 
-    */
-/*
-    to_channel( log_buf, CHANNEL_MONITOR, "Monitor", level ); 
-*/
    log_string_plus( log_buf, LOG_COMM, level );
-   return;
 }
-
 
 void send_rip_screen( CHAR_DATA * ch )
 {
@@ -1508,7 +1442,6 @@ void send_ascii_title( CHAR_DATA * ch )
       write_to_buffer( ch->desc, BUFF, num );
    }
 }
-
 
 void do_rip( CHAR_DATA * ch, const char *argument )
 {
@@ -1618,9 +1551,7 @@ void do_save( CHAR_DATA * ch, const char *argument )
    save_home( ch );
    saving_char = NULL;
    send_to_char( "Ok.\r\n", ch );
-   return;
 }
-
 
 /*
  * Something from original DikuMUD that Merc yanked out.
@@ -1637,7 +1568,6 @@ bool circle_follow( CHAR_DATA * ch, CHAR_DATA * victim )
          return TRUE;
    return FALSE;
 }
-
 
 void do_follow( CHAR_DATA * ch, const char *argument )
 {
@@ -1685,16 +1615,13 @@ void do_follow( CHAR_DATA * ch, const char *argument )
       stop_follower( ch );
 
    add_follower( ch, victim );
-   return;
 }
-
-
 
 void add_follower( CHAR_DATA * ch, CHAR_DATA * master )
 {
    if( ch->master )
    {
-      bug( "Add_follower: non-null master.", 0 );
+      bug( "%s: non-null master.", __func__ );
       return;
    }
 
@@ -1705,17 +1632,13 @@ void add_follower( CHAR_DATA * ch, CHAR_DATA * master )
       act( AT_ACTION, "$n now follows you.", ch, NULL, master, TO_VICT );
 
    act( AT_ACTION, "You now follow $N.", ch, NULL, master, TO_CHAR );
-
-   return;
 }
-
-
 
 void stop_follower( CHAR_DATA * ch )
 {
    if( !ch->master )
    {
-      bug( "Stop_follower: null master.", 0 );
+      bug( "%s: null master.", __func__ );
       return;
    }
 
@@ -1731,10 +1654,7 @@ void stop_follower( CHAR_DATA * ch )
 
    ch->master = NULL;
    ch->leader = NULL;
-   return;
 }
-
-
 
 void die_follower( CHAR_DATA * ch )
 {
@@ -1764,7 +1684,7 @@ void do_order( CHAR_DATA * ch, const char *argument )
    bool found;
    bool fAll;
 
-   strcpy( argbuf, argument );
+   mudstrlcpy( argbuf, argument, MAX_INPUT_LENGTH );
    argument = one_argument( argument, arg );
 
    if( arg[0] == '\0' || argument[0] == '\0' )
@@ -1827,7 +1747,7 @@ void do_order( CHAR_DATA * ch, const char *argument )
 
    if( found )
    {
-      sprintf( log_buf, "%s: order %s.", ch->name, argbuf );
+      snprintf( log_buf, MAX_STRING_LENGTH, "%s: order %s.", ch->name, argbuf );
       log_string_plus( log_buf, LOG_NORMAL, ch->top_level );
       send_to_char( "Ok.\r\n", ch );
       WAIT_STATE( ch, 12 );
@@ -1852,7 +1772,7 @@ void do_group( CHAR_DATA * ch, const char *argument )
       set_char_color( AT_GREEN, ch );
       ch_printf( ch, "%s's group:\r\n", PERS( leader, ch ) );
 
-/* Changed so that no info revealed on possess */
+      /* Changed so that no info revealed on possess */
       for( gch = first_char; gch; gch = gch->next )
       {
          if( is_same_group( gch, ch ) )
@@ -1961,10 +1881,7 @@ void do_group( CHAR_DATA * ch, const char *argument )
    act( AT_ACTION, "$N joins $n's group.", ch, NULL, victim, TO_NOTVICT );
    act( AT_ACTION, "You join $n's group.", ch, NULL, victim, TO_VICT );
    act( AT_ACTION, "$N joins your group.", ch, NULL, victim, TO_CHAR );
-   return;
 }
-
-
 
 /*
  * 'Split' originally by Gnort, God of Chaos.
@@ -2039,7 +1956,7 @@ void do_split( CHAR_DATA * ch, const char *argument )
    set_char_color( AT_GOLD, ch );
    ch_printf( ch, "You split %d credits.  Your share is %d credits.\r\n", amount, share + extra );
 
-   sprintf( buf, "$n splits %d credits.  Your share is %d credits.", amount, share );
+   snprintf( buf, MAX_STRING_LENGTH, "$n splits %d credits.  Your share is %d credits.", amount, share );
 
    for( gch = ch->in_room->first_person; gch; gch = gch->next_in_room )
    {
@@ -2049,10 +1966,7 @@ void do_split( CHAR_DATA * ch, const char *argument )
          gch->gold += share;
       }
    }
-   return;
 }
-
-
 
 void do_gtell( CHAR_DATA * ch, const char *argument )
 {
@@ -2073,7 +1987,6 @@ void do_gtell( CHAR_DATA * ch, const char *argument )
    /*
     * Note use of send_to_char, so gtell works on sleepers.
     */
-/*    sprintf( buf, "%s tells the group '%s'.\r\n", ch->name, argument );*/
    for( gch = first_char; gch; gch = gch->next )
    {
       if( is_same_group( gch, ch ) )
@@ -2089,10 +2002,7 @@ void do_gtell( CHAR_DATA * ch, const char *argument )
             ch_printf( gch, "%s tells the group '%s'.\r\n", ch->name, scramble( argument, ch->speaking ) );
       }
    }
-
-   return;
 }
-
 
 /*
  * It is very important that this be an equivalence relation:
@@ -2120,7 +2030,7 @@ void talk_auction( char *argument )
    char buf[MAX_STRING_LENGTH];
    CHAR_DATA *original;
 
-   sprintf( buf, "Auction: %s", argument );  /* last %s to reset color */
+   snprintf( buf, MAX_STRING_LENGTH, "Auction: %s", argument );  /* last %s to reset color */
 
    for( d = first_descriptor; d; d = d->next )
    {
@@ -2160,6 +2070,7 @@ bool knows_language( CHAR_DATA * ch, int language, CHAR_DATA * cch )
       if( ch->pcdata->clan == cch->pcdata->clan && ch->pcdata->clan != NULL )
          return TRUE;
    }
+
    if( !IS_NPC( ch ) )
    {
       int lang;
@@ -2201,7 +2112,7 @@ bool can_learn_lang( CHAR_DATA * ch, int language )
                return FALSE;
             if( ( sn = skill_lookup( lang_names[lang] ) ) < 0 )
             {
-               bug( "Can_learn_lang: valid language without sn: %d", lang );
+               bug( "%s: valid language without sn: %d", __func__, lang );
                continue;
             }
             if( ch->pcdata->learned[sn] >= 99 )
@@ -2396,7 +2307,6 @@ void do_languages( CHAR_DATA * ch, const char *argument )
       send_to_char( "\r\n", ch );
    }
    send_to_char( "\r\n", ch );
-   return;
 }
 
 void do_wartalk( CHAR_DATA * ch, const char *argument )
@@ -2407,5 +2317,4 @@ void do_wartalk( CHAR_DATA * ch, const char *argument )
       return;
    }
    talk_channel( ch, argument, CHANNEL_WARTALK, "war" );
-   return;
 }

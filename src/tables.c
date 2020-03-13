@@ -35,32 +35,32 @@ const char *const skill_tname[] = { "unknown", "Spell", "Skill", "Weapon", "Tong
 
 SPELL_FUN *spell_function( const char *name )
 {
-  SPELL_FUN *funHandle = 0;
-  const char *error = 0;
-  *(void**)( &funHandle ) = dlsym( sysdata.dlHandle, name );
+   SPELL_FUN *funHandle = 0;
+   const char *error = 0;
+   *(void**)( &funHandle ) = dlsym( sysdata.dlHandle, name );
 
-  if( ( error = dlerror() ) != NULL )
-    {
-      bug( "Error locating %s in symbol table. %s", name, error );
+   if( ( error = dlerror() ) != NULL )
+   {
+      bug( "%s: Error locating %s in symbol table. %s", __func__, name, error );
       return spell_notfound;
-    }
+   }
 
-  return funHandle;
+   return funHandle;
 }
 
 DO_FUN *skill_function( const char *name )
 {
-  const char *error = 0;
-  DO_FUN *funHandle = 0;
-  *(void**)( &funHandle ) = dlsym( sysdata.dlHandle, name );
+   const char *error = 0;
+   DO_FUN *funHandle = 0;
+   *(void**)( &funHandle ) = dlsym( sysdata.dlHandle, name );
 
-  if( ( error = dlerror() ) != NULL )
-    {
-      bug( "Error locating %s in symbol table. %s", name, error );
+   if( ( error = dlerror() ) != NULL )
+   {
+      bug( "%s: Error locating %s in symbol table. %s", __func__, name, error );
       return skill_notfound;
-    }
+   }
 
-  return funHandle;
+   return funHandle;
 }
 
 /*
@@ -92,7 +92,6 @@ void sort_skill_table(  )
    log_string( "Sorting skill table..." );
    qsort( &skill_table[1], top_sn - 1, sizeof( SKILLTYPE * ), ( int ( * )( const void *, const void * ) )skill_comp );
 }
-
 
 /*
  * Write skill data to a file
@@ -188,7 +187,7 @@ void save_skill_table(  )
 
    if( ( fpout = fopen( SKILL_FILE, "w" ) ) == NULL )
    {
-      bug( "Cannot open skills.dat for writting", 0 );
+      bug( "%s: Cannot open skills.dat for writting", __func__ );
       perror( SKILL_FILE );
       return;
    }
@@ -214,7 +213,7 @@ void save_herb_table(  )
 
    if( ( fpout = fopen( HERB_FILE, "w" ) ) == NULL )
    {
-      bug( "Cannot open herbs.dat for writting", 0 );
+      bug( "%s: Cannot open herbs.dat for writting", __func__ );
       perror( HERB_FILE );
       return;
    }
@@ -241,7 +240,7 @@ void save_socials(  )
 
    if( ( fpout = fopen( SOCIAL_FILE, "w" ) ) == NULL )
    {
-      bug( "Cannot open socials.dat for writting", 0 );
+      bug( "%s: Cannot open socials.dat for writting", __func__ );
       perror( SOCIAL_FILE );
       return;
    }
@@ -252,7 +251,7 @@ void save_socials(  )
       {
          if( !social->name || social->name[0] == '\0' )
          {
-            bug( "Save_socials: blank social in hash bucket %d", x );
+            bug( "%s: blank social in hash bucket %d", __func__, x );
             continue;
          }
          fprintf( fpout, "#SOCIAL\n" );
@@ -260,7 +259,7 @@ void save_socials(  )
          if( social->char_no_arg )
             fprintf( fpout, "CharNoArg   %s~\n", social->char_no_arg );
          else
-            bug( "Save_socials: NULL char_no_arg in hash bucket %d", x );
+            bug( "%s: NULL char_no_arg in hash bucket %d", __func__, x );
          if( social->others_no_arg )
             fprintf( fpout, "OthersNoArg %s~\n", social->others_no_arg );
          if( social->char_found )
@@ -306,7 +305,7 @@ void save_commands(  )
 
    if( ( fpout = fopen( COMMAND_FILE, "w" ) ) == NULL )
    {
-      bug( "Cannot open commands.dat for writing", 0 );
+      bug( "%s: annot open commands.dat for writing", __func__ );
       perror( COMMAND_FILE );
       return;
    }
@@ -317,7 +316,7 @@ void save_commands(  )
       {
          if( !command->name || command->name[0] == '\0' )
          {
-            bug( "Save_commands: blank command in hash bucket %d", x );
+            bug( "%s: blank command in hash bucket %d", __func__, x );
             continue;
          }
          fprintf( fpout, "#COMMAND\n" );
@@ -335,7 +334,6 @@ void save_commands(  )
 
 SKILLTYPE *fread_skill( FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
    SKILLTYPE *skill;
@@ -395,7 +393,7 @@ SKILLTYPE *fread_skill( FILE * fp )
                }
                else
                {
-                  bug( "%s: unknown skill/spell %s", __FUNCTION__, w );
+                  bug( "%s: unknown skill/spell %s", __func__, w );
                   skill->spell_fun = spell_null;
                }
                break;
@@ -480,8 +478,7 @@ SKILLTYPE *fread_skill( FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_skill: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
@@ -507,7 +504,7 @@ void load_skill_table(  )
 
          if( letter != '#' )
          {
-            bug( "Load_skill_table: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -516,7 +513,7 @@ void load_skill_table(  )
          {
             if( top_sn >= MAX_SKILL )
             {
-               bug( "load_skill_table: more skills than MAX_SKILL %d", MAX_SKILL );
+               bug( "%s: more skills than MAX_SKILL %d", __func__, MAX_SKILL );
                fclose( fp );
                return;
             }
@@ -527,7 +524,7 @@ void load_skill_table(  )
             break;
          else
          {
-            bug( "Load_skill_table: bad section.", 0 );
+            bug( "%s: bad section.", __func__ );
             continue;
          }
       }
@@ -535,8 +532,8 @@ void load_skill_table(  )
    }
    else
    {
-      bug( "Cannot open skills.dat", 0 );
-      exit( 0 );
+      bug( "%s: Cannot open skills.dat", __func__ );
+      exit( 1 );
    }
 }
 
@@ -561,7 +558,7 @@ void load_herb_table(  )
 
          if( letter != '#' )
          {
-            bug( "Load_herb_table: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -570,7 +567,7 @@ void load_herb_table(  )
          {
             if( top_herb >= MAX_HERB )
             {
-               bug( "load_herb_table: more herbs than MAX_HERB %d", MAX_HERB );
+               bug( "%s: more herbs than MAX_HERB %d", __func__, MAX_HERB );
                fclose( fp );
                return;
             }
@@ -583,7 +580,7 @@ void load_herb_table(  )
             break;
          else
          {
-            bug( "Load_herb_table: bad section.", 0 );
+            bug( "%s: bad section.", __func__ );
             continue;
          }
       }
@@ -591,14 +588,13 @@ void load_herb_table(  )
    }
    else
    {
-      bug( "Cannot open herbs.dat", 0 );
-      exit( 0 );
+      bug( "%s: Cannot open herbs.dat", __func__ );
+      exit( 1 );
    }
 }
 
 void fread_social( FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
    SOCIALTYPE *social;
@@ -628,13 +624,13 @@ void fread_social( FILE * fp )
             {
                if( !social->name )
                {
-                  bug( "Fread_social: Name not found", 0 );
+                  bug( "%s: Name not found", __func__ );
                   free_social( social );
                   return;
                }
                if( !social->char_no_arg )
                {
-                  bug( "Fread_social: CharNoArg not found", 0 );
+                  bug( "%s: CharNoArg not found", __func__ );
                   free_social( social );
                   return;
                }
@@ -660,8 +656,7 @@ void fread_social( FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_social: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
@@ -686,7 +681,7 @@ void load_socials(  )
 
          if( letter != '#' )
          {
-            bug( "Load_socials: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -700,7 +695,7 @@ void load_socials(  )
             break;
          else
          {
-            bug( "Load_socials: bad section.", 0 );
+            bug( "%s: bad section.", __func__ );
             continue;
          }
       }
@@ -708,14 +703,13 @@ void load_socials(  )
    }
    else
    {
-      bug( "Cannot open socials.dat", 0 );
-      exit( 0 );
+      bug( "%s: Cannot open socials.dat", __func__ );
+      exit( 1 );
    }
 }
 
 void fread_command( FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
    CMDTYPE *command;
@@ -743,13 +737,13 @@ void fread_command( FILE * fp )
 	    {
 		if( !command->name )
 		{
-		   bug( "%s", "Fread_command: Name not found" );
+		   bug( "%s: Name not found", __func__ );
 		   free_command( command );
 		   return;
 		}
 		if( !command->fun_name )
 		{
-		   bug( "fread_command: No function name supplied for %s", command->name );
+		   bug( "%s: No function name supplied for %s", __func__, command->name );
 		   free_command( command );
 		   return;
 		}
@@ -761,7 +755,7 @@ void fread_command( FILE * fp )
 	      command->do_fun = skill_function( command->fun_name );
 		if( command->do_fun == skill_notfound )
 		{
-		   bug( "Fread_command: Function %s not found for %s", command->fun_name, command->name );
+		   bug( "%s: Function %s not found for %s", __func__, command->fun_name, command->name );
 		   free_command( command );
 		   return;
 		}
@@ -786,8 +780,7 @@ void fread_command( FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_command: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
@@ -812,7 +805,7 @@ void load_commands(  )
 
          if( letter != '#' )
          {
-            bug( "Load_commands: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -826,7 +819,7 @@ void load_commands(  )
             break;
          else
          {
-            bug( "Load_commands: bad section.", 0 );
+            bug( "%s: bad section.", __func__ );
             continue;
          }
       }
@@ -834,8 +827,7 @@ void load_commands(  )
    }
    else
    {
-      bug( "Cannot open commands.dat", 0 );
-      exit( 0 );
+      bug( "%s: Cannot open commands.dat", __func__ );
+      exit( 1 );
    }
-
 }

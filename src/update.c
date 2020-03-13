@@ -27,32 +27,31 @@
 #include "mud.h"
 
 /* from swskills.c */
-void add_reinforcements args( ( CHAR_DATA * ch ) );
+void add_reinforcements( CHAR_DATA * ch );
 
 /*
  * Local functions.
  */
-int hit_gain args( ( CHAR_DATA * ch ) );
-int mana_gain args( ( CHAR_DATA * ch ) );
-int move_gain args( ( CHAR_DATA * ch ) );
-void gain_addiction args( ( CHAR_DATA * ch ) );
-void mobile_update args( ( void ) );
-void weather_update args( ( void ) );
-void update_taxes args( ( void ) );
-void char_update args( ( void ) );
-void obj_update args( ( void ) );
-void aggr_update args( ( void ) );
-void room_act_update args( ( void ) );
-void obj_act_update args( ( void ) );
-void char_check args( ( void ) );
-void drunk_randoms args( ( CHAR_DATA * ch ) );
-void halucinations args( ( CHAR_DATA * ch ) );
-void subtract_times args( ( struct timeval * etime, struct timeval * sttime ) );
+int hit_gain( CHAR_DATA * ch );
+int mana_gain( CHAR_DATA * ch );
+int move_gain( CHAR_DATA * ch );
+void gain_addiction( CHAR_DATA * ch );
+void mobile_update( void );
+void weather_update( void );
+void update_taxes( void );
+void char_update( void );
+void obj_update( void );
+void aggr_update( void );
+void room_act_update( void );
+void obj_act_update( void );
+void char_check( void );
+void drunk_randoms( CHAR_DATA * ch );
+void halucinations( CHAR_DATA * ch );
+void subtract_times( struct timeval * etime, struct timeval * sttime );
 
 /*
  * Global Variables
  */
-
 CHAR_DATA *gch_prev;
 OBJ_DATA *gobj_prev;
 
@@ -303,8 +302,6 @@ void advance_level( CHAR_DATA * ch, int ability )
 
    if( !IS_NPC( ch ) )
       REMOVE_BIT( ch->act, PLR_BOUGHT_PET );
-
-   return;
 }
 
 void gain_exp( CHAR_DATA * ch, int gain, int ability )
@@ -333,11 +330,7 @@ void gain_exp( CHAR_DATA * ch, int gain, int ability )
       ch_printf( ch, "You have now obtained %s level %d!\r\n", ability_name[ability], ++ch->skill_level[ability] );
       advance_level( ch, ability );
    }
-
-   return;
 }
-
-
 
 /*
  * Regeneration stuff.
@@ -402,8 +395,6 @@ int hit_gain( CHAR_DATA * ch )
    return UMIN( gain, ch->max_hit - ch->hit );
 }
 
-
-
 int mana_gain( CHAR_DATA * ch )
 {
    int gain;
@@ -444,8 +435,6 @@ int mana_gain( CHAR_DATA * ch )
 
    return UMIN( gain, ch->max_mana - ch->mana );
 }
-
-
 
 int move_gain( CHAR_DATA * ch )
 {
@@ -590,7 +579,6 @@ void gain_addiction( CHAR_DATA * ch )
       else if( ch->pcdata->addiction[drug] > 0 && ch->pcdata->drug_level[drug] <= 0 )
          ch->pcdata->addiction[drug]--;
    }
-
 }
 
 void gain_condition( CHAR_DATA * ch, int iCond, int value )
@@ -639,7 +627,7 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             retcode = rNONE;
             break;
          default:
-            bug( "Gain_condition: invalid condition type %d", iCond );
+            bug( "%s: invalid condition type %d", __func__, iCond );
             retcode = rNONE;
             break;
       }
@@ -682,7 +670,6 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
             break;
       }
    }
-
 
    if( ch->pcdata->condition[iCond] == 2 )
    {
@@ -729,7 +716,6 @@ void gain_condition( CHAR_DATA * ch, int iCond, int value )
 
       }
    }
-   return;
 }
 
 /*
@@ -754,7 +740,7 @@ void mobile_update( void )
       set_cur_char( ch );
       if( ch == first_char && ch->prev )
       {
-         bug( "%s: first_char->prev != NULL... fixed", __FUNCTION__ );
+         bug( "%s: first_char->prev != NULL... fixed", __func__ );
          ch->prev = NULL;
       }
 
@@ -762,7 +748,7 @@ void mobile_update( void )
 
       if( gch_prev && gch_prev->next != ch )
       {
-         bug( "FATAL: %s: %s->prev->next doesn't point to ch.", __FUNCTION__, ch->name );
+         bug( "FATAL: %s: %s->prev->next doesn't point to ch.", __func__, ch->name );
          gch_prev = NULL;
          ch->prev = NULL;
          do_shout( ch, "Thoric says, 'Prepare for the worst!'" );
@@ -848,7 +834,7 @@ void mobile_update( void )
 
       if( ch != cur_char )
       {
-         bug( "Mobile_update: ch != cur_char after spec_fun", 0 );
+         bug( "%s: ch != cur_char after spec_fun", __func__ );
          continue;
       }
 
@@ -978,16 +964,16 @@ void mobile_update( void )
                switch ( number_bits( 2 ) )
                {
                   case 0:
-                     sprintf( buf, "Get away from me, %s!", rch->name );
+                     snprintf( buf, MAX_STRING_LENGTH, "Get away from me, %s!", rch->name );
                      break;
                   case 1:
-                     sprintf( buf, "Leave me be, %s!", rch->name );
+                     snprintf( buf, MAX_STRING_LENGTH, "Leave me be, %s!", rch->name );
                      break;
                   case 2:
-                     sprintf( buf, "%s is trying to kill me!  Help!", rch->name );
+                     snprintf( buf, MAX_STRING_LENGTH, "%s is trying to kill me!  Help!", rch->name );
                      break;
                   case 3:
-                     sprintf( buf, "Someone save me from %s!", rch->name );
+                     snprintf( buf, MAX_STRING_LENGTH, "Someone save me from %s!", rch->name );
                      break;
                }
                do_yell( ch, buf );
@@ -999,8 +985,6 @@ void mobile_update( void )
             retcode = move_char( ch, pexit, 0 );
       }
    }
-
-   return;
 }
 
 void update_taxes( void )
@@ -1038,9 +1022,7 @@ void update_taxes( void )
          save_planet( planet );
       }
    }
-
 }
-
 
 /*
  * Update the weather.
@@ -1058,31 +1040,31 @@ void weather_update( void )
    {
       case 5:
          weather_info.sunlight = SUN_LIGHT;
-         strcat( buf, "The day has begun." );
+         mudstrlcat( buf, "The day has begun.", MAX_STRING_LENGTH );
          AT_TEMP = AT_YELLOW;
          break;
 
       case 6:
          weather_info.sunlight = SUN_RISE;
-         strcat( buf, "The sun rises in the east." );
+         mudstrlcat( buf, "The sun rises in the east.", MAX_STRING_LENGTH );
          AT_TEMP = AT_ORANGE;
          break;
 
       case 12:
          weather_info.sunlight = SUN_LIGHT;
-         strcat( buf, "It's noon." );
+         mudstrlcat( buf, "It's noon.", MAX_STRING_LENGTH );
          AT_TEMP = AT_YELLOW;
          break;
 
       case 19:
          weather_info.sunlight = SUN_SET;
-         strcat( buf, "The sun slowly disappears in the west." );
+         mudstrlcat( buf, "The sun slowly disappears in the west.", MAX_STRING_LENGTH );
          AT_TEMP = AT_BLOOD;
          break;
 
       case 20:
          weather_info.sunlight = SUN_DARK;
-         strcat( buf, "The night has begun." );
+         mudstrlcat( buf, "The night has begun.", MAX_STRING_LENGTH );
          AT_TEMP = AT_DGREY;
          break;
 
@@ -1139,14 +1121,14 @@ void weather_update( void )
    switch ( weather_info.sky )
    {
       default:
-         bug( "Weather_update: bad sky %d.", weather_info.sky );
+         bug( "%s: bad sky %d.", __func__, weather_info.sky );
          weather_info.sky = SKY_CLOUDLESS;
          break;
 
       case SKY_CLOUDLESS:
          if( weather_info.mmhg < 990 || ( weather_info.mmhg < 1010 && number_bits( 2 ) == 0 ) )
          {
-            strcat( buf, "The sky is getting cloudy." );
+            mudstrlcat( buf, "The sky is getting cloudy.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_CLOUDY;
             AT_TEMP = AT_GREY;
          }
@@ -1155,14 +1137,14 @@ void weather_update( void )
       case SKY_CLOUDY:
          if( weather_info.mmhg < 970 || ( weather_info.mmhg < 990 && number_bits( 2 ) == 0 ) )
          {
-            strcat( buf, "It starts to rain." );
+            mudstrlcat( buf, "It starts to rain.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_RAINING;
             AT_TEMP = AT_BLUE;
          }
 
          if( weather_info.mmhg > 1030 && number_bits( 2 ) == 0 )
          {
-            strcat( buf, "The clouds disappear." );
+            mudstrlcat( buf, "The clouds disappear.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_CLOUDLESS;
             AT_TEMP = AT_WHITE;
          }
@@ -1171,14 +1153,14 @@ void weather_update( void )
       case SKY_RAINING:
          if( weather_info.mmhg < 970 && number_bits( 2 ) == 0 )
          {
-            strcat( buf, "Lightning flashes in the sky." );
+            mudstrlcat( buf, "Lightning flashes in the sky.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_LIGHTNING;
             AT_TEMP = AT_YELLOW;
          }
 
          if( weather_info.mmhg > 1030 || ( weather_info.mmhg > 1010 && number_bits( 2 ) == 0 ) )
          {
-            strcat( buf, "The rain stopped." );
+            mudstrlcat( buf, "The rain stopped.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_CLOUDY;
             AT_TEMP = AT_WHITE;
          }
@@ -1187,7 +1169,7 @@ void weather_update( void )
       case SKY_LIGHTNING:
          if( weather_info.mmhg > 1010 || ( weather_info.mmhg > 990 && number_bits( 2 ) == 0 ) )
          {
-            strcat( buf, "The lightning has stopped." );
+            mudstrlcat( buf, "The lightning has stopped.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_RAINING;
             AT_TEMP = AT_GREY;
             break;
@@ -1203,11 +1185,7 @@ void weather_update( void )
             act( AT_TEMP, buf, d->character, 0, 0, TO_CHAR );
       }
    }
-
-   return;
 }
-
-
 
 /*
  * Update all chars, including mobs.
@@ -1224,14 +1202,14 @@ void char_update( void )
    {
       if( ch == first_char && ch->prev )
       {
-         bug( "char_update: first_char->prev != NULL... fixed", 0 );
+         bug( "%s: first_char->prev != NULL... fixed", __func__ );
          ch->prev = NULL;
       }
       gch_prev = ch->prev;
       set_cur_char( ch );
       if( gch_prev && gch_prev->next != ch )
       {
-         bug( "char_update: ch->prev->next != ch", 0 );
+         bug( "%s: ch->prev->next != ch", __func__ );
          return;
       }
 
@@ -1504,11 +1482,7 @@ void char_update( void )
       }
 
    }
-
-   return;
 }
-
-
 
 /*
  * Update all objs.
@@ -1526,13 +1500,13 @@ void obj_update( void )
 
       if( obj == first_object && obj->prev )
       {
-         bug( "obj_update: first_object->prev != NULL... fixed", 0 );
+         bug( "%s: first_object->prev != NULL... fixed", __func__ );
          obj->prev = NULL;
       }
       gobj_prev = obj->prev;
       if( gobj_prev && gobj_prev->next != obj )
       {
-         bug( "obj_update: obj->prev->next != obj", 0 );
+         bug( "%s: obj->prev->next != obj", __func__ );
          return;
       }
       set_cur_obj( obj );
@@ -1592,9 +1566,7 @@ void obj_update( void )
             REMOVE_BIT( obj->value[3], PIPE_HOT );
       }
 
-
-/* Corpse decay (npc corpses decay at 8 times the rate of pc corpses) - Narn */
-
+      /* Corpse decay (npc corpses decay at 8 times the rate of pc corpses) - Narn */
       if( obj->item_type == ITEM_CORPSE_PC || obj->item_type == ITEM_CORPSE_NPC || obj->item_type == ITEM_DROID_CORPSE )
       {
          short timerfrac = UMAX( 1, obj->timer - 1 );
@@ -1613,9 +1585,9 @@ void obj_update( void )
             separate_obj( obj );
             obj->value[2] = timerfrac;
             if( obj->item_type == ITEM_DROID_CORPSE )
-               sprintf( buf, d_corpse_descs[UMIN( timerfrac - 1, 4 )], bufptr );
+               snprintf( buf, MAX_STRING_LENGTH, d_corpse_descs[UMIN( timerfrac - 1, 4 )], bufptr );
             else
-               sprintf( buf, corpse_descs[UMIN( timerfrac - 1, 4 )], capitalize( bufptr ) );
+               snprintf( buf, MAX_STRING_LENGTH, corpse_descs[UMIN( timerfrac - 1, 4 )], capitalize( bufptr ) );
 
             STRFREE( obj->description );
             obj->description = STRALLOC( buf );
@@ -1639,11 +1611,9 @@ void obj_update( void )
       if( ( obj->timer <= 0 || --obj->timer > 0 ) )
          continue;
 
-
       /*
        * if we get this far, object's timer has expired. 
        */
-
       AT_TEMP = AT_PLAIN;
       switch ( obj->item_type )
       {
@@ -1716,9 +1686,7 @@ void obj_update( void )
          global_objcode = rOBJ_EXPIRED;
       extract_obj( obj );
    }
-   return;
 }
-
 
 /*
  * Function to check important stuff happening to a player
@@ -1811,7 +1779,6 @@ void char_check( void )
                {
                   int dam;
 
-
                   dam = number_range( ch->max_hit / 50, ch->max_hit / 30 );
                   dam = UMAX( 1, dam );
                   if( ch->hit <= 0 )
@@ -1851,11 +1818,9 @@ void char_check( void )
                }
             }
          }
-
       }
    }
 }
-
 
 /*
  * Aggress.
@@ -1875,29 +1840,6 @@ void aggr_update( void )
    DESCRIPTOR_DATA *d, *dnext;
    CHAR_DATA *wch, *ch, *ch_next, *victim;
    struct act_prog_data *apdtmp;
-
-#ifdef UNDEFD
-   /*
-    *  GRUNT!  To do
-    *
-    */
-   if( IS_NPC( wch ) && wch->mpactnum > 0 && wch->in_room->area->nplayer > 0 )
-   {
-      MPROG_ACT_LIST *tmp_act, *tmp2_act;
-      for( tmp_act = wch->mpact; tmp_act; tmp_act = tmp_act->next )
-      {
-         oprog_wordlist_check( tmp_act->buf, wch, tmp_act->ch, tmp_act->obj, tmp_act->vo, ACT_PROG );
-         DISPOSE( tmp_act->buf );
-      }
-      for( tmp_act = wch->mpact; tmp_act; tmp_act = tmp2_act )
-      {
-         tmp2_act = tmp_act->next;
-         DISPOSE( tmp_act );
-      }
-      wch->mpactnum = 0;
-      wch->mpact = NULL;
-   }
-#endif
 
    /*
     * check mobprog act queue 
@@ -1964,7 +1906,7 @@ void aggr_update( void )
 
          if( !victim )
          {
-            bug( "Aggr_update: null victim.", count );
+            bug( "%s: null victim.", __func__, count );
             continue;
          }
 
@@ -1995,8 +1937,6 @@ void aggr_update( void )
          global_retcode = multi_hit( ch, victim, TYPE_UNDEFINED );
       }
    }
-
-   return;
 }
 
 /* From interp.c */
@@ -2040,7 +1980,6 @@ void drunk_randoms( CHAR_DATA * ch )
    }
 
    ch->position = position;
-   return;
 }
 
 void halucinations( CHAR_DATA * ch )
@@ -2115,7 +2054,6 @@ void halucinations( CHAR_DATA * ch )
       }
       send_to_char( t, ch );
    }
-   return;
 }
 
 void tele_update( void )
@@ -2140,7 +2078,6 @@ void tele_update( void )
    }
 }
 
-#if FALSE
 /* 
  * Write all outstanding authorization requests to Log channel - Gorog
  */
@@ -2148,7 +2085,6 @@ void auth_update( void )
 {
    CHAR_DATA *victim;
    DESCRIPTOR_DATA *d;
-   char log_buf[MAX_INPUT_LENGTH];
    bool first_time = TRUE; /* so titles are only done once */
 
    for( d = first_descriptor; d; d = d->next )
@@ -2159,37 +2095,12 @@ void auth_update( void )
          if( first_time )
          {
             first_time = FALSE;
-            strcpy( log_buf, "Pending authorizations:" );
+            mudstrlcpy( log_buf, "Pending authorizations:", MAX_STRING_LENGTH );
             to_channel( log_buf, CHANNEL_MONITOR, "Monitor", 1 );
          }
-         sprintf( log_buf, " %s@%s new %s", victim->name, victim->desc->host, race_table[victim->race].race_name );
+         snprintf( log_buf, MAX_STRING_LENGTH, " %s@%s new %s", victim->name, victim->desc->host, race_table[victim->race].race_name );
          to_channel( log_buf, CHANNEL_MONITOR, "Monitor", 1 );
       }
-   }
-}
-#endif
-
-void auth_update( void )
-{
-   CHAR_DATA *victim;
-   DESCRIPTOR_DATA *d;
-   char buf[MAX_INPUT_LENGTH];
-   bool found_hit = FALSE; /* was at least one found? */
-
-   strcpy( log_buf, "Pending authorizations:\r\n" );
-   for( d = first_descriptor; d; d = d->next )
-   {
-      if( ( victim = d->character ) && IS_WAITING_FOR_AUTH( victim ) )
-      {
-         found_hit = TRUE;
-         sprintf( buf, " %s@%s new %s\r\n", victim->name, victim->desc->host, race_table[victim->race].race_name );
-         strcat( log_buf, buf );
-      }
-   }
-   if( found_hit )
-   {
-      log_string( log_buf );
-      to_channel( log_buf, CHANNEL_MONITOR, "Monitor", 1 );
    }
 }
 
@@ -2313,9 +2224,7 @@ void update_handler( void )
       timechar = NULL;
    }
    tail_chain(  );
-   return;
 }
-
 
 void remove_portal( OBJ_DATA * portal )
 {
@@ -2326,7 +2235,7 @@ void remove_portal( OBJ_DATA * portal )
 
    if( !portal )
    {
-      bug( "remove_portal: portal is NULL", 0 );
+      bug( "%s: portal is NULL", __func__ );
       return;
    }
 
@@ -2334,7 +2243,7 @@ void remove_portal( OBJ_DATA * portal )
    found = FALSE;
    if( !fromRoom )
    {
-      bug( "remove_portal: portal->in_room is NULL", 0 );
+      bug( "%s: portal->in_room is NULL", __func__ );
       return;
    }
 
@@ -2347,47 +2256,23 @@ void remove_portal( OBJ_DATA * portal )
 
    if( !found )
    {
-      bug( "remove_portal: portal not found in room %d!", fromRoom->vnum );
+      bug( "%s: portal not found in room %d!", __func__, fromRoom->vnum );
       return;
    }
 
    if( pexit->vdir != DIR_PORTAL )
-      bug( "remove_portal: exit in dir %d != DIR_PORTAL", pexit->vdir );
+      bug( "%s: exit in dir %d != DIR_PORTAL", __func__, pexit->vdir );
 
    if( ( toRoom = pexit->to_room ) == NULL )
-      bug( "remove_portal: toRoom is NULL", 0 );
+      bug( "%s: toRoom is NULL", __func__ );
 
    extract_exit( fromRoom, pexit );
-   /*
-    * rendunancy 
-    */
-   /*
-    * send a message to fromRoom 
-    */
-   /*
-    * ch = fromRoom->first_person; 
-    */
-   /*
-    * if(ch!=NULL) 
-    */
-   /*
-    * act( AT_PLAIN, "A magical portal below winks from existence.", ch, NULL, NULL, TO_ROOM ); 
-    */
 
    /*
     * send a message to toRoom 
     */
    if( toRoom && ( ch = toRoom->first_person ) != NULL )
       act( AT_PLAIN, "A magical portal above winks from existence.", ch, NULL, NULL, TO_ROOM );
-
-   /*
-    * remove the portal obj: looks better to let update_obj do this 
-    */
-   /*
-    * extract_obj(portal);  
-    */
-
-   return;
 }
 
 void reboot_check( time_t reset )
@@ -2401,6 +2286,7 @@ void reboot_check( time_t reset )
       "SYSTEM: Reboot in 5 minutes.",
       "SYSTEM: Reboot in 10 minutes.",
    };
+
    static const int times[] = { 10, 30, 60, 120, 180, 240, 300, 600 };
    static const int timesize = 8; // UMIN( sizeof( times ) / sizeof( *times ), sizeof( tmsg ) / sizeof( *tmsg ) );
    char buf[MAX_STRING_LENGTH];
@@ -2418,7 +2304,7 @@ void reboot_check( time_t reset )
 
    if( ( current_time % 1800 ) == 0 )
    {
-      sprintf( buf, "%.24s: %d players", ctime( &current_time ), num_descriptors );
+      snprintf( buf, MAX_STRING_LENGTH, "%.24s: %d players", ctime( &current_time ), num_descriptors );
       append_to_file( USAGE_FILE, buf );
    }
 
@@ -2431,7 +2317,7 @@ void reboot_check( time_t reset )
 
       if( auction->item )
       {
-         sprintf( buf, "Sale of %s has been stopped by mud.", auction->item->short_descr );
+         snprintf( buf, MAX_STRING_LENGTH, "Sale of %s has been stopped by mud.", auction->item->short_descr );
          talk_auction( buf );
          obj_to_char( auction->item, auction->seller );
          auction->item = NULL;
@@ -2459,221 +2345,9 @@ void reboot_check( time_t reset )
       --trun;
       return;
    }
-   return;
 }
-
-#if 0
-void reboot_check( char *arg )
-{
-   char buf[MAX_STRING_LENGTH];
-   /*
-    * struct tm *timestruct;
-    * int timecheck;
-    */
-   CHAR_DATA *vch;
-
-   /*
-    * Bools to show which pre-boot echoes we've done. 
-    */
-   static bool thirty = FALSE;
-   static bool fifteen = FALSE;
-   static bool ten = FALSE;
-   static bool five = FALSE;
-   static bool four = FALSE;
-   static bool three = FALSE;
-   static bool two = FALSE;
-   static bool one = FALSE;
-
-   /*
-    * This function can be called by do_setboot when the reboot time
-    * is being manually set to reset all the bools. 
-    */
-   if( !str_cmp( arg, "reset" ) )
-   {
-      thirty = FALSE;
-      fifteen = FALSE;
-      ten = FALSE;
-      five = FALSE;
-      four = FALSE;
-      three = FALSE;
-      two = FALSE;
-      one = FALSE;
-      return;
-   }
-
-   /*
-    * If the mud has been up less than 18 hours and the boot time 
-    * wasn't set manually, forget it. 
-    */
-/* Usage monitor */
-
-   if( ( current_time % 1800 ) == 0 )
-   {
-      sprintf( buf, "%s: %d players", ctime( &current_time ), num_descriptors );
-      append_to_file( USAGE_FILE, buf );
-   }
-
-/* Change by Scryn - if mud has not been up 18 hours at boot time - still 
- * allow for warnings even if not up 18 hours 
- */
-   if( new_boot_time_t - boot_time < 60 * 60 * 18 && set_boot_time->manual == 0 )
-   {
-      return;
-   }
-/*
-    timestruct = localtime( &current_time);
-
-    if ( timestruct->tm_hour == set_boot_time->hour        
-         && timestruct->tm_min  == set_boot_time->min )*/
-   if( new_boot_time_t <= current_time )
-   {
-      /*
-       * Return auction item to seller 
-       */
-      if( auction->item != NULL )
-      {
-         sprintf( buf, "Sale of %s has been stopped by mud.", auction->item->short_descr );
-         talk_auction( buf );
-         obj_to_char( auction->item, auction->seller );
-         auction->item = NULL;
-         if( auction->buyer != NULL && auction->seller != auction->buyer ) /* return money to the buyer */
-         {
-            auction->buyer->gold += auction->bet;
-            send_to_char( "Your money has been returned.\r\n", auction->buyer );
-         }
-      }
-
-      sprintf( buf, "You are forced from these realms by a strong magical presence" );
-      echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-      sprintf( buf, "as life here is reconstructed." );
-      echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-
-      /*
-       * Save all characters before booting. 
-       */
-      for( vch = first_char; vch; vch = vch->next )
-      {
-         if( !IS_NPC( vch ) )
-            save_char_obj( vch );
-      }
-      mud_down = TRUE;
-   }
-
-   /*
-    * How many minutes to the scheduled boot? 
-    */
-/*  timecheck = ( set_boot_time->hour * 60 + set_boot_time->min )
-              - ( timestruct->tm_hour * 60 + timestruct->tm_min );
-
-  if ( timecheck > 30  || timecheck < 0 ) return;
-
-  if ( timecheck <= 1 ) */
-   if( new_boot_time_t - current_time <= 60 )
-   {
-      if( one == FALSE )
-      {
-         sprintf( buf, "You feel the ground shake as the end comes near!" );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         one = TRUE;
-         sysdata.DENY_NEW_PLAYERS = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 2 )*/
-   if( new_boot_time_t - current_time <= 120 )
-   {
-      if( two == FALSE )
-      {
-         sprintf( buf, "Lightning crackles in the sky above!" );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         two = TRUE;
-         sysdata.DENY_NEW_PLAYERS = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 3 )*/
-   if( new_boot_time_t - current_time <= 180 )
-   {
-      if( three == FALSE )
-      {
-         sprintf( buf, "Crashes of thunder sound across the land!" );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         three = TRUE;
-         sysdata.DENY_NEW_PLAYERS = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 4 )*/
-   if( new_boot_time_t - current_time <= 240 )
-   {
-      if( four == FALSE )
-      {
-         sprintf( buf, "The sky has suddenly turned midnight black." );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         four = TRUE;
-         sysdata.DENY_NEW_PLAYERS = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 5 )*/
-   if( new_boot_time_t - current_time <= 300 )
-   {
-      if( five == FALSE )
-      {
-         sprintf( buf, "You notice the life forms around you slowly dwindling away." );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         five = TRUE;
-         sysdata.DENY_NEW_PLAYERS = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 10 )*/
-   if( new_boot_time_t - current_time <= 600 )
-   {
-      if( ten == FALSE )
-      {
-         sprintf( buf, "The seas across the realm have turned frigid." );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         ten = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 15 )*/
-   if( new_boot_time_t - current_time <= 900 )
-   {
-      if( fifteen == FALSE )
-      {
-         sprintf( buf, "The aura of magic which once surrounded the realms seems slightly unstable." );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         fifteen = TRUE;
-      }
-      return;
-   }
-
-/*  if ( timecheck == 30 )*/
-   if( new_boot_time_t - current_time <= 1800 )
-   {
-      if( thirty == FALSE )
-      {
-         sprintf( buf, "You sense a change in the magical forces surrounding you." );
-         echo_to_all( AT_YELLOW, buf, ECHOTAR_ALL );
-         thirty = TRUE;
-      }
-      return;
-   }
-
-   return;
-}
-#endif
 
 /* the auction update*/
-
 void auction_update( void )
 {
    int tax, pay;
@@ -2684,10 +2358,10 @@ void auction_update( void )
       case 1: /* going once */
       case 2: /* going twice */
          if( auction->bet > auction->starting )
-            sprintf( buf, "%s: going %s for %d.", auction->item->short_descr,
+            snprintf( buf, MAX_STRING_LENGTH, "%s: going %s for %d.", auction->item->short_descr,
                      ( ( auction->going == 1 ) ? "once" : "twice" ), auction->bet );
          else
-            sprintf( buf, "%s: going %s (bid not received yet).", auction->item->short_descr,
+            snprintf( buf, MAX_STRING_LENGTH, "%s: going %s (bid not received yet).", auction->item->short_descr,
                      ( ( auction->going == 1 ) ? "once" : "twice" ) );
 
          talk_auction( buf );
@@ -2696,12 +2370,12 @@ void auction_update( void )
       case 3: /* SOLD! */
          if( !auction->buyer && auction->bet )
          {
-            bug( "Auction code reached SOLD, with NULL buyer, but %d gold bid", auction->bet );
+            bug( "%s: Auction code reached SOLD, with NULL buyer, but %d gold bid", __func__, auction->bet );
             auction->bet = 0;
          }
          if( auction->bet > 0 && auction->buyer != auction->seller )
          {
-            sprintf( buf, "%s sold to %s for %d.",
+            snprintf( buf, MAX_STRING_LENGTH, "%s sold to %s for %d.",
                      auction->item->short_descr,
                      IS_NPC( auction->buyer ) ? auction->buyer->short_descr : auction->buyer->name, auction->bet );
             talk_auction( buf );
@@ -2725,7 +2399,7 @@ void auction_update( void )
             tax = ( int )( auction->bet * 0.1 );
             boost_economy( auction->seller->in_room->area, tax );
             auction->seller->gold += pay; /* give him the money, tax 10 % */
-            sprintf( buf, "The auctioneer pays you %d gold, charging an auction fee of %d.\r\n", pay, tax );
+            snprintf( buf, MAX_STRING_LENGTH, "The auctioneer pays you %d gold, charging an auction fee of %d.\r\n", pay, tax );
             send_to_char( buf, auction->seller );
             auction->item = NULL;   /* reset item */
             if( IS_SET( sysdata.save_flags, SV_AUCTION ) )
@@ -2736,7 +2410,7 @@ void auction_update( void )
          }
          else  /* not sold */
          {
-            sprintf( buf, "No bids received for %s - object has been removed from auction\r\n.",
+            snprintf( buf, MAX_STRING_LENGTH, "No bids received for %s - object has been removed from auction\r\n.",
                      auction->item->short_descr );
             talk_auction( buf );
             act( AT_ACTION, "The auctioneer appears before you to return $p to you.",
@@ -2755,7 +2429,7 @@ void auction_update( void )
                obj_to_char( auction->item, auction->seller );
             tax = ( int )( auction->item->cost * 0.05 );
             boost_economy( auction->seller->in_room->area, tax );
-            sprintf( buf, "The auctioneer charges you an auction fee of %d.\r\n", tax );
+            snprintf( buf, MAX_STRING_LENGTH, "The auctioneer charges you an auction fee of %d.\r\n", tax );
             send_to_char( buf, auction->seller );
             if( ( auction->seller->gold - tax ) < 0 )
                auction->seller->gold = 0;
@@ -2777,5 +2451,4 @@ void subtract_times( struct timeval *etime, struct timeval *sttime )
       etime->tv_usec += 1000000;
       etime->tv_sec--;
    }
-   return;
 }

@@ -33,16 +33,13 @@ const char *const spell_saves[] = { "none", "poison_death", "wands", "para_petri
 
 const char *const spell_damage[] = { "none", "fire", "cold", "electricity", "energy", "acid", "poison", "drain" };
 
-const char *const spell_action[] = { "none", "create", "destroy", "resist", "suscept", "divinate", "obscure",
-   "change"
-};
+const char *const spell_action[] = { "none", "create", "destroy", "resist", "suscept", "divinate", "obscure", "change" };
 
 const char *const spell_power[] = { "none", "minor", "greater", "major" };
 
 const char *const spell_class[] = { "none", "lunar", "solar", "travel", "summon", "life", "death", "illusion" };
 
 const char *const target_type[] = { "ignore", "offensive", "defensive", "self", "objinv" };
-
 
 void show_char_to_char( CHAR_DATA * list, CHAR_DATA * ch );
 bool validate_spec_fun( const char *name );
@@ -139,7 +136,6 @@ bool is_legal_kill( CHAR_DATA * ch, CHAR_DATA * vch )
    return TRUE;
 }
 
-
 extern const char *target_name;  /* from magic.c */
 
 /*
@@ -218,7 +214,7 @@ bool check_skill( CHAR_DATA * ch, const char *command, const char *argument )
       switch ( skill_table[sn]->target )
       {
          default:
-            bug( "Check_skill: bad target for sn %d.", sn );
+            bug( "%s: bad target for sn %d.", __func__, sn );
             send_to_char( "Something went wrong...\r\n", ch );
             return TRUE;
 
@@ -425,14 +421,14 @@ void do_slookup( CHAR_DATA * ch, const char *argument )
                     spell_damage[SPELL_DAMAGE( skill )],
                     spell_action[SPELL_ACTION( skill )],
                     spell_class[SPELL_CLASS( skill )], spell_power[SPELL_POWER( skill )] );
-         strcpy( buf, "Flags:" );
+         mudstrlcpy( buf, "Flags:", MAX_STRING_LENGTH );
          for( x = 11; x < 32; x++ )
             if( SPELL_FLAG( skill, 1 << x ) )
             {
-               strcat( buf, " " );
-               strcat( buf, spell_flag[x - 11] );
+               mudstrlcat( buf, " ", MAX_STRING_LENGTH );
+               mudstrlcat( buf, spell_flag[x - 11], MAX_STRING_LENGTH );
             }
-         strcat( buf, "\r\n" );
+         mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
          send_to_char( buf, ch );
       }
       ch_printf( ch, "Saves: %s\r\n", spell_saves[( int )skill->saves] );
@@ -462,39 +458,39 @@ void do_slookup( CHAR_DATA * ch, const char *argument )
       {
          if( aff == skill->first_affect )
             send_to_char( "\r\n", ch );
-         sprintf( buf, "Affect %d", ++cnt );
+         snprintf( buf, MAX_STRING_LENGTH, "Affect %d", ++cnt );
          if( aff->location )
          {
-            strcat( buf, " modifies " );
-            strcat( buf, a_types[aff->location % REVERSE_APPLY] );
-            strcat( buf, " by '" );
-            strcat( buf, aff->modifier );
+            mudstrlcat( buf, " modifies ", MAX_STRING_LENGTH );
+            mudstrlcat( buf, a_types[aff->location % REVERSE_APPLY], MAX_STRING_LENGTH );
+            mudstrlcat( buf, " by '", MAX_STRING_LENGTH );
+            mudstrlcat( buf, aff->modifier, MAX_STRING_LENGTH );
             if( aff->bitvector )
-               strcat( buf, "' and" );
+               mudstrlcat( buf, "' and", MAX_STRING_LENGTH );
             else
-               strcat( buf, "'" );
+               mudstrlcat( buf, "'", MAX_STRING_LENGTH );
          }
          if( aff->bitvector )
          {
             int x;
 
-            strcat( buf, " applies" );
+            mudstrlcat( buf, " applies", MAX_STRING_LENGTH );
             for( x = 0; x < 32; x++ )
                if( IS_SET( aff->bitvector, 1 << x ) )
                {
-                  strcat( buf, " " );
-                  strcat( buf, a_flags[x] );
+                  mudstrlcat( buf, " ", MAX_STRING_LENGTH );
+                  mudstrlcat( buf, a_flags[x], MAX_STRING_LENGTH );
                }
          }
          if( aff->duration[0] != '\0' && aff->duration[0] != '0' )
          {
-            strcat( buf, " for '" );
-            strcat( buf, aff->duration );
-            strcat( buf, "' rounds" );
+            mudstrlcat( buf, " for '", MAX_STRING_LENGTH );
+            mudstrlcat( buf, aff->duration, MAX_STRING_LENGTH );
+            mudstrlcat( buf, "' rounds", MAX_STRING_LENGTH );
          }
          if( aff->location >= REVERSE_APPLY )
-            strcat( buf, " (affects caster only)" );
-         strcat( buf, "\r\n" );
+            mudstrlcat( buf, " (affects caster only)", MAX_STRING_LENGTH );
+         mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
          send_to_char( buf, ch );
          if( !aff->next )
             send_to_char( "\r\n", ch );
@@ -525,14 +521,11 @@ void do_slookup( CHAR_DATA * ch, const char *argument )
          ch_printf( ch, "Immroom   : %s\r\n", skill->imm_room );
       if( skill->type != SKILL_HERB && skill->guild >= 0 && skill->guild < MAX_ABILITY )
       {
-         sprintf( buf, "guild: %s   Align: %4d   lvl: %3d\r\n",
+         ch_printf( ch, "guild: %s   Align: %4d   lvl: %3d\r\n",
                   ability_name[skill->guild], skill->alignment, skill->min_level );
-         send_to_char( buf, ch );
       }
       send_to_char( "\r\n", ch );
    }
-
-   return;
 }
 
 /*
@@ -1121,8 +1114,10 @@ void do_sset( CHAR_DATA * ch, const char *argument )
    {
       if( ( sn = skill_lookup( arg1 ) ) >= 0 )
       {
-         sprintf( arg1, "%d %s %s", sn, arg2, argument );
-         do_sset( ch, arg1 );
+         char buf[MAX_STRING_LENGTH];
+
+         snprintf( buf, MAX_STRING_LENGTH, "%d %s %s", sn, arg2, argument );
+         do_sset( ch, buf );
       }
       else
          send_to_char( "They aren't here.\r\n", ch );
@@ -1175,10 +1170,7 @@ void do_sset( CHAR_DATA * ch, const char *argument )
    }
    else
       victim->pcdata->learned[sn] = value;
-
-   return;
 }
-
 
 void learn_from_success( CHAR_DATA * ch, int sn )
 {
@@ -1232,7 +1224,6 @@ void learn_from_success( CHAR_DATA * ch, int sn )
       gain_exp( ch, gain, skill_table[sn]->guild );
    }
 }
-
 
 void learn_from_failure( CHAR_DATA * ch, int sn )
 {
@@ -1308,8 +1299,6 @@ void do_gouge( CHAR_DATA * ch, const char *argument )
       global_retcode = damage( ch, victim, 0, gsn_gouge );
       learn_from_failure( ch, gsn_gouge );
    }
-
-   return;
 }
 
 void do_detrap( CHAR_DATA * ch, const char *argument )
@@ -1375,10 +1364,10 @@ void do_detrap( CHAR_DATA * ch, const char *argument )
          if( !ch->dest_buf )
          {
             send_to_char( "Your detrapping was interrupted!\r\n", ch );
-            bug( "do_detrap: ch->dest_buf NULL!", 0 );
+            bug( "%s: ch->dest_buf NULL!", __func__ );
             return;
          }
-         strcpy( arg, ( const char* ) ch->dest_buf );
+         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          ch->dest_buf = NULL;
          ch->substate = SUB_NONE;
@@ -1429,7 +1418,6 @@ void do_detrap( CHAR_DATA * ch, const char *argument )
 
    send_to_char( "You successfully remove a trap.\r\n", ch );
    learn_from_success( ch, gsn_detrap );
-   return;
 }
 
 void do_dig( CHAR_DATA * ch, const char *argument )
@@ -1499,10 +1487,10 @@ void do_dig( CHAR_DATA * ch, const char *argument )
          {
             send_to_char( "Your digging was interrupted!\r\n", ch );
             act( AT_PLAIN, "$n's digging was interrupted!", ch, NULL, NULL, TO_ROOM );
-            bug( "do_dig: dest_buf NULL", 0 );
+            bug( "%s: dest_buf NULL", __func__ );
             return;
          }
-         strcpy( arg, ( const char* ) ch->dest_buf );
+         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -1582,8 +1570,6 @@ void do_dig( CHAR_DATA * ch, const char *argument )
    act( AT_SKILL, "Your dig uncovered $p!", ch, obj, NULL, TO_CHAR );
    act( AT_SKILL, "$n's dig uncovered $p!", ch, obj, NULL, TO_ROOM );
    learn_from_success( ch, gsn_dig );
-
-   return;
 }
 
 void do_search( CHAR_DATA * ch, const char *argument )
@@ -1638,10 +1624,10 @@ void do_search( CHAR_DATA * ch, const char *argument )
          if( !ch->dest_buf )
          {
             send_to_char( "Your search was interrupted!\r\n", ch );
-            bug( "do_search: dest_buf NULL", 0 );
+            bug( "%s: dest_buf NULL", __func__ );
             return;
          }
-         strcpy( arg, ( const char* ) ch->dest_buf );
+         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
       case SUB_TIMER_DO_ABORT:
@@ -1720,7 +1706,6 @@ void do_search( CHAR_DATA * ch, const char *argument )
    act( AT_SKILL, "Your search reveals $p!", ch, obj, NULL, TO_CHAR );
    act( AT_SKILL, "$n finds $p!", ch, obj, NULL, TO_ROOM );
    learn_from_success( ch, gsn_search );
-   return;
 }
 
 void do_steal( CHAR_DATA * ch, const char *argument )
@@ -1788,7 +1773,7 @@ void do_steal( CHAR_DATA * ch, const char *argument )
       act( AT_ACTION, "$n tried to steal from you!\r\n", ch, NULL, victim, TO_VICT );
       act( AT_ACTION, "$n tried to steal from $N.\r\n", ch, NULL, victim, TO_NOTVICT );
 
-      sprintf( buf, "%s is a bloody thief!", ch->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s is a bloody thief!", ch->name );
       do_yell( victim, buf );
 
       learn_from_failure( ch, gsn_steal );
@@ -1910,8 +1895,6 @@ void do_steal( CHAR_DATA * ch, const char *argument )
    separate_obj( obj );
    obj_from_char( obj );
    obj_to_char( obj, ch );
-
-   return;
 }
 
 void do_backstab( CHAR_DATA * ch, const char *argument )
@@ -1994,9 +1977,7 @@ void do_backstab( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_backstab );
       global_retcode = damage( ch, victim, 0, gsn_backstab );
    }
-   return;
 }
-
 
 void do_rescue( CHAR_DATA * ch, const char *argument )
 {
@@ -2087,7 +2068,6 @@ void do_rescue( CHAR_DATA * ch, const char *argument )
     */
    set_fighting( ch, fch );
    set_fighting( fch, ch );
-   return;
 }
 
 void do_kick( CHAR_DATA * ch, const char *argument )
@@ -2117,7 +2097,6 @@ void do_kick( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_kick );
       global_retcode = damage( ch, victim, 0, gsn_kick );
    }
-   return;
 }
 
 void do_punch( CHAR_DATA * ch, const char *argument )
@@ -2153,29 +2132,23 @@ void do_punch( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_punch );
       global_retcode = damage( ch, victim, 0, gsn_punch );
    }
-   return;
 }
-
 
 void do_bite( CHAR_DATA * ch, const char *argument )
 {
 }
 
-
 void do_claw( CHAR_DATA * ch, const char *argument )
 {
 }
-
 
 void do_sting( CHAR_DATA * ch, const char *argument )
 {
 }
 
-
 void do_tail( CHAR_DATA * ch, const char *argument )
 {
 }
-
 
 void do_bash( CHAR_DATA * ch, const char *argument )
 {
@@ -2224,9 +2197,7 @@ void do_bash( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_bash );
       global_retcode = damage( ch, victim, 0, gsn_bash );
    }
-   return;
 }
-
 
 void do_stun( CHAR_DATA * ch, const char *argument )
 {
@@ -2309,16 +2280,12 @@ void do_stun( CHAR_DATA * ch, const char *argument )
       act( AT_SKILL, "Your attempt to stun $N leaves you racing past $E as $e laughs.", ch, NULL, victim, TO_CHAR );
       act( AT_SKILL, "$n charges screaming at $N, but keeps going right on past.", ch, NULL, victim, TO_NOTVICT );
    }
-   return;
 }
-
 
 void do_feed( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "It is not of your nature to feed on living creatures.\r\n", ch );
-   return;
 }
-
 
 /*
  * Disarm a creature.
@@ -2363,10 +2330,7 @@ void disarm( CHAR_DATA * ch, CHAR_DATA * victim )
 
    obj_from_char( obj );
    obj_to_room( obj, victim->in_room );
-
-   return;
 }
-
 
 void do_disarm( CHAR_DATA * ch, const char *argument )
 {
@@ -2416,9 +2380,7 @@ void do_disarm( CHAR_DATA * ch, const char *argument )
       send_to_char( "You failed.\r\n", ch );
       learn_from_failure( ch, gsn_disarm );
    }
-   return;
 }
-
 
 /*
  * Trip a creature.
@@ -2452,10 +2414,7 @@ void trip( CHAR_DATA * ch, CHAR_DATA * victim )
       WAIT_STATE( victim, 2 * PULSE_VIOLENCE );
       victim->position = POS_RESTING;
    }
-
-   return;
 }
-
 
 void do_pick( CHAR_DATA * ch, const char *argument )
 {
@@ -2627,7 +2586,7 @@ void do_pick( CHAR_DATA * ch, const char *argument )
       if( IS_NPC( ch ) || !ch->pcdata || number_percent(  ) > ch->pcdata->learned[gsn_pickshiplock] )
       {
          send_to_char( "You failed.\r\n", ch );
-         sprintf( buf, "[ALARM] %s attempting to pick %s.", ch->name, ship->name );
+         snprintf( buf, MAX_STRING_LENGTH, "[ALARM] %s attempting to pick %s.", ch->name, ship->name );
          echo_to_all( AT_RED, buf, 0 );
          learn_from_failure( ch, gsn_pickshiplock );
          return;
@@ -2645,10 +2604,7 @@ void do_pick( CHAR_DATA * ch, const char *argument )
    }
 
    ch_printf( ch, "You see no %s here.\r\n", arg );
-   return;
 }
-
-
 
 void do_sneak( CHAR_DATA * ch, const char *argument )
 {
@@ -2681,11 +2637,7 @@ void do_sneak( CHAR_DATA * ch, const char *argument )
    }
    else
       learn_from_failure( ch, gsn_sneak );
-
-   return;
 }
-
-
 
 void do_hide( CHAR_DATA * ch, const char *argument )
 {
@@ -2713,10 +2665,7 @@ void do_hide( CHAR_DATA * ch, const char *argument )
    }
    else
       learn_from_failure( ch, gsn_hide );
-   return;
 }
-
-
 
 /*
  * Contributed by Alander.
@@ -2732,9 +2681,7 @@ void do_visible( CHAR_DATA * ch, const char *argument )
    if( ch->race != RACE_NOGHRI ) /* Noghri has perm sneak */
       REMOVE_BIT( ch->affected_by, AFF_SNEAK );
    send_to_char( "Ok.\r\n", ch );
-   return;
 }
-
 
 void do_recall( CHAR_DATA * ch, const char *argument )
 {
@@ -2807,10 +2754,7 @@ void do_recall( CHAR_DATA * ch, const char *argument )
    }
    act( AT_ACTION, "$n appears in a swirl of the Force.", ch, NULL, NULL, TO_ROOM );
    do_look( ch, "auto" );
-
-   return;
 }
-
 
 void do_aid( CHAR_DATA * ch, const char *argument )
 {
@@ -2884,9 +2828,7 @@ void do_aid( CHAR_DATA * ch, const char *argument )
 
    update_pos( victim );
    act( AT_SKILL, "$n aids you!", ch, NULL, victim, TO_VICT );
-   return;
 }
-
 
 void do_mount( CHAR_DATA * ch, const char *argument )
 {
@@ -2952,9 +2894,7 @@ void do_mount( CHAR_DATA * ch, const char *argument )
       act( AT_SKILL, "$n tries to mount you.", ch, NULL, victim, TO_VICT );
       learn_from_failure( ch, gsn_mount );
    }
-   return;
 }
-
 
 void do_dismount( CHAR_DATA * ch, const char *argument )
 {
@@ -2988,9 +2928,7 @@ void do_dismount( CHAR_DATA * ch, const char *argument )
       ch->position = POS_SITTING;
       global_retcode = damage( ch, ch, 1, TYPE_UNDEFINED );
    }
-   return;
 }
-
 
 /**************************************************************************/
 
@@ -3042,8 +2980,6 @@ bool check_parry( CHAR_DATA * ch, CHAR_DATA * victim )
    learn_from_success( victim, gsn_parry );
    return TRUE;
 }
-
-
 
 /*
  * Check for dodge.
@@ -3207,7 +3143,6 @@ void do_poison_weapon( CHAR_DATA * ch, const char *argument )
    extract_obj( pobj );
    extract_obj( wobj );
    learn_from_success( ch, gsn_poison_weapon );
-   return;
 }
 
 void do_scribe( CHAR_DATA * ch, const char *argument )
@@ -3329,7 +3264,6 @@ void do_circle( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_circle );
       global_retcode = damage( ch, victim, 0, gsn_circle );
    }
-   return;
 }
 
 /* Berserk and HitAll. -- Altrag */
@@ -3375,11 +3309,10 @@ void do_berserk( CHAR_DATA * ch, const char *argument )
    affect_to_char( ch, &af );
    send_to_char( "You start to lose control..\r\n", ch );
    learn_from_success( ch, gsn_berserk );
-   return;
 }
 
 /* External from fight.c */
-ch_ret one_hit args( ( CHAR_DATA * ch, CHAR_DATA * victim, int dt ) );
+ch_ret one_hit( CHAR_DATA * ch, CHAR_DATA * victim, int dt );
 void do_hitall( CHAR_DATA * ch, const char *argument )
 {
    CHAR_DATA *vch;
@@ -3430,10 +3363,7 @@ void do_hitall( CHAR_DATA * ch, const char *argument )
       learn_from_success( ch, gsn_hitall );
    else
       learn_from_failure( ch, gsn_hitall );
-   return;
 }
-
-
 
 bool check_illegal_psteal( CHAR_DATA * ch, CHAR_DATA * victim )
 {
@@ -3567,8 +3497,6 @@ void do_scan( CHAR_DATA * ch, const char *argument )
    char_from_room( ch );
    char_to_room( ch, was_in_room );
    learn_from_success( ch, gsn_scan );
-
-   return;
 }
 
 void do_slice( CHAR_DATA * ch, const char *argument )

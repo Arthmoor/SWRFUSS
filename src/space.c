@@ -90,7 +90,7 @@ bool is_facing( SHIP_DATA * ship, SHIP_DATA * target );
 void sound_to_ship( SHIP_DATA * ship, char *argument );
 
 /* from comm.c */
-bool write_to_descriptor args( ( int desc, char *txt, int length ) );
+bool write_to_descriptor( int desc, char *txt, int length );
 
 void echo_to_room_dnr( int ecolor, ROOM_INDEX_DATA * room, const char *argument )
 {
@@ -106,7 +106,6 @@ void echo_to_room_dnr( int ecolor, ROOM_INDEX_DATA * room, const char *argument 
    }
 }
 
-
 bool land_bus( SHIP_DATA * ship, int destination )
 {
    char buf[MAX_STRING_LENGTH];
@@ -121,9 +120,9 @@ bool land_bus( SHIP_DATA * ship, int destination )
    ship->shipstate = SHIP_DOCKED;
    if( ship->starsystem )
       ship_from_starsystem( ship, ship->starsystem );
-   sprintf( buf, "%s lands on the platform.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s lands on the platform.", ship->name );
    echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
-   sprintf( buf, "The hatch on %s opens.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "The hatch on %s opens.", ship->name );
    echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
    echo_to_room( AT_YELLOW, get_room_index( ship->entrance ), "The hatch opens." );
    ship->hatchopen = TRUE;
@@ -138,7 +137,7 @@ void launch_bus( SHIP_DATA * ship )
 
    sound_to_room( get_room_index( ship->entrance ), "!!SOUND(door)" );
    sound_to_room( get_room_index( ship->location ), "!!SOUND(door)" );
-   sprintf( buf, "The hatch on %s closes and it begins to launch.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "The hatch on %s closes and it begins to launch.", ship->name );
    echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
    echo_to_room( AT_YELLOW, get_room_index( ship->entrance ), "The hatch slides shut." );
    ship->hatchopen = FALSE;
@@ -201,8 +200,7 @@ void update_traffic(  )
    turbocar = ship_from_cockpit( ROOM_CORUSCANT_TURBOCAR );
    if( turbocar != NULL )
    {
-      sprintf( buf, "The turbocar doors close and it speeds out of the station." );
-      echo_to_room( AT_YELLOW, get_room_index( turbocar->location ), buf );
+      echo_to_room( AT_YELLOW, get_room_index( turbocar->location ), "The turbocar doors close and it speeds out of the station." );
       extract_ship( turbocar );
       turbocar->location = 0;
       ship_to_room( turbocar, station_vnum[turbocar_stop] );
@@ -212,9 +210,9 @@ void update_traffic(  )
       turbocar->shipstate = SHIP_DOCKED;
       if( turbocar->starsystem )
          ship_from_starsystem( turbocar, turbocar->starsystem );
-      sprintf( buf, "A turbocar pulls into the platform and the doors slide open." );
-      echo_to_room( AT_YELLOW, get_room_index( turbocar->location ), buf );
-      sprintf( buf, "Welcome to %s.", station_name[turbocar_stop] );
+
+      echo_to_room( AT_YELLOW, get_room_index( turbocar->location ), "A turbocar pulls into the platform and the doors slide open." );
+      snprintf( buf, MAX_STRING_LENGTH, "Welcome to %s.", station_name[turbocar_stop] );
       echo_to_ship( AT_CYAN, turbocar, buf );
       turbocar->hatchopen = TRUE;
 
@@ -222,7 +220,6 @@ void update_traffic(  )
       if( turbocar_stop >= MAX_STATION )
          turbocar_stop = 0;
    }
-
 }
 
 void update_bus(  )
@@ -241,12 +238,11 @@ void update_bus(  )
 
    switch ( bus_pos )
    {
-
       case 0:
          target = ship_from_hanger( bus_vnum[bus_planet] );
          if( target != NULL && !target->starsystem )
          {
-            sprintf( buf, "An electronic voice says, 'Cannot land at %s ... it seems to have dissapeared.'",
+            snprintf( buf, MAX_STRING_LENGTH, "An electronic voice says, 'Cannot land at %s ... it seems to have dissapeared.'",
                      bus_stop[bus_planet] );
             echo_to_ship( AT_CYAN, ship, buf );
             bus_pos = 5;
@@ -255,7 +251,7 @@ void update_bus(  )
          target = ship_from_hanger( bus_vnum[bus2_planet] );
          if( target != NULL && !target->starsystem )
          {
-            sprintf( buf, "An electronic voice says, 'Cannot land at %s ... it seems to have dissapeared.'",
+            snprintf( buf, MAX_STRING_LENGTH, "An electronic voice says, 'Cannot land at %s ... it seems to have dissapeared.'",
                      bus_stop[bus_planet] );
             echo_to_ship( AT_CYAN, ship2, buf );
             bus_pos = 5;
@@ -287,26 +283,26 @@ void update_bus(  )
          destination = bus_vnum[bus_planet];
          if( !land_bus( ship, destination ) )
          {
-            sprintf( buf, "An electronic voice says, 'Oh My, %s seems to have dissapeared.'", bus_stop[bus_planet] );
+            snprintf( buf, MAX_STRING_LENGTH, "An electronic voice says, 'Oh My, %s seems to have dissapeared.'", bus_stop[bus_planet] );
             echo_to_ship( AT_CYAN, ship, buf );
             echo_to_ship( AT_CYAN, ship, "An electronic voice says, 'I do hope it wasn't a superlaser. Landing aborted.'" );
          }
          else
          {
-            sprintf( buf, "An electronic voice says, 'Welcome to %s'", bus_stop[bus_planet] );
+            snprintf( buf, MAX_STRING_LENGTH, "An electronic voice says, 'Welcome to %s'", bus_stop[bus_planet] );
             echo_to_ship( AT_CYAN, ship, buf );
             echo_to_ship( AT_CYAN, ship, "It continues, 'Please exit through the main ramp. Enjoy your stay.'" );
          }
          destination = bus_vnum[bus2_planet];
          if( !land_bus( ship2, destination ) )
          {
-            sprintf( buf, "An electronic voice says, 'Oh My, %s seems to have dissapeared.'", bus_stop[bus_planet] );
+            snprintf( buf, MAX_STRING_LENGTH, "An electronic voice says, 'Oh My, %s seems to have dissapeared.'", bus_stop[bus_planet] );
             echo_to_ship( AT_CYAN, ship2, buf );
             echo_to_ship( AT_CYAN, ship2, "An electronic voice says, 'I do hope it wasn't a superlaser. Landing aborted.'" );
          }
          else
          {
-            sprintf( buf, "An electronic voice says, 'Welcome to %s'", bus_stop[bus2_planet] );
+            snprintf( buf, MAX_STRING_LENGTH, "An electronic voice says, 'Welcome to %s'", bus_stop[bus2_planet] );
             echo_to_ship( AT_CYAN, ship2, buf );
             echo_to_ship( AT_CYAN, ship2, "It continues, 'Please exit through the main ramp. Enjoy your stay.'" );
          }
@@ -314,10 +310,10 @@ void update_bus(  )
          break;
 
       case 5:
-         sprintf( buf, "It continues, 'Next stop, %s'", bus_stop[bus_planet + 1] );
+         snprintf( buf, MAX_STRING_LENGTH, "It continues, 'Next stop, %s'", bus_stop[bus_planet + 1] );
          echo_to_ship( AT_CYAN, ship, "An electronic voice says, 'Preparing for launch.'" );
          echo_to_ship( AT_CYAN, ship, buf );
-         sprintf( buf, "It continues, 'Next stop, %s'", bus_stop[bus2_planet + 1] );
+         snprintf( buf, MAX_STRING_LENGTH, "It continues, 'Next stop, %s'", bus_stop[bus2_planet + 1] );
          echo_to_ship( AT_CYAN, ship2, "An electronic voice says, 'Preparing for launch.'" );
          echo_to_ship( AT_CYAN, ship2, buf );
          bus_pos++;
@@ -339,7 +335,6 @@ void update_bus(  )
       bus_planet = 0;
    if( bus2_planet >= MAX_BUS_STOP )
       bus2_planet = 0;
-
 }
 
 void move_ships()
@@ -387,7 +382,7 @@ void move_ships()
 		  echo_to_room( AT_YELLOW, get_room_index( ship->gunseat ), "Your missile hits its target dead on!" );
 		  echo_to_cockpit( AT_BLOOD, target, "The ship is hit by a missile." );
 		  echo_to_ship( AT_RED, target, "A loud explosion shakes thee ship violently!" );
-		  sprintf( buf, "You see a small explosion as %s is hit by a missile", target->name );
+		  snprintf( buf, MAX_STRING_LENGTH, "You see a small explosion as %s is hit by a missile", target->name );
 		  echo_to_system( AT_ORANGE, target, buf, ship );
 		  for( ch = first_char; ch; ch = ch->next )
 		    if( !IS_NPC( ch ) && nifty_is_name( missile->fired_by, ch->name ) )
@@ -524,7 +519,7 @@ void move_ships()
 	  && abs( ( int )( ship->vz - ship->starsystem->s1z ) ) < 10 )
 	{
 	  echo_to_cockpit( AT_BLOOD + AT_BLINK, ship, "You fly directly into the sun." );
-	  sprintf( buf, "%s flys directly into %s!", ship->name, ship->starsystem->star1 );
+	  snprintf( buf, MAX_STRING_LENGTH, "%s flys directly into %s!", ship->name, ship->starsystem->star1 );
 	  echo_to_system( AT_ORANGE, ship, buf, NULL );
 	  destroy_ship( ship, NULL );
 	  continue;
@@ -535,7 +530,7 @@ void move_ships()
 	  && abs( ( int )( ship->vz - ship->starsystem->s2z ) ) < 10 )
 	{
 	  echo_to_cockpit( AT_BLOOD + AT_BLINK, ship, "You fly directly into the sun." );
-	  sprintf( buf, "%s flys directly into %s!", ship->name, ship->starsystem->star2 );
+	  snprintf( buf, MAX_STRING_LENGTH, "%s flys directly into %s!", ship->name, ship->starsystem->star2 );
 	  echo_to_system( AT_ORANGE, ship, buf, NULL );
 	  destroy_ship( ship, NULL );
 	  continue;
@@ -548,9 +543,9 @@ void move_ships()
 	      && abs( ( int )( ship->vy - ship->starsystem->p1y ) ) < 10
 	      && abs( ( int )( ship->vz - ship->starsystem->p1z ) ) < 10 )
 	    {
-	      sprintf( buf, "You begin orbitting %s.", ship->starsystem->planet1 );
+	      snprintf( buf, MAX_STRING_LENGTH, "You begin orbitting %s.", ship->starsystem->planet1 );
 	      echo_to_cockpit( AT_YELLOW, ship, buf );
-	      sprintf( buf, "%s begins orbiting %s.", ship->name, ship->starsystem->planet1 );
+	      snprintf( buf, MAX_STRING_LENGTH, "%s begins orbiting %s.", ship->name, ship->starsystem->planet1 );
 	      echo_to_system( AT_ORANGE, ship, buf, NULL );
 	      ship->currspeed = 0;
 	      continue;
@@ -560,9 +555,9 @@ void move_ships()
 	      && abs( ( int )( ship->vy - ship->starsystem->p2y ) ) < 10
 	      && abs( ( int )( ship->vz - ship->starsystem->p2z ) ) < 10 )
 	    {
-	      sprintf( buf, "You begin orbitting %s.", ship->starsystem->planet2 );
+	      snprintf( buf, MAX_STRING_LENGTH, "You begin orbitting %s.", ship->starsystem->planet2 );
 	      echo_to_cockpit( AT_YELLOW, ship, buf );
-	      sprintf( buf, "%s begins orbiting %s.", ship->name, ship->starsystem->planet2 );
+	      snprintf( buf, MAX_STRING_LENGTH, "%s begins orbiting %s.", ship->name, ship->starsystem->planet2 );
 	      echo_to_system( AT_ORANGE, ship, buf, NULL );
 	      ship->currspeed = 0;
 	      continue;
@@ -572,9 +567,9 @@ void move_ships()
 	      && abs( ( int )( ship->vy - ship->starsystem->p3y ) ) < 10
 	      && abs( ( int )( ship->vz - ship->starsystem->p3z ) ) < 10 )
 	    {
-	      sprintf( buf, "You begin orbitting %s.", ship->starsystem->planet2 );
+	      snprintf( buf, MAX_STRING_LENGTH, "You begin orbitting %s.", ship->starsystem->planet2 );
 	      echo_to_cockpit( AT_YELLOW, ship, buf );
-	      sprintf( buf, "%s begins orbiting %s.", ship->name, ship->starsystem->planet2 );
+	      snprintf( buf, MAX_STRING_LENGTH, "%s begins orbiting %s.", ship->name, ship->starsystem->planet2 );
 	      echo_to_system( AT_ORANGE, ship, buf, NULL );
 	      ship->currspeed = 0;
 	      continue;
@@ -661,16 +656,16 @@ void recharge_ships(  )
                         schance = URANGE( 10, schance, 90 );
                         if( number_percent(  ) > schance )
                         {
-                           sprintf( buf, "%s fires at you but misses.", ship->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "%s fires at you but misses.", ship->name );
                            echo_to_cockpit( AT_ORANGE, target, buf );
-                           sprintf( buf, "Laserfire from %s barely misses %s.", ship->name, target->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "Laserfire from %s barely misses %s.", ship->name, target->name );
                            echo_to_system( AT_ORANGE, target, buf, NULL );
                         }
                         else
                         {
-                           sprintf( buf, "Laserfire from %s hits %s.", ship->name, target->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "Laserfire from %s hits %s.", ship->name, target->name );
                            echo_to_system( AT_ORANGE, target, buf, NULL );
-                           sprintf( buf, "You are hit by lasers from %s!", ship->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "You are hit by lasers from %s!", ship->name );
                            echo_to_cockpit( AT_BLOOD, target, buf );
                            echo_to_ship( AT_RED, target, "A small explosion vibrates through the ship." );
                            damage_ship( target, 5, 10 );
@@ -682,7 +677,6 @@ void recharge_ships(  )
             }
          }
       }
-
    }
 }
 
@@ -725,22 +719,20 @@ void update_space(  )
             {
                echo_to_room( AT_YELLOW, get_room_index( ship->pilotseat ), "Hyperjump complete." );
                echo_to_ship( AT_YELLOW, ship, "The ship lurches slightly as it comes out of hyperspace." );
-               sprintf( buf, "%s enters the starsystem at %.0f %.0f %.0f", ship->name, ship->vx, ship->vy, ship->vz );
+               snprintf( buf, MAX_STRING_LENGTH, "%s enters the starsystem at %.0f %.0f %.0f", ship->name, ship->vx, ship->vy, ship->vz );
                echo_to_system( AT_YELLOW, ship, buf, NULL );
                ship->shipstate = SHIP_READY;
                STRFREE( ship->home );
                ship->home = STRALLOC( ship->starsystem->name );
                if( str_cmp( "Public", ship->owner ) )
                   save_ship( ship );
-
             }
          }
          else
          {
-            sprintf( buf, "%d", ship->hyperdistance );
+            snprintf( buf, MAX_STRING_LENGTH, "%d", ship->hyperdistance );
             echo_to_room_dnr( AT_YELLOW, get_room_index( ship->pilotseat ), "Remaining jump distance: " );
             echo_to_room( AT_WHITE, get_room_index( ship->pilotseat ), buf );
-
          }
       }
 
@@ -749,7 +741,6 @@ void update_space(  )
        * in the middle of a manuever and are stuck in a busy state 
        * but now used for timed manouevers such as turning 
        */
-
       if( ship->shipstate == SHIP_BUSY_3 )
       {
          echo_to_room( AT_YELLOW, get_room_index( ship->pilotseat ), "Manuever complete." );
@@ -794,18 +785,18 @@ void update_space(  )
 
       if( ship->starsystem && ship->currspeed > 0 )
       {
-         sprintf( buf, "%d", ship->currspeed );
+         snprintf( buf, MAX_STRING_LENGTH, "%d", ship->currspeed );
          echo_to_room_dnr( AT_BLUE, get_room_index( ship->pilotseat ), "Speed: " );
          echo_to_room_dnr( AT_LBLUE, get_room_index( ship->pilotseat ), buf );
-         sprintf( buf, "%.0f %.0f %.0f", ship->vx, ship->vy, ship->vz );
+         snprintf( buf, MAX_STRING_LENGTH, "%.0f %.0f %.0f", ship->vx, ship->vy, ship->vz );
          echo_to_room_dnr( AT_BLUE, get_room_index( ship->pilotseat ), "  Coords: " );
          echo_to_room( AT_LBLUE, get_room_index( ship->pilotseat ), buf );
          if( ship->pilotseat != ship->coseat )
          {
-            sprintf( buf, "%d", ship->currspeed );
+            snprintf( buf, MAX_STRING_LENGTH, "%d", ship->currspeed );
             echo_to_room_dnr( AT_BLUE, get_room_index( ship->coseat ), "Speed: " );
             echo_to_room_dnr( AT_LBLUE, get_room_index( ship->coseat ), buf );
-            sprintf( buf, "%.0f %.0f %.0f", ship->vx, ship->vy, ship->vz );
+            snprintf( buf, MAX_STRING_LENGTH, "%.0f %.0f %.0f", ship->vx, ship->vy, ship->vz );
             echo_to_room_dnr( AT_BLUE, get_room_index( ship->coseat ), "  Coords: " );
             echo_to_room( AT_LBLUE, get_room_index( ship->coseat ), buf );
          }
@@ -822,7 +813,7 @@ void update_space(  )
 		&& abs( ( int )( ship->vy - target->vy ) ) < target_too_close
 		&& abs( ( int )( ship->vz - target->vz ) ) < target_too_close )
             {
-               sprintf( buf, "Proximity alert: %s  %.0f %.0f %.0f", target->name, target->vx, target->vy, target->vz );
+               snprintf( buf, MAX_STRING_LENGTH, "Proximity alert: %s  %.0f %.0f %.0f", target->name, target->vx, target->vy, target->vz );
                echo_to_room( AT_RED, get_room_index( ship->pilotseat ), buf );
             }
          }
@@ -832,7 +823,7 @@ void update_space(  )
 	     && abs( ( int )( ship->vy - ship->starsystem->s1y ) ) < too_close
 	     && abs( ( int )( ship->vz - ship->starsystem->s1z ) ) < too_close)
          {
-            sprintf( buf, "Proximity alert: %s  %d %d %d", ship->starsystem->star1,
+            snprintf( buf, MAX_STRING_LENGTH, "Proximity alert: %s  %d %d %d", ship->starsystem->star1,
                      ship->starsystem->s1x, ship->starsystem->s1y, ship->starsystem->s1z );
             echo_to_room( AT_RED, get_room_index( ship->pilotseat ), buf );
          }
@@ -841,7 +832,7 @@ void update_space(  )
 	     && abs( ( int )( ship->vy - ship->starsystem->s2y ) ) < too_close
 	     && abs( ( int )( ship->vz - ship->starsystem->s2z ) ) < too_close)
          {
-            sprintf( buf, "Proximity alert: %s  %d %d %d", ship->starsystem->star2,
+            snprintf( buf, MAX_STRING_LENGTH, "Proximity alert: %s  %d %d %d", ship->starsystem->star2,
                      ship->starsystem->s2x, ship->starsystem->s2y, ship->starsystem->s2z );
             echo_to_room( AT_RED, get_room_index( ship->pilotseat ), buf );
          }
@@ -851,7 +842,7 @@ void update_space(  )
 	     && abs( ( int )( ship->vy - ship->starsystem->p1y ) ) < too_close
 	     && abs( ( int )( ship->vz - ship->starsystem->p1z ) ) < too_close)
          {
-            sprintf( buf, "Proximity alert: %s  %d %d %d", ship->starsystem->planet1,
+            snprintf( buf, MAX_STRING_LENGTH, "Proximity alert: %s  %d %d %d", ship->starsystem->planet1,
                      ship->starsystem->p1x, ship->starsystem->p1y, ship->starsystem->p1z );
             echo_to_room( AT_RED, get_room_index( ship->pilotseat ), buf );
          }
@@ -861,7 +852,7 @@ void update_space(  )
 	     && abs( ( int )( ship->vy - ship->starsystem->p2y ) ) < too_close
 	     && abs( ( int )( ship->vz - ship->starsystem->p2z ) ) < too_close)
          {
-            sprintf( buf, "Proximity alert: %s  %d %d %d", ship->starsystem->planet2,
+            snprintf( buf, MAX_STRING_LENGTH, "Proximity alert: %s  %d %d %d", ship->starsystem->planet2,
                      ship->starsystem->p2x, ship->starsystem->p2y, ship->starsystem->p2z );
             echo_to_room( AT_RED, get_room_index( ship->pilotseat ), buf );
          }
@@ -871,16 +862,15 @@ void update_space(  )
 	     && abs( ( int )( ship->vy - ship->starsystem->p3y ) ) < too_close
 	     && abs( ( int )( ship->vz - ship->starsystem->p3z ) ) < too_close)
          {
-            sprintf( buf, "Proximity alert: %s  %d %d %d", ship->starsystem->planet3,
+            snprintf( buf, MAX_STRING_LENGTH, "Proximity alert: %s  %d %d %d", ship->starsystem->planet3,
                      ship->starsystem->p3x, ship->starsystem->p3y, ship->starsystem->p3z );
             echo_to_room( AT_RED, get_room_index( ship->pilotseat ), buf );
          }
       }
 
-
       if( ship->target0 )
       {
-         sprintf( buf, "%s   %.0f %.0f %.0f", ship->target0->name, ship->target0->vx, ship->target0->vy, ship->target0->vz );
+         snprintf( buf, MAX_STRING_LENGTH, "%s   %.0f %.0f %.0f", ship->target0->name, ship->target0->vx, ship->target0->vy, ship->target0->vz );
          echo_to_room_dnr( AT_BLUE, get_room_index( ship->gunseat ), "Target: " );
          echo_to_room( AT_LBLUE, get_room_index( ship->gunseat ), buf );
          if( ship->starsystem != ship->target0->starsystem )
@@ -889,7 +879,7 @@ void update_space(  )
 
       if( ship->target1 )
       {
-         sprintf( buf, "%s   %.0f %.0f %.0f", ship->target1->name, ship->target1->vx, ship->target1->vy, ship->target1->vz );
+         snprintf( buf, MAX_STRING_LENGTH, "%s   %.0f %.0f %.0f", ship->target1->name, ship->target1->vx, ship->target1->vy, ship->target1->vz );
          echo_to_room_dnr( AT_BLUE, get_room_index( ship->turret1 ), "Target: " );
          echo_to_room( AT_LBLUE, get_room_index( ship->turret1 ), buf );
          if( ship->starsystem != ship->target1->starsystem )
@@ -898,7 +888,7 @@ void update_space(  )
 
       if( ship->target2 )
       {
-         sprintf( buf, "%s   %.0f %.0f %.0f", ship->target2->name, ship->target2->vx, ship->target2->vy, ship->target2->vz );
+         snprintf( buf, MAX_STRING_LENGTH, "%s   %.0f %.0f %.0f", ship->target2->name, ship->target2->vx, ship->target2->vy, ship->target2->vz );
          echo_to_room_dnr( AT_BLUE, get_room_index( ship->turret2 ), "Target: " );
          echo_to_room( AT_LBLUE, get_room_index( ship->turret2 ), buf );
          if( ship->starsystem != ship->target2->starsystem )
@@ -977,7 +967,7 @@ void update_space(  )
                         if( target->target0 == NULL && ship->target0 != target )
                         {
                            target->target0 = ship->target0;
-                           sprintf( buf, "You are being targetted by %s.", target->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
                            echo_to_cockpit( AT_BLOOD, target->target0, buf );
                            break;
                         }
@@ -1016,9 +1006,9 @@ void update_space(  )
                      {
                         new_missile( ship, target, NULL, CONCUSSION_MISSILE );
                         ship->missiles--;
-                        sprintf( buf, "Incoming missile from %s.", ship->name );
+                        snprintf( buf, MAX_STRING_LENGTH, "Incoming missile from %s.", ship->name );
                         echo_to_cockpit( AT_BLOOD, target, buf );
-                        sprintf( buf, "%s fires a missile towards %s.", ship->name, target->name );
+                        snprintf( buf, MAX_STRING_LENGTH, "%s fires a missile towards %s.", ship->name, target->name );
                         echo_to_system( AT_ORANGE, target, buf, NULL );
 
                         if( ship->ship_class == CAPITAL_SHIP
@@ -1048,7 +1038,7 @@ void update_space(  )
                         if( !str_cmp( target->owner, "The New Republic" ) )
                         {
                            ship->target0 = target;
-                           sprintf( buf, "You are being targetted by %s.", ship->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", ship->name );
                            echo_to_cockpit( AT_BLOOD, target, buf );
                            break;
                         }
@@ -1057,7 +1047,7 @@ void update_space(  )
                      if( ship->starsystem == target->starsystem )
                         if( !str_cmp( target->owner, "The Empire" ) )
                         {
-                           sprintf( buf, "You are being targetted by %s.", ship->name );
+                           snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", ship->name );
                            echo_to_cockpit( AT_BLOOD, target, buf );
                            ship->target0 = target;
                            break;
@@ -1067,12 +1057,11 @@ void update_space(  )
                   for( target = first_ship; target; target = target->next )
                      if( ship->starsystem == target->starsystem )
                      {
-                        sprintf( buf, "You are being targetted by %s.", ship->name );
+                        snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", ship->name );
                         echo_to_cockpit( AT_BLOOD, target, buf );
                         ship->target0 = target;
                         break;
                      }
-
             }
          }
          else
@@ -1101,10 +1090,7 @@ void update_space(  )
             ship->rockets++;
       }
    }
-
 }
-
-
 
 void write_starsystem_list(  )
 {
@@ -1112,11 +1098,11 @@ void write_starsystem_list(  )
    FILE *fpout;
    char filename[256];
 
-   sprintf( filename, "%s%s", SPACE_DIR, SPACE_LIST );
+   snprintf( filename, 256, "%s%s", SPACE_DIR, SPACE_LIST );
    fpout = fopen( filename, "w" );
    if( !fpout )
    {
-      bug( "FATAL: cannot open starsystem.lst for writing!\r\n", 0 );
+      bug( "FATAL: %s: cannot open starsystem.lst for writing!\r\n", __func__ );
       return;
    }
    for( tstarsystem = first_starsystem; tstarsystem; tstarsystem = tstarsystem->next )
@@ -1124,7 +1110,6 @@ void write_starsystem_list(  )
    fprintf( fpout, "$\n" );
    fclose( fpout );
 }
-
 
 /*
  * Get pointer to space structure from starsystem name.
@@ -1165,7 +1150,6 @@ SPACE_DATA *starsystem_from_vnum( int vnum )
    return NULL;
 }
 
-
 /*
  * Save a starsystem's data to its data file
  */
@@ -1173,26 +1157,24 @@ void save_starsystem( SPACE_DATA * starsystem )
 {
    FILE *fp;
    char filename[256];
-   char buf[MAX_STRING_LENGTH];
 
    if( !starsystem )
    {
-      bug( "save_starsystem: null starsystem pointer!", 0 );
+      bug( "%s: null starsystem pointer!", __func__ );
       return;
    }
 
    if( !starsystem->filename || starsystem->filename[0] == '\0' )
    {
-      sprintf( buf, "save_starsystem: %s has no filename", starsystem->name );
-      bug( buf, 0 );
+      bug( "%s: %s has no filename", __func__, starsystem->name );
       return;
    }
 
-   sprintf( filename, "%s%s", SPACE_DIR, starsystem->filename );
+   snprintf( filename, 256, "%s%s", SPACE_DIR, starsystem->filename );
 
    if( ( fp = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "save_starsystem: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( filename );
    }
    else
@@ -1250,7 +1232,6 @@ void save_starsystem( SPACE_DATA * starsystem )
       fclose( fp );
       fp = NULL;
    }
-   return;
 }
 
 /*
@@ -1258,7 +1239,6 @@ void save_starsystem( SPACE_DATA * starsystem )
  */
 void fread_starsystem( SPACE_DATA * starsystem, FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
 
@@ -1285,7 +1265,6 @@ void fread_starsystem( SPACE_DATA * starsystem, FILE * fp )
             KEY( "Doc2c", starsystem->doc2c, fread_number( fp ) );
             KEY( "Doc3c", starsystem->doc3c, fread_number( fp ) );
             break;
-
 
          case 'E':
             if( !str_cmp( word, "End" ) )
@@ -1387,8 +1366,7 @@ void fread_starsystem( SPACE_DATA * starsystem, FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_starsystem: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
@@ -1396,7 +1374,6 @@ void fread_starsystem( SPACE_DATA * starsystem, FILE * fp )
 /*
  * Load a starsystem file
  */
-
 bool load_starsystem( const char *starsystemfile )
 {
    char filename[256];
@@ -1407,11 +1384,10 @@ bool load_starsystem( const char *starsystemfile )
    CREATE( starsystem, SPACE_DATA, 1 );
 
    found = FALSE;
-   sprintf( filename, "%s%s", SPACE_DIR, starsystemfile );
+   snprintf( filename, 256, "%s%s", SPACE_DIR, starsystemfile );
 
    if( ( fp = fopen( filename, "r" ) ) != NULL )
    {
-
       found = TRUE;
       LINK( starsystem, first_starsystem, last_starsystem, next, prev );
       for( ;; )
@@ -1428,7 +1404,7 @@ bool load_starsystem( const char *starsystemfile )
 
          if( letter != '#' )
          {
-            bug( "Load_starsystem_file: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -1442,10 +1418,7 @@ bool load_starsystem( const char *starsystemfile )
             break;
          else
          {
-            char buf[MAX_STRING_LENGTH];
-
-            sprintf( buf, "Load_starsystem_file: bad section: %s.", word );
-            bug( buf, 0 );
+            bug( "%s: bad section: %s.", __func__, word );
             break;
          }
       }
@@ -1466,15 +1439,13 @@ void load_space(  )
    FILE *fpList;
    const char *filename;
    char starsystemlist[256];
-   char buf[MAX_STRING_LENGTH];
-
 
    first_starsystem = NULL;
    last_starsystem = NULL;
 
    log_string( "Loading space..." );
 
-   sprintf( starsystemlist, "%s%s", SPACE_DIR, SPACE_LIST );
+   snprintf( starsystemlist, 256, "%s%s", SPACE_DIR, SPACE_LIST );
    if( ( fpList = fopen( starsystemlist, "r" ) ) == NULL )
    {
       perror( starsystemlist );
@@ -1487,16 +1458,13 @@ void load_space(  )
       if( filename[0] == '$' )
          break;
 
-
       if( !load_starsystem( filename ) )
       {
-         sprintf( buf, "Cannot load starsystem file: %s", filename );
-         bug( buf, 0 );
+         bug( "%s: Cannot load starsystem file: %s", __func__, filename );
       }
    }
    fclose( fpList );
    log_string( " Done starsystems " );
-   return;
 }
 
 void do_setstarsystem( CHAR_DATA * ch, const char *argument )
@@ -1537,7 +1505,6 @@ void do_setstarsystem( CHAR_DATA * ch, const char *argument )
       send_to_char( "No such starsystem.\r\n", ch );
       return;
    }
-
 
    if( !str_cmp( arg2, "doc1a" ) )
    {
@@ -1900,9 +1867,7 @@ void do_setstarsystem( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-
    do_setstarsystem( ch, "" );
-   return;
 }
 
 void showstarsystem( CHAR_DATA * ch, SPACE_DATA * starsystem )
@@ -1928,7 +1893,6 @@ void showstarsystem( CHAR_DATA * ch, SPACE_DATA * starsystem )
    ch_printf( ch, "     Doc3a: %5d (%s)\r\n", starsystem->doc3a, starsystem->location3a );
    ch_printf( ch, "     Doc3b: %5d (%s)\r\n", starsystem->doc3b, starsystem->location3b );
    ch_printf( ch, "     Doc3c: %5d (%s)\r\n", starsystem->doc3c, starsystem->location3c );
-   return;
 }
 
 void do_showstarsystem( CHAR_DATA * ch, const char *argument )
@@ -1941,7 +1905,6 @@ void do_showstarsystem( CHAR_DATA * ch, const char *argument )
       send_to_char( "&RNo such starsystem.\r\n", ch );
    else
       showstarsystem( ch, starsystem );
-
 }
 
 void do_makestarsystem( CHAR_DATA * ch, const char *argument )
@@ -1955,7 +1918,6 @@ void do_makestarsystem( CHAR_DATA * ch, const char *argument )
       send_to_char( "Usage: makestarsystem <starsystem name>\r\n", ch );
       return;
    }
-
 
    CREATE( starsystem, SPACE_DATA, 1 );
    LINK( starsystem, first_starsystem, last_starsystem, next, prev );
@@ -1978,7 +1940,7 @@ void do_makestarsystem( CHAR_DATA * ch, const char *argument )
    starsystem->star2 = STRALLOC( "" );
 
    argument = one_argument( argument, arg );
-   sprintf( filename, "%s.system", strlower( arg ) );
+   snprintf( filename, 256, "%s.system", strlower( arg ) );
    starsystem->filename = str_dup( filename );
    save_starsystem( starsystem );
    write_starsystem_list(  );
@@ -2011,7 +1973,6 @@ void echo_to_ship( int color, SHIP_DATA * ship, const char *argument )
    {
       echo_to_room( color, get_room_index( room ), argument );
    }
-
 }
 
 void sound_to_ship( SHIP_DATA * ship, const char *argument )
@@ -2032,7 +1993,6 @@ void sound_to_ship( SHIP_DATA * ship, const char *argument )
             send_to_char( argument, vic );
       }
    }
-
 }
 
 void echo_to_cockpit( int color, SHIP_DATA * ship, const char *argument )
@@ -2046,7 +2006,6 @@ void echo_to_cockpit( int color, SHIP_DATA * ship, const char *argument )
           || room == ship->gunseat || room == ship->engineroom || room == ship->turret1 || room == ship->turret2 )
          echo_to_room( color, get_room_index( room ), argument );
    }
-
 }
 
 void echo_to_system( int color, SHIP_DATA * ship, const char *argument,
@@ -2062,7 +2021,6 @@ void echo_to_system( int color, SHIP_DATA * ship, const char *argument,
       if( target != ship && target != ignore )
          echo_to_cockpit( color, target, argument );
    }
-
 }
 
 bool is_facing( SHIP_DATA * ship, SHIP_DATA * target )
@@ -2085,7 +2043,6 @@ bool is_facing( SHIP_DATA * ship, SHIP_DATA * target )
 
    return FALSE;
 }
-
 
 long int get_ship_value( SHIP_DATA * ship )
 {
@@ -2169,7 +2126,6 @@ long int get_ship_value( SHIP_DATA * ship )
    price = ( long )( price * 1.5 );
 
    return price;
-
 }
 
 void write_ship_list(  )
@@ -2178,11 +2134,11 @@ void write_ship_list(  )
    FILE *fpout;
    char filename[256];
 
-   sprintf( filename, "%s%s", SHIP_DIR, SHIP_LIST );
+   snprintf( filename, 256, "%s%s", SHIP_DIR, SHIP_LIST );
    fpout = fopen( filename, "w" );
    if( !fpout )
    {
-      bug( "FATAL: cannot open ship.lst for writing!\r\n", 0 );
+      bug( "FATAL: %s: cannot open ship.lst for writing!\r\n", __func__ );
       return;
    }
    for( tship = first_ship; tship; tship = tship->next )
@@ -2248,7 +2204,6 @@ SHIP_DATA *get_ship_here( const char *name, SPACE_DATA * starsystem )
    return NULL;
 }
 
-
 /*
  * Get pointer to ship structure from ship name.
  */
@@ -2265,7 +2220,6 @@ SHIP_DATA *ship_from_pilot( const char *name )
       return ship;
    return NULL;
 }
-
 
 /*
  * Get pointer to ship structure from cockpit, turret, or entrance ramp vnum.
@@ -2345,7 +2299,6 @@ SHIP_DATA *ship_from_engine( int vnum )
 }
 
 
-
 SHIP_DATA *ship_from_turret( int vnum )
 {
    SHIP_DATA *ship;
@@ -2376,31 +2329,28 @@ SHIP_DATA *ship_from_hanger( int vnum )
    return NULL;
 }
 
-
 void save_ship( SHIP_DATA * ship )
 {
    FILE *fp;
    char filename[256];
-   char buf[MAX_STRING_LENGTH];
 
    if( !ship )
    {
-      bug( "save_ship: null ship pointer!", 0 );
+      bug( "%s: null ship pointer!", __func__ );
       return;
    }
 
    if( !ship->filename || ship->filename[0] == '\0' )
    {
-      sprintf( buf, "save_ship: %s has no filename", ship->name );
-      bug( buf, 0 );
+      bug( "%s: %s has no filename", __func__, ship->name );
       return;
    }
 
-   sprintf( filename, "%s%s", SHIP_DIR, ship->filename );
+   snprintf( filename, 256, "%s%s", SHIP_DIR, ship->filename );
 
    if( ( fp = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "save_ship: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( filename );
    }
    else
@@ -2461,7 +2411,6 @@ void save_ship( SHIP_DATA * ship )
       fclose( fp );
       fp = NULL;
    }
-   return;
 }
 
 /*
@@ -2469,11 +2418,9 @@ void save_ship( SHIP_DATA * ship )
  */
 void fread_ship( SHIP_DATA * ship, FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
    int dummy_number;
-
 
    for( ;; )
    {
@@ -2499,7 +2446,6 @@ void fread_ship( SHIP_DATA * ship, FILE * fp )
             KEY( "Comm", ship->comm, fread_number( fp ) );
             KEY( "Chaff", ship->chaff, fread_number( fp ) );
             break;
-
 
          case 'D':
             KEY( "Description", ship->description, fread_string( fp ) );
@@ -2642,8 +2588,7 @@ void fread_ship( SHIP_DATA * ship, FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_ship: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
@@ -2651,7 +2596,6 @@ void fread_ship( SHIP_DATA * ship, FILE * fp )
 /*
  * Load a ship file
  */
-
 bool load_ship_file( const char *shipfile )
 {
    char filename[256];
@@ -2664,11 +2608,10 @@ bool load_ship_file( const char *shipfile )
    CREATE( ship, SHIP_DATA, 1 );
 
    found = FALSE;
-   sprintf( filename, "%s%s", SHIP_DIR, shipfile );
+   snprintf( filename, 256, "%s%s", SHIP_DIR, shipfile );
 
    if( ( fp = fopen( filename, "r" ) ) != NULL )
    {
-
       found = TRUE;
       for( ;; )
       {
@@ -2684,7 +2627,7 @@ bool load_ship_file( const char *shipfile )
 
          if( letter != '#' )
          {
-            bug( "Load_ship_file: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -2698,10 +2641,7 @@ bool load_ship_file( const char *shipfile )
             break;
          else
          {
-            char buf[MAX_STRING_LENGTH];
-
-            sprintf( buf, "Load_ship_file: bad section: %s.", word );
-            bug( buf, 0 );
+            bug( "%s: bad section: %s.", __func__, word );
             break;
          }
       }
@@ -2714,7 +2654,6 @@ bool load_ship_file( const char *shipfile )
       LINK( ship, first_ship, last_ship, next, prev );
       if( !str_cmp( "Public", ship->owner ) || ship->type == MOB_SHIP )
       {
-
 	if( ship->ship_class != SHIP_PLATFORM && ship->type != MOB_SHIP && ship->ship_class != CAPITAL_SHIP )
          {
             extract_ship( ship );
@@ -2750,10 +2689,7 @@ bool load_ship_file( const char *shipfile )
          ship->autorecharge = FALSE;
          ship->autotrack = FALSE;
          ship->autospeed = FALSE;
-
-
       }
-
       else if( ship->cockpit == ROOM_SHUTTLE_BUS ||
                ship->cockpit == ROOM_SHUTTLE_BUS_2 ||
                ship->cockpit == ROOM_SENATE_SHUTTLE ||
@@ -2768,7 +2704,6 @@ bool load_ship_file( const char *shipfile )
          ship->in_room = pRoomIndex;
          ship->location = ship->lastdoc;
       }
-
 
       if( ship->ship_class == SHIP_PLATFORM
 	  || ship->type == MOB_SHIP || ship->ship_class == CAPITAL_SHIP )
@@ -2793,9 +2728,7 @@ bool load_ship_file( const char *shipfile )
          else
             clan->vehicles++;
       }
-
    }
-
    return found;
 }
 
@@ -2807,8 +2740,6 @@ void load_ships(  )
    FILE *fpList;
    const char *filename;
    char shiplist[256];
-   char buf[MAX_STRING_LENGTH];
-
 
    first_ship = NULL;
    last_ship = NULL;
@@ -2817,7 +2748,7 @@ void load_ships(  )
 
    log_string( "Loading ships..." );
 
-   sprintf( shiplist, "%s%s", SHIP_DIR, SHIP_LIST );
+   snprintf( shiplist, 256, "%s%s", SHIP_DIR, SHIP_LIST );
    if( ( fpList = fopen( shiplist, "r" ) ) == NULL )
    {
       perror( shiplist );
@@ -2826,7 +2757,6 @@ void load_ships(  )
 
    for( ;; )
    {
-
       filename = feof( fpList ) ? "$" : fread_word( fpList );
 
       if( filename[0] == '$' )
@@ -2834,14 +2764,11 @@ void load_ships(  )
 
       if( !load_ship_file( filename ) )
       {
-         sprintf( buf, "Cannot load ship file: %s", filename );
-         bug( buf, 0 );
+         bug( "%s: Cannot load ship file: %s", __func__, filename );
       }
-
    }
    fclose( fpList );
    log_string( " Done ships " );
-   return;
 }
 
 void resetship( SHIP_DATA * ship )
@@ -2950,7 +2877,6 @@ void do_resetship( CHAR_DATA * ch, const char *argument )
       ship->autorecharge = TRUE;
       ship->shield = ship->maxshield;
    }
-
 }
 
 void do_setship( CHAR_DATA * ch, const char *argument )
@@ -3564,7 +3490,6 @@ void do_setship( CHAR_DATA * ch, const char *argument )
    }
 
    do_setship( ch, "" );
-   return;
 }
 
 void do_showship( CHAR_DATA * ch, const char *argument )
@@ -3632,7 +3557,6 @@ void do_showship( CHAR_DATA * ch, const char *argument )
    ch_printf( ch, "Current Heading: %.0f %.0f %.0f\r\n", ship->hx, ship->hy, ship->hz );
    ch_printf( ch, "Speed: %d/%d   Hyperspeed: %d\r\n  Manueverability: %d",
               ship->currspeed, ship->realspeed, ship->hyperspeed, ship->manuever );
-   return;
 }
 
 void do_makeship( CHAR_DATA * ch, const char *argument )
@@ -3672,7 +3596,6 @@ void do_makeship( CHAR_DATA * ch, const char *argument )
    ship->filename = str_dup( arg );
    save_ship( ship );
    write_ship_list(  );
-
 }
 
 void do_copyship( CHAR_DATA * ch, const char *argument )
@@ -3777,7 +3700,6 @@ void do_ships( CHAR_DATA * ch, const char *argument )
 
    }
 
-
    count = 0;
    send_to_char( "&Y\r\nThe following ships are docked here:\r\n", ch );
 
@@ -3864,7 +3786,6 @@ void do_speeders( CHAR_DATA * ch, const char *argument )
 
    }
 
-
    count = 0;
    send_to_char( "&Y\r\nThe following vehicles are parked here:\r\n", ch );
 
@@ -3883,7 +3804,6 @@ void do_speeders( CHAR_DATA * ch, const char *argument )
          set_char_color( AT_DGREEN, ch );
       else
          set_char_color( AT_BLUE, ch );
-
 
       ch_printf( ch, "%-35s %-15s", ship->name, ship->owner );
 
@@ -3928,7 +3848,6 @@ void do_allspeeders( CHAR_DATA * ch, const char *argument )
       else
          set_char_color( AT_BLUE, ch );
 
-
       ch_printf( ch, "%-35s %-15s ", ship->name, ship->owner );
 
       if( !str_cmp( ship->owner, "Public" ) )
@@ -3948,7 +3867,6 @@ void do_allspeeders( CHAR_DATA * ch, const char *argument )
       send_to_char( "There are none currently formed.\r\n", ch );
       return;
    }
-
 }
 
 void do_allships( CHAR_DATA * ch, const char *argument )
@@ -4003,9 +3921,7 @@ void do_allships( CHAR_DATA * ch, const char *argument )
       send_to_char( "There are no ships currently formed.\r\n", ch );
       return;
    }
-
 }
-
 
 void ship_to_starsystem( SHIP_DATA * ship, SPACE_DATA * starsystem )
 {
@@ -4027,7 +3943,6 @@ void ship_to_starsystem( SHIP_DATA * ship, SPACE_DATA * starsystem )
    starsystem->last_ship = ship;
 
    ship->starsystem = starsystem;
-
 }
 
 void new_missile( SHIP_DATA * ship, SHIP_DATA * target, CHAR_DATA * ch, int missiletype )
@@ -4080,12 +3995,10 @@ void new_missile( SHIP_DATA * ship, SHIP_DATA * target, CHAR_DATA * ch, int miss
    starsystem->last_missile = missile;
 
    missile->starsystem = starsystem;
-
 }
 
 void ship_from_starsystem( SHIP_DATA * ship, SPACE_DATA * starsystem )
 {
-
    if( starsystem == NULL )
       return;
 
@@ -4107,7 +4020,6 @@ void ship_from_starsystem( SHIP_DATA * ship, SPACE_DATA * starsystem )
    ship->starsystem = NULL;
    ship->next_in_starsystem = NULL;
    ship->prev_in_starsystem = NULL;
-
 }
 
 void extract_missile( MISSILE_DATA * missile )
@@ -4146,7 +4058,6 @@ void extract_missile( MISSILE_DATA * missile )
       STRFREE( missile->fired_by );
 
    DISPOSE( missile );
-
 }
 
 bool is_rental( CHAR_DATA * ch, SHIP_DATA * ship )
@@ -4244,7 +4155,6 @@ void damage_ship_ch( SHIP_DATA * ship, int min, int max, CHAR_DATA * ch )
          echo_to_room( AT_BLOOD + AT_BLINK, get_room_index( ship->turret2 ), "Turret DAMAGED!" );
          ship->statet2 = LASER_DAMAGED;
       }
-
    }
 
    ship->hull -= sdamage * 5;
@@ -4262,7 +4172,6 @@ void damage_ship_ch( SHIP_DATA * ship, int min, int max, CHAR_DATA * ch )
 
    if( ship->hull <= ship->maxhull / 20 )
       echo_to_cockpit( AT_BLOOD + AT_BLINK, ship, "WARNING! Ship hull severely damaged!" );
-
 }
 
 void damage_ship( SHIP_DATA * ship, int min, int max )
@@ -4282,7 +4191,6 @@ void damage_ship( SHIP_DATA * ship, int min, int max )
 
    if( sdamage > 0 )
    {
-
       if( number_range( 1, 100 ) <= 5 && ship->shipstate != SHIP_DISABLED )
       {
          echo_to_cockpit( AT_BLOOD + AT_BLINK, ship, "Ships Drive DAMAGED!" );
@@ -4306,7 +4214,6 @@ void damage_ship( SHIP_DATA * ship, int min, int max )
          echo_to_room( AT_BLOOD + AT_BLINK, get_room_index( ship->turret2 ), "Turret DAMAGED!" );
          ship->statet2 = LASER_DAMAGED;
       }
-
    }
 
    ship->hull -= sdamage * 5;
@@ -4319,7 +4226,6 @@ void damage_ship( SHIP_DATA * ship, int min, int max )
 
    if( ship->hull <= ship->maxhull / 20 )
       echo_to_cockpit( AT_BLOOD + AT_BLINK, ship, "WARNING! Ship hull severely damaged!" );
-
 }
 
 void destroy_ship( SHIP_DATA * ship, CHAR_DATA * ch )
@@ -4330,7 +4236,7 @@ void destroy_ship( SHIP_DATA * ship, CHAR_DATA * ch )
    OBJ_DATA *robj;
    CHAR_DATA *rch;
 
-   sprintf( buf, "%s explodes in a blinding flash of light!", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s explodes in a blinding flash of light!", ship->name );
    echo_to_system( AT_WHITE + AT_BLINK, ship, buf, NULL );
 
    if( ship->ship_class == FIGHTER_SHIP )
@@ -4369,11 +4275,9 @@ void destroy_ship( SHIP_DATA * ship, CHAR_DATA * ch )
             extract_obj( robj );
          }
       }
-
    }
 
    resetship( ship );
-
 }
 
 bool ship_to_room( SHIP_DATA * ship, int vnum )
@@ -4386,7 +4290,6 @@ bool ship_to_room( SHIP_DATA * ship, int vnum )
    ship->in_room = shipto;
    return TRUE;
 }
-
 
 void do_board( CHAR_DATA * ch, const char *argument )
 {
@@ -4451,7 +4354,6 @@ void do_board( CHAR_DATA * ch, const char *argument )
 
 bool rent_ship( CHAR_DATA * ch, SHIP_DATA * ship )
 {
-
    long price;
 
    if( IS_NPC( ch ) )
@@ -4468,7 +4370,6 @@ bool rent_ship( CHAR_DATA * ch, SHIP_DATA * ship )
    ch->gold -= price;
    ch_printf( ch, "&GYou pay %ld credits to rent the ship.\r\n", price );
    return TRUE;
-
 }
 
 void do_leaveship( CHAR_DATA * ch, const char *argument )
@@ -4661,7 +4562,7 @@ void do_launch( CHAR_DATA * ch, const char *argument )
       if( ship->hatchopen )
       {
          ship->hatchopen = FALSE;
-         sprintf( buf, "The hatch on %s closes.", ship->name );
+         snprintf( buf, MAX_STRING_LENGTH, "The hatch on %s closes.", ship->name );
          echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
          echo_to_room( AT_YELLOW, get_room_index( ship->entrance ), "The hatch slides shut." );
          sound_to_room( get_room_index( ship->entrance ), "!!SOUND(door)" );
@@ -4671,7 +4572,7 @@ void do_launch( CHAR_DATA * ch, const char *argument )
       send_to_char( "Launch sequence initiated.\r\n", ch );
       act( AT_PLAIN, "$n starts up the ship and begins the launch sequence.", ch, NULL, argument, TO_ROOM );
       echo_to_ship( AT_YELLOW, ship, "The ship hums as it lifts off the ground." );
-      sprintf( buf, "%s begins to launch.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s begins to launch.", ship->name );
       echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
       ship->shipstate = SHIP_LAUNCH;
       ship->currspeed = ship->realspeed;
@@ -4692,8 +4593,6 @@ void do_launch( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_midships );
    if( ship->ship_class == CAPITAL_SHIP )
       learn_from_failure( ch, gsn_capitalships );
-   return;
-
 }
 
 void launchship( SHIP_DATA * ship )
@@ -4704,12 +4603,11 @@ void launchship( SHIP_DATA * ship )
 
    ship_to_starsystem( ship, starsystem_from_vnum( ship->location ) );
 
-
    if( ship->starsystem == NULL )
    {
       echo_to_room( AT_YELLOW, get_room_index( ship->pilotseat ), "Launch path blocked .. Launch aborted." );
       echo_to_ship( AT_YELLOW, ship, "The ship slowly sets back back down on the landing pad." );
-      sprintf( buf, "%s slowly sets back down.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s slowly sets back down.", ship->name );
       echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
       ship->shipstate = SHIP_DOCKED;
       return;
@@ -4798,13 +4696,11 @@ void launchship( SHIP_DATA * ship )
 
    echo_to_room( AT_GREEN, get_room_index( ship->pilotseat ), "Launch complete.\r\n" );
    echo_to_ship( AT_YELLOW, ship, "The ship leaves the platform far behind as it flies into space." );
-   sprintf( buf, "%s enters the starsystem at %.0f %.0f %.0f", ship->name, ship->vx, ship->vy, ship->vz );
+   snprintf( buf, MAX_STRING_LENGTH, "%s enters the starsystem at %.0f %.0f %.0f", ship->name, ship->vx, ship->vy, ship->vz );
    echo_to_system( AT_YELLOW, ship, buf, NULL );
-   sprintf( buf, "%s lifts off into space.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s lifts off into space.", ship->name );
    echo_to_room( AT_YELLOW, get_room_index( ship->lastdoc ), buf );
-
 }
-
 
 void do_land( CHAR_DATA * ch, const char *argument )
 {
@@ -4814,7 +4710,7 @@ void do_land( CHAR_DATA * ch, const char *argument )
    SHIP_DATA *target;
    int vx = 0, vy = 0, vz = 0;
 
-   strcpy( arg, argument );
+   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    if( ( ship = ship_from_cockpit( ch->in_room->vnum ) ) == NULL )
    {
@@ -5040,7 +4936,6 @@ void do_land( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_starfighters );
    else
       learn_from_failure( ch, gsn_midships );
-   return;
 }
 
 void landship( SHIP_DATA * ship, const char *arg )
@@ -5084,7 +4979,7 @@ void landship( SHIP_DATA * ship, const char *arg )
 
    echo_to_room( AT_YELLOW, get_room_index( ship->pilotseat ), "Landing sequence complete." );
    echo_to_ship( AT_YELLOW, ship, "You feel a slight thud as the ship sets down on the ground." );
-   sprintf( buf, "%s disapears from your scanner.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s disapears from your scanner.", ship->name );
    echo_to_system( AT_YELLOW, ship, buf, NULL );
 
    ship->location = destination;
@@ -5093,7 +4988,7 @@ void landship( SHIP_DATA * ship, const char *arg )
       ship->shipstate = SHIP_DOCKED;
    ship_from_starsystem( ship, ship->starsystem );
 
-   sprintf( buf, "%s lands on the platform.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s lands on the platform.", ship->name );
    echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
 
    ship->energy = ship->energy - 25 - 25 * ship->ship_class;
@@ -5207,7 +5102,7 @@ void do_accelerate( CHAR_DATA * ch, const char *argument )
    {
       send_to_char( "&GAccelerating\r\n", ch );
       echo_to_cockpit( AT_YELLOW, ship, "The ship begins to accelerate." );
-      sprintf( buf, "%s begins to speed up.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s begins to speed up.", ship->name );
       echo_to_system( AT_ORANGE, ship, buf, NULL );
    }
 
@@ -5215,7 +5110,7 @@ void do_accelerate( CHAR_DATA * ch, const char *argument )
    {
       send_to_char( "&GDecelerating\r\n", ch );
       echo_to_cockpit( AT_YELLOW, ship, "The ship begins to slow down." );
-      sprintf( buf, "%s begins to slow down.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s begins to slow down.", ship->name );
       echo_to_system( AT_ORANGE, ship, buf, NULL );
    }
 
@@ -5229,7 +5124,6 @@ void do_accelerate( CHAR_DATA * ch, const char *argument )
       learn_from_success( ch, gsn_midships );
    if( ship->ship_class == CAPITAL_SHIP )
       learn_from_success( ch, gsn_capitalships );
-
 }
 
 void do_trajectory( CHAR_DATA * ch, const char *argument )
@@ -5341,7 +5235,7 @@ void do_trajectory( CHAR_DATA * ch, const char *argument )
    act( AT_PLAIN, "$n manipulates the ships controls.", ch, NULL, argument, TO_ROOM );
 
    echo_to_cockpit( AT_YELLOW, ship, "The ship begins to turn.\r\n" );
-   sprintf( buf, "%s turns altering its present course.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s turns altering its present course.", ship->name );
    echo_to_system( AT_ORANGE, ship, buf, NULL );
 
    if( ship->ship_class == FIGHTER_SHIP || ( ship->ship_class == MIDSIZE_SHIP && ship->manuever > 50 ) )
@@ -5446,7 +5340,6 @@ void do_buyship( CHAR_DATA * ch, const char *argument )
    STRFREE( ship->owner );
    ship->owner = STRALLOC( ch->name );
    save_ship( ship );
-
 }
 
 void do_clanbuyship( CHAR_DATA * ch, const char *argument )
@@ -5572,7 +5465,6 @@ void do_sellship( CHAR_DATA * ch, const char *argument )
    STRFREE( ship->owner );
    ship->owner = STRALLOC( "" );
    save_ship( ship );
-
 }
 
 void do_info( CHAR_DATA * ch, const char *argument )
@@ -5640,7 +5532,6 @@ void do_info( CHAR_DATA * ch, const char *argument )
    ch_printf( ch, "Maximum Speed: %d   Hyperspeed: %d\r\n", target->realspeed, target->hyperspeed );
 
    act( AT_PLAIN, "$n checks various gages and displays on the control panel.", ch, NULL, argument, TO_ROOM );
-
 }
 
 void do_autorecharge( CHAR_DATA * ch, const char *argument )
@@ -5648,7 +5539,6 @@ void do_autorecharge( CHAR_DATA * ch, const char *argument )
    int schance;
    SHIP_DATA *ship;
    int recharge;
-
 
    if( ( ship = ship_from_cockpit( ch->in_room->vnum ) ) == NULL )
    {
@@ -5768,7 +5658,6 @@ void do_autopilot( CHAR_DATA * ch, const char *argument )
       send_to_char( "&GYou toggle the autopilot.\r\n", ch );
       echo_to_cockpit( AT_YELLOW, ship, "Autopilot ON." );
    }
-
 }
 
 void do_openhatch( CHAR_DATA * ch, const char *argument )
@@ -5802,7 +5691,7 @@ void do_openhatch( CHAR_DATA * ch, const char *argument )
             ship->hatchopen = TRUE;
             send_to_char( "&GYou open the hatch.\r\n", ch );
             act( AT_PLAIN, "$n opens the hatch.", ch, NULL, argument, TO_ROOM );
-            sprintf( buf, "The hatch on %s opens.", ship->name );
+            snprintf( buf, MAX_STRING_LENGTH, "The hatch on %s opens.", ship->name );
             echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
             sound_to_room( get_room_index( ship->entrance ), "!!SOUND(door)" );
             sound_to_room( get_room_index( ship->location ), "!!SOUND(door)" );
@@ -5847,9 +5736,7 @@ void do_openhatch( CHAR_DATA * ch, const char *argument )
    }
 
    send_to_char( "&GIts already open!\r\n", ch );
-
 }
-
 
 void do_closehatch( CHAR_DATA * ch, const char *argument )
 {
@@ -5877,7 +5764,7 @@ void do_closehatch( CHAR_DATA * ch, const char *argument )
             ship->hatchopen = FALSE;
             send_to_char( "&GYou close the hatch.\r\n", ch );
             act( AT_PLAIN, "$n closes the hatch.", ch, NULL, argument, TO_ROOM );
-            sprintf( buf, "The hatch on %s closes.", ship->name );
+            snprintf( buf, MAX_STRING_LENGTH, "The hatch on %s closes.", ship->name );
             echo_to_room( AT_YELLOW, get_room_index( ship->location ), buf );
             sound_to_room( get_room_index( ship->entrance ), "!!SOUND(door)" );
             sound_to_room( get_room_index( ship->location ), "!!SOUND(door)" );
@@ -5922,8 +5809,6 @@ void do_closehatch( CHAR_DATA * ch, const char *argument )
          return;
       }
    }
-
-
 }
 
 void do_status( CHAR_DATA * ch, const char *argument )
@@ -6025,7 +5910,6 @@ void do_hyperspace( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-
    if( ship->ship_class == SHIP_PLATFORM )
    {
       send_to_char( "&RPlatforms can't move!\r\n", ch );
@@ -6105,7 +5989,7 @@ void do_hyperspace( CHAR_DATA * ch, const char *argument )
          learn_from_failure( ch, gsn_capitalships );
       return;
    }
-   sprintf( buf, "%s disapears from your scanner.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s disapears from your scanner.", ship->name );
    echo_to_system( AT_YELLOW, ship, buf, NULL );
 
    ship_from_starsystem( ship, ship->starsystem );
@@ -6128,9 +6012,7 @@ void do_hyperspace( CHAR_DATA * ch, const char *argument )
       learn_from_success( ch, gsn_midships );
    if( ship->ship_class == CAPITAL_SHIP )
       learn_from_success( ch, gsn_capitalships );
-
 }
-
 
 void do_target( CHAR_DATA * ch, const char *argument )
 {
@@ -6140,7 +6022,7 @@ void do_target( CHAR_DATA * ch, const char *argument )
    SHIP_DATA *target;
    char buf[MAX_STRING_LENGTH];
 
-   strcpy( arg, argument );
+   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    switch ( ch->substate )
    {
@@ -6235,7 +6117,7 @@ void do_target( CHAR_DATA * ch, const char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         strcpy( arg, ( const char* ) ch->dest_buf );
+         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -6272,7 +6154,7 @@ void do_target( CHAR_DATA * ch, const char *argument )
       ship->target2 = target;
 
    send_to_char( "&GTarget Locked.\r\n", ch );
-   sprintf( buf, "You are being targetted by %s.", ship->name );
+   snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", ship->name );
    echo_to_cockpit( AT_BLOOD, target, buf );
 
    sound_to_room( ch->in_room, "!!SOUND(targetlock)" );
@@ -6280,7 +6162,7 @@ void do_target( CHAR_DATA * ch, const char *argument )
 
    if( autofly( target ) && !target->target0 )
    {
-      sprintf( buf, "You are being targetted by %s.", target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
       echo_to_cockpit( AT_BLOOD, ship, buf );
       target->target0 = ship;
    }
@@ -6326,7 +6208,6 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       send_to_char( "&RYou'll have to turn off the ships autopilot first.\r\n", ch );
       return;
    }
-
 
    schance = IS_NPC( ch ) ? ch->top_level
       : ( int )( ch->perm_dex * 2 + ch->pcdata->learned[gsn_spacecombat] / 3
@@ -6380,22 +6261,22 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       act( AT_PLAIN, "$n presses the fire button.", ch, NULL, argument, TO_ROOM );
       if( number_percent(  ) > schance )
       {
-         sprintf( buf, "Lasers fire from %s at you but miss.", ship->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Lasers fire from %s at you but miss.", ship->name );
          echo_to_cockpit( AT_ORANGE, target, buf );
-         sprintf( buf, "The ships lasers fire at %s but miss.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "The ships lasers fire at %s but miss.", target->name );
          echo_to_cockpit( AT_ORANGE, ship, buf );
          learn_from_failure( ch, gsn_spacecombat );
          learn_from_failure( ch, gsn_spacecombat2 );
          learn_from_failure( ch, gsn_spacecombat3 );
-         sprintf( buf, "Laserfire from %s barely misses %s.", ship->name, target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Laserfire from %s barely misses %s.", ship->name, target->name );
          echo_to_system( AT_ORANGE, ship, buf, target );
          return;
       }
-      sprintf( buf, "Laserfire from %s hits %s.", ship->name, target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Laserfire from %s hits %s.", ship->name, target->name );
       echo_to_system( AT_ORANGE, ship, buf, target );
-      sprintf( buf, "You are hit by lasers from %s!", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "You are hit by lasers from %s!", ship->name );
       echo_to_cockpit( AT_BLOOD, target, buf );
-      sprintf( buf, "Your ships lasers hit %s!.", target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Your ships lasers hit %s!.", target->name );
       echo_to_cockpit( AT_YELLOW, ship, buf );
       learn_from_success( ch, gsn_spacecombat );
       learn_from_success( ch, gsn_spacecombat2 );
@@ -6406,7 +6287,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       if( autofly( target ) && target->target0 != ship )
       {
          target->target0 = ship;
-         sprintf( buf, "You are being targetted by %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
          echo_to_cockpit( AT_BLOOD, ship, buf );
       }
 
@@ -6473,9 +6354,9 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       ship->missiles--;
       act( AT_PLAIN, "$n presses the fire button.", ch, NULL, argument, TO_ROOM );
       echo_to_cockpit( AT_YELLOW, ship, "Missiles launched." );
-      sprintf( buf, "Incoming missile from %s.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Incoming missile from %s.", ship->name );
       echo_to_cockpit( AT_BLOOD, target, buf );
-      sprintf( buf, "%s fires a missile towards %s.", ship->name, target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s fires a missile towards %s.", ship->name, target->name );
       echo_to_system( AT_ORANGE, ship, buf, target );
       learn_from_success( ch, gsn_weaponsystems );
       if( ship->ship_class == CAPITAL_SHIP || ship->ship_class == SHIP_PLATFORM )
@@ -6486,7 +6367,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       if( autofly( target ) && target->target0 != ship )
       {
          target->target0 = ship;
-         sprintf( buf, "You are being targetted by %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
          echo_to_cockpit( AT_BLOOD, ship, buf );
       }
 
@@ -6551,9 +6432,9 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       ship->torpedos--;
       act( AT_PLAIN, "$n presses the fire button.", ch, NULL, argument, TO_ROOM );
       echo_to_cockpit( AT_YELLOW, ship, "Missiles launched." );
-      sprintf( buf, "Incoming torpedo from %s.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Incoming torpedo from %s.", ship->name );
       echo_to_cockpit( AT_BLOOD, target, buf );
-      sprintf( buf, "%s fires a torpedo towards %s.", ship->name, target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s fires a torpedo towards %s.", ship->name, target->name );
       echo_to_system( AT_ORANGE, ship, buf, target );
       learn_from_success( ch, gsn_weaponsystems );
       if( ship->ship_class == CAPITAL_SHIP || ship->ship_class == SHIP_PLATFORM )
@@ -6564,7 +6445,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       if( autofly( target ) && target->target0 != ship )
       {
          target->target0 = ship;
-         sprintf( buf, "You are being targetted by %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
          echo_to_cockpit( AT_BLOOD, ship, buf );
       }
 
@@ -6631,9 +6512,9 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       ship->rockets--;
       act( AT_PLAIN, "$n presses the fire button.", ch, NULL, argument, TO_ROOM );
       echo_to_cockpit( AT_YELLOW, ship, "Rocket launched." );
-      sprintf( buf, "Incoming rocket from %s.", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Incoming rocket from %s.", ship->name );
       echo_to_cockpit( AT_BLOOD, target, buf );
-      sprintf( buf, "%s fires a heavy rocket towards %s.", ship->name, target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "%s fires a heavy rocket towards %s.", ship->name, target->name );
       echo_to_system( AT_ORANGE, ship, buf, target );
       learn_from_success( ch, gsn_weaponsystems );
       if( ship->ship_class == CAPITAL_SHIP || ship->ship_class == SHIP_PLATFORM )
@@ -6644,7 +6525,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       if( autofly( target ) && target->target0 != ship )
       {
          target->target0 = ship;
-         sprintf( buf, "You are being targetted by %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
          echo_to_cockpit( AT_BLOOD, ship, buf );
       }
 
@@ -6693,22 +6574,22 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       act( AT_PLAIN, "$n presses the fire button.", ch, NULL, argument, TO_ROOM );
       if( number_percent(  ) > schance )
       {
-         sprintf( buf, "Turbolasers fire from %s at you but miss.", ship->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from %s at you but miss.", ship->name );
          echo_to_cockpit( AT_ORANGE, target, buf );
-         sprintf( buf, "Turbolasers fire from the ships turret at %s but miss.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from the ships turret at %s but miss.", target->name );
          echo_to_cockpit( AT_ORANGE, ship, buf );
-         sprintf( buf, "%s fires at %s but misses.", ship->name, target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "%s fires at %s but misses.", ship->name, target->name );
          echo_to_system( AT_ORANGE, ship, buf, target );
          learn_from_failure( ch, gsn_spacecombat );
          learn_from_failure( ch, gsn_spacecombat2 );
          learn_from_failure( ch, gsn_spacecombat3 );
          return;
       }
-      sprintf( buf, "Turboasers fire from %s, hitting %s.", ship->name, target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Turboasers fire from %s, hitting %s.", ship->name, target->name );
       echo_to_system( AT_ORANGE, ship, buf, target );
-      sprintf( buf, "You are hit by turbolasers from %s!", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "You are hit by turbolasers from %s!", ship->name );
       echo_to_cockpit( AT_BLOOD, target, buf );
-      sprintf( buf, "Turbolasers fire from the turret, hitting %s!.", target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from the turret, hitting %s!.", target->name );
       echo_to_cockpit( AT_YELLOW, ship, buf );
       learn_from_success( ch, gsn_spacecombat );
       learn_from_success( ch, gsn_spacecombat2 );
@@ -6719,7 +6600,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       if( autofly( target ) && target->target0 != ship )
       {
          target->target0 = ship;
-         sprintf( buf, "You are being targetted by %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
          echo_to_cockpit( AT_BLOOD, ship, buf );
       }
 
@@ -6768,22 +6649,22 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       act( AT_PLAIN, "$n presses the fire button.", ch, NULL, argument, TO_ROOM );
       if( number_percent(  ) > schance )
       {
-         sprintf( buf, "Turbolasers fire from %s barely missing %s.", ship->name, target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from %s barely missing %s.", ship->name, target->name );
          echo_to_system( AT_ORANGE, ship, buf, target );
-         sprintf( buf, "Turbolasers fire from %s at you but miss.", ship->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from %s at you but miss.", ship->name );
          echo_to_cockpit( AT_ORANGE, target, buf );
-         sprintf( buf, "Turbolasers fire from the turret missing %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from the turret missing %s.", target->name );
          echo_to_cockpit( AT_ORANGE, ship, buf );
          learn_from_failure( ch, gsn_spacecombat );
          learn_from_failure( ch, gsn_spacecombat2 );
          learn_from_failure( ch, gsn_spacecombat3 );
          return;
       }
-      sprintf( buf, "Turbolasers fire from %s, hitting %s.", ship->name, target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "Turbolasers fire from %s, hitting %s.", ship->name, target->name );
       echo_to_system( AT_ORANGE, ship, buf, target );
-      sprintf( buf, "You are hit by turbolasers from %s!", ship->name );
+      snprintf( buf, MAX_STRING_LENGTH, "You are hit by turbolasers from %s!", ship->name );
       echo_to_cockpit( AT_BLOOD, target, buf );
-      sprintf( buf, "turbolasers fire from the turret hitting %s!.", target->name );
+      snprintf( buf, MAX_STRING_LENGTH, "turbolasers fire from the turret hitting %s!.", target->name );
       echo_to_cockpit( AT_YELLOW, ship, buf );
       learn_from_success( ch, gsn_spacecombat );
       learn_from_success( ch, gsn_spacecombat2 );
@@ -6794,7 +6675,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
       if( autofly( target ) && target->target0 != ship )
       {
          target->target0 = ship;
-         sprintf( buf, "You are being targetted by %s.", target->name );
+         snprintf( buf, MAX_STRING_LENGTH, "You are being targetted by %s.", target->name );
          echo_to_cockpit( AT_BLOOD, ship, buf );
       }
 
@@ -6802,9 +6683,7 @@ void do_fire( CHAR_DATA * ch, const char *argument )
    }
 
    send_to_char( "&RYou can't fire that!\r\n", ch );
-
 }
-
 
 void do_calculate( CHAR_DATA * ch, const char *argument )
 {
@@ -6818,7 +6697,6 @@ void do_calculate( CHAR_DATA * ch, const char *argument )
    argument = one_argument( argument, arg1 );
    argument = one_argument( argument, arg2 );
    argument = one_argument( argument, arg3 );
-
 
    if( ( ship = ship_from_cockpit( ch->in_room->vnum ) ) == NULL )
    {
@@ -6888,7 +6766,6 @@ void do_calculate( CHAR_DATA * ch, const char *argument )
       learn_from_failure( ch, gsn_navigation );
       return;
    }
-
 
    ship->currjump = starsystem_from_name( arg1 );
    ship->jx = atoi( arg2 );
@@ -6989,7 +6866,6 @@ void do_recharge( CHAR_DATA * ch, const char *argument )
    int schance;
    SHIP_DATA *ship;
 
-
    if( ( ship = ship_from_cockpit( ch->in_room->vnum ) ) == NULL )
    {
       send_to_char( "&RYou must be in the cockpit of a ship to do that!\r\n", ch );
@@ -7038,14 +6914,13 @@ void do_recharge( CHAR_DATA * ch, const char *argument )
    ship->energy -= ( recharge * 2 + recharge * ship->ship_class );
 }
 
-
 void do_repairship( CHAR_DATA * ch, const char *argument )
 {
    char arg[MAX_INPUT_LENGTH];
    int schance, change;
    SHIP_DATA *ship;
 
-   strcpy( arg, argument );
+   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    switch ( ch->substate )
    {
@@ -7084,7 +6959,7 @@ void do_repairship( CHAR_DATA * ch, const char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         strcpy( arg, ( const char* ) ch->dest_buf );
+         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -7149,9 +7024,7 @@ void do_repairship( CHAR_DATA * ch, const char *argument )
    act( AT_PLAIN, "$n finishes the repairs.", ch, NULL, argument, TO_ROOM );
 
    learn_from_success( ch, gsn_shipmaintenance );
-
 }
-
 
 void do_refuel( CHAR_DATA * ch, const char *argument )
 {
@@ -7224,7 +7097,6 @@ void do_addpilot( CHAR_DATA * ch, const char *argument )
    ship->pilot = STRALLOC( argument );
    send_to_char( "Pilot Added.\r\n", ch );
    save_ship( ship );
-
 }
 
 void do_rempilot( CHAR_DATA * ch, const char *argument )
@@ -7291,7 +7163,6 @@ void do_rempilot( CHAR_DATA * ch, const char *argument )
    }
 
    send_to_char( "&RThat person isn't listed as one of the ships pilots.\r\n", ch );
-
 }
 
 void do_radar( CHAR_DATA * ch, const char *argument )
@@ -7339,7 +7210,6 @@ void do_radar( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-
    act( AT_PLAIN, "$n checks the radar.", ch, NULL, argument, TO_ROOM );
 
    set_char_color( AT_WHITE, ch );
@@ -7380,7 +7250,6 @@ void do_radar( CHAR_DATA * ch, const char *argument )
 
 
    learn_from_success( ch, gsn_navigation );
-
 }
 
 void do_autotrack( CHAR_DATA * ch, const char *argument )
@@ -7445,18 +7314,20 @@ void do_autotrack( CHAR_DATA * ch, const char *argument )
    }
 
    learn_from_success( ch, gsn_shipsystems );
-
 }
 
 void do_jumpvector( CHAR_DATA * ch, const char *argument )
 {
 }
+
 void do_reload( CHAR_DATA * ch, const char *argument )
 {
 }
+
 void do_closebay( CHAR_DATA * ch, const char *argument )
 {
 }
+
 void do_openbay( CHAR_DATA * ch, const char *argument )
 {
 }
@@ -7488,14 +7359,12 @@ void do_pluogus( CHAR_DATA * ch, const char *argument )
    /*
     * current port 
     */
-
    if( bus_pos < 7 && bus_pos > 1 )
       ch_printf( ch, "The Pluogus is Currently docked at %s.\r\n", bus_stop[bus_planet] );
 
    /*
     * destinations 
     */
-
    next_planet = bus_planet;
    send_to_char( "Next stops: ", ch );
 
@@ -7540,7 +7409,6 @@ void do_pluogus( CHAR_DATA * ch, const char *argument )
    }
 
    ch_printf( ch, "\r\n" );
-
 }
 
 void do_fly( CHAR_DATA * ch, const char *argument )
@@ -7584,7 +7452,6 @@ void do_drive( CHAR_DATA * ch, const char *argument )
    }
 
    drive_ship( ch, ship, get_exit( get_room_index( ship->location ), dir ), 0 );
-
 }
 
 ch_ret drive_ship( CHAR_DATA * ch, SHIP_DATA * ship, EXIT_DATA * pexit, int fall )
@@ -7601,7 +7468,6 @@ ch_ret drive_ship( CHAR_DATA * ch, SHIP_DATA * ship, EXIT_DATA * pexit, int fall
    CHAR_DATA *rch;
    CHAR_DATA *next_rch;
 
-
    if( !IS_NPC( ch ) )
       if( IS_DRUNK( ch, 2 ) && ( ch->position != POS_SHOVE ) && ( ch->position != POS_DRAG ) )
          drunk = TRUE;
@@ -7615,7 +7481,7 @@ ch_ret drive_ship( CHAR_DATA * ch, SHIP_DATA * ship, EXIT_DATA * pexit, int fall
 #ifdef DEBUG
    if( pexit )
    {
-      sprintf( buf, "drive_ship: %s to door %d", ch->name, pexit->vdir );
+      snprintf( buf, MAX_STRING_LENGTH, "%s: %s to door %d", __func__, ch->name, pexit->vdir );
       log_string( buf );
    }
 #endif
@@ -7790,11 +7656,11 @@ ch_ret drive_ship( CHAR_DATA * ch, SHIP_DATA * ship, EXIT_DATA * pexit, int fall
          txt = "drive";
       }
    }
-   sprintf( buf, "$n %ss the vehicle $T.", txt );
+   snprintf( buf, MAX_STRING_LENGTH, "$n %ss the vehicle $T.", txt );
    act( AT_ACTION, buf, ch, NULL, dir_name[door], TO_ROOM );
-   sprintf( buf, "You %s the vehicle $T.", txt );
+   snprintf( buf, MAX_STRING_LENGTH, "You %s the vehicle $T.", txt );
    act( AT_ACTION, buf, ch, NULL, dir_name[door], TO_CHAR );
-   sprintf( buf, "%s %ss %s.", ship->name, txt, dir_name[door] );
+   snprintf( buf, MAX_STRING_LENGTH, "%s %ss %s.", ship->name, txt, dir_name[door] );
    echo_to_room( AT_ACTION, get_room_index( ship->location ), buf );
 
    extract_ship( ship );
@@ -7853,7 +7719,7 @@ ch_ret drive_ship( CHAR_DATA * ch, SHIP_DATA * ship, EXIT_DATA * pexit, int fall
          break;
    }
 
-   sprintf( buf, "%s %s from %s.", ship->name, txt, dtxt );
+   snprintf( buf, MAX_STRING_LENGTH, "%s %s from %s.", ship->name, txt, dtxt );
    echo_to_room( AT_ACTION, get_room_index( ship->location ), buf );
 
    for( rch = ch->in_room->last_person; rch; rch = next_rch )
@@ -7888,7 +7754,6 @@ ch_ret drive_ship( CHAR_DATA * ch, SHIP_DATA * ship, EXIT_DATA * pexit, int fall
 
 */
    return retcode;
-
 }
 
 void do_bomb( CHAR_DATA * ch, const char *argument )
@@ -7958,7 +7823,6 @@ void do_chaff( CHAR_DATA * ch, const char *argument )
    echo_to_cockpit( AT_YELLOW, ship, "A burst of chaff is released from the ship." );
 
    learn_from_success( ch, gsn_weaponsystems );
-
 }
 
 bool autofly( SHIP_DATA * ship )
@@ -7974,10 +7838,7 @@ bool autofly( SHIP_DATA * ship )
       return TRUE;
 
    return FALSE;
-
 }
-
-
 
 /* Generic Pilot Command To use as template
 
@@ -7987,7 +7848,7 @@ void do_hmm( CHAR_DATA *ch, const char *argument )
     int schance;
     SHIP_DATA *ship;
     
-    strcpy( arg, argument );    
+    mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );    
     
     switch( ch->substate )
     { 
@@ -8055,7 +7916,7 @@ void do_hmm( CHAR_DATA *ch, const char *argument )
     	case 1:
     		if ( !ch->dest_buf )
     		   return;
-    		strcpy(arg, ch->dest_buf);
+    		mudstrlcpy(arg, ch->dest_buf, MAX_INPUT_LENGTH);
     		DISPOSE( ch->dest_buf);
     		break;
     		

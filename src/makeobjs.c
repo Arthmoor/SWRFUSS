@@ -34,7 +34,6 @@ void make_fire( ROOM_INDEX_DATA * in_room, short timer )
    fire = create_object( get_obj_index( OBJ_VNUM_FIRE ), 0 );
    fire->timer = number_fuzzy( timer );
    obj_to_room( fire, in_room );
-   return;
 }
 
 /*
@@ -78,10 +77,10 @@ void make_scraps( OBJ_DATA * obj )
    }
    else
    {
-      sprintf( buf, scraps->short_descr, obj->short_descr );
+      snprintf( buf, MAX_STRING_LENGTH, scraps->short_descr, obj->short_descr );
       STRFREE( scraps->short_descr );
       scraps->short_descr = STRALLOC( buf );
-      sprintf( buf, scraps->description, obj->short_descr );
+      snprintf( buf, MAX_STRING_LENGTH, scraps->description, obj->short_descr );
       STRFREE( scraps->description );
       scraps->description = STRALLOC( buf );
    }
@@ -175,15 +174,15 @@ OBJ_DATA *make_corpse( CHAR_DATA * ch, CHAR_DATA * killer )
    /*
     * Added corpse name - make locate easier , other skills 
     */
-   sprintf( buf, "corpse %s", name );
+   snprintf( buf, MAX_STRING_LENGTH, "corpse %s", name );
    STRFREE( corpse->name );
    corpse->name = STRALLOC( buf );
 
-   sprintf( buf, corpse->short_descr, name );
+   snprintf( buf, MAX_STRING_LENGTH, corpse->short_descr, name );
    STRFREE( corpse->short_descr );
    corpse->short_descr = STRALLOC( buf );
 
-   sprintf( buf, corpse->description, name );
+   snprintf( buf, MAX_STRING_LENGTH, corpse->description, name );
    STRFREE( corpse->description );
    corpse->description = STRALLOC( buf );
 
@@ -218,7 +217,6 @@ void make_bloodstain( CHAR_DATA * ch )
    obj_to_room( obj, ch->in_room );
 }
 
-
 /*
  * make some coinage
  */
@@ -229,7 +227,7 @@ OBJ_DATA *create_money( int amount )
 
    if( amount <= 0 )
    {
-      bug( "Create_money: zero or negative money %d.", amount );
+      bug( "%s: zero or negative money %d.", __func__, amount );
       amount = 1;
    }
 
@@ -240,7 +238,7 @@ OBJ_DATA *create_money( int amount )
    else
    {
       obj = create_object( get_obj_index( OBJ_VNUM_MONEY_SOME ), 0 );
-      sprintf( buf, obj->short_descr, amount );
+      snprintf( buf, MAX_STRING_LENGTH, obj->short_descr, amount );
       STRFREE( obj->short_descr );
       obj->short_descr = STRALLOC( buf );
       obj->value[0] = amount;

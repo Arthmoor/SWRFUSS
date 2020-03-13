@@ -33,7 +33,6 @@
  */
 #define SAVEVERSION 4
 
-
 /*
  * Array to keep track of equipment temporarily.		-Thoric
  */
@@ -58,8 +57,8 @@ static OBJ_DATA *rgObjNest[MAX_NEST];
 /*
  * Local functions.
  */
-void fwrite_char args( ( CHAR_DATA * ch, FILE * fp ) );
-void fread_char args( ( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover ) );
+void fwrite_char( CHAR_DATA * ch, FILE * fp );
+void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover );
 
 void save_home( CHAR_DATA * ch )
 {
@@ -70,8 +69,7 @@ void save_home( CHAR_DATA * ch )
       short templvl;
       OBJ_DATA *contents;
 
-
-      sprintf( filename, "%s%c/%s.home", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
+      snprintf( filename, 256, "%s%c/%s.home", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
       if( ( fp = fopen( filename, "w" ) ) == NULL )
       {
       }
@@ -95,7 +93,6 @@ void save_home( CHAR_DATA * ch )
  */
 void de_equip_char( CHAR_DATA * ch )
 {
-   char buf[MAX_STRING_LENGTH];
    OBJ_DATA *obj;
    int x, y;
 
@@ -105,7 +102,6 @@ void de_equip_char( CHAR_DATA * ch )
    for( obj = ch->first_carrying; obj; obj = obj->next_content )
       if( obj->wear_loc > -1 && obj->wear_loc < MAX_WEAR )
       {
-
          for( x = 0; x < MAX_LAYERS; x++ )
             if( !save_equipment[obj->wear_loc][x] )
             {
@@ -114,9 +110,8 @@ void de_equip_char( CHAR_DATA * ch )
             }
          if( x == MAX_LAYERS )
          {
-            sprintf( buf, "%s had on more than %d layers of clothing in one location (%d): %s",
+            bug( "%s: %s had on more than %d layers of clothing in one location (%d): %s", __func__,
                      ch->name, MAX_LAYERS, obj->wear_loc, obj->name );
-            bug( buf, 0 );
          }
 
          unequip_char( ch, obj );
@@ -142,7 +137,6 @@ void re_equip_char( CHAR_DATA * ch )
             break;
 }
 
-
 /*
  * Save a character and inventory.
  * Would be cool to save NPC's too for quest purposes,
@@ -150,13 +144,13 @@ void re_equip_char( CHAR_DATA * ch )
  */
 void save_char_obj( CHAR_DATA * ch )
 {
-   char strsave[MAX_INPUT_LENGTH];
-   char strback[MAX_INPUT_LENGTH];
+   char strsave[256];
+   char strback[256];
    FILE *fp;
 
    if( !ch )
    {
-      bug( "Save_char_obj: null ch!", 0 );
+      bug( "%s: null ch!", __func__ );
       return;
    }
 
@@ -176,14 +170,14 @@ void save_char_obj( CHAR_DATA * ch )
    de_equip_char( ch );
 
    ch->save_time = current_time;
-   sprintf( strsave, "%s%c/%s", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
+   snprintf( strsave, 256, "%s%c/%s", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
 
    /*
     * Auto-backup pfile (can cause lag with high disk access situtations
     */
    if( IS_SET( sysdata.save_flags, SV_BACKUP ) )
    {
-      sprintf( strback, "%s%c/%s", BACKUP_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
+      snprintf( strback, 256, "%s%c/%s", BACKUP_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
       rename( strsave, strback );
    }
 
@@ -196,11 +190,11 @@ void save_char_obj( CHAR_DATA * ch )
     */
    if( get_trust( ch ) > LEVEL_HERO )
    {
-      sprintf( strback, "%s%s", GOD_DIR, capitalize( ch->name ) );
+      snprintf( strback, 256, "%s%s", GOD_DIR, capitalize( ch->name ) );
 
       if( ( fp = fopen( strback, "w" ) ) == NULL )
       {
-         bug( "Save_god_level: fopen", 0 );
+         bug( "%s: fopen", __func__ );
          perror( strback );
       }
       else
@@ -219,7 +213,7 @@ void save_char_obj( CHAR_DATA * ch )
 
    if( ( fp = fopen( strsave, "w" ) ) == NULL )
    {
-      bug( "Save_char_obj: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( strsave );
    }
    else
@@ -238,18 +232,17 @@ void save_char_obj( CHAR_DATA * ch )
    write_corpses( ch, NULL );
    quitting_char = NULL;
    saving_char = NULL;
-   return;
 }
 
 void save_clone( CHAR_DATA * ch )
 {
-   char strsave[MAX_INPUT_LENGTH];
-   char strback[MAX_INPUT_LENGTH];
+   char strsave[256];
+   char strback[256];
    FILE *fp;
 
    if( !ch )
    {
-      bug( "Save_char_obj: null ch!", 0 );
+      bug( "%s: null ch!", __func__ );
       return;
    }
 
@@ -262,20 +255,20 @@ void save_clone( CHAR_DATA * ch )
    de_equip_char( ch );
 
    ch->save_time = current_time;
-   sprintf( strsave, "%s%c/%s.clone", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
+   snprintf( strsave, 256, "%s%c/%s.clone", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
 
    /*
     * Auto-backup pfile (can cause lag with high disk access situtations
     */
    if( IS_SET( sysdata.save_flags, SV_BACKUP ) )
    {
-      sprintf( strback, "%s%c/%s", BACKUP_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
+      snprintf( strback, 256, "%s%c/%s", BACKUP_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
       rename( strsave, strback );
    }
 
    if( ( fp = fopen( strsave, "w" ) ) == NULL )
    {
-      bug( "Save_char_obj: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( strsave );
    }
    else
@@ -292,10 +285,7 @@ void save_clone( CHAR_DATA * ch )
    write_corpses( ch, NULL );
    quitting_char = NULL;
    saving_char = NULL;
-   return;
 }
-
-
 
 /*
  * Write the char.
@@ -509,7 +499,6 @@ void fwrite_char( CHAR_DATA * ch, FILE * fp )
    imc_savechar( ch, fp );
 #endif
    fprintf( fp, "End\n\n" );
-   return;
 }
 
 /*
@@ -523,13 +512,13 @@ void fwrite_obj( CHAR_DATA * ch, OBJ_DATA * obj, FILE * fp, int iNest, short os_
 
    if( iNest >= MAX_NEST )
    {
-      bug( "%s: iNest hit MAX_NEST %d", __FUNCTION__, iNest );
+      bug( "%s: iNest hit MAX_NEST %d", __func__, iNest );
       return;
    }
 
    if( !obj )
    {
-      bug( "%s: NULL obj", __FUNCTION__ );
+      bug( "%s: NULL obj", __func__ );
       return;
    }
 
@@ -685,18 +674,14 @@ void fwrite_obj( CHAR_DATA * ch, OBJ_DATA * obj, FILE * fp, int iNest, short os_
 
    if( obj->first_content )
       fwrite_obj( ch, obj->last_content, fp, iNest + 1, OS_CARRY, hotboot );
-
-   return;
 }
-
-
 
 /*
  * Load a char and inventory into a new ch structure.
  */
 bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover )
 {
-   char strsave[MAX_INPUT_LENGTH];
+   char strsave[256];
    CHAR_DATA *ch;
    FILE *fp;
    bool found;
@@ -748,17 +733,17 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
    imc_initchar( ch );
 #endif
    found = FALSE;
-   sprintf( strsave, "%s%c/%s", PLAYER_DIR, tolower( name[0] ), capitalize( name ) );
+   snprintf( strsave, 256, "%s%c/%s", PLAYER_DIR, tolower( name[0] ), capitalize( name ) );
    if( stat( strsave, &fst ) != -1 )
    {
       if( fst.st_size == 0 )
       {
-         sprintf( strsave, "%s%c/%s", BACKUP_DIR, tolower( name[0] ), capitalize( name ) );
+         snprintf( strsave, 256, "%s%c/%s", BACKUP_DIR, tolower( name[0] ), capitalize( name ) );
          send_to_char( "Restoring your backup player file...", ch );
       }
       else
       {
-         sprintf( buf, "%s player data for: %s (%dK)",
+         snprintf( buf, MAX_INPUT_LENGTH, "%s player data for: %s (%dK)",
                   preload ? "Preloading" : "Loading", ch->name, ( int )fst.st_size / 1024 );
          log_string_plus( buf, LOG_COMM, LEVEL_GREATER );
       }
@@ -779,7 +764,7 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
        * Cheat so that bug will show line #'s -- Altrag 
        */
       fpArea = fp;
-      strcpy( strArea, strsave );
+      mudstrlcpy( strArea, strsave, MAX_INPUT_LENGTH );
       for( ;; )
       {
          char letter;
@@ -794,8 +779,7 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
 
          if( letter != '#' )
          {
-            bug( "Load_char_obj: # not found.", 0 );
-            bug( name, 0 );
+            bug( "%s: # not found: %s", __func__, name );
             break;
          }
 
@@ -814,14 +798,13 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
             break;
          else
          {
-            bug( "Load_char_obj: bad section.", 0 );
-            bug( name, 0 );
+            bug( "%s: bad section: %s", __func__, name );
             break;
          }
       }
       fclose( fp );
       fpArea = NULL;
-      strcpy( strArea, "$" );
+      mudstrlcpy( strArea, "$", MAX_INPUT_LENGTH );
    }
 
    if( !found )
@@ -924,7 +907,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
 
       if( word[0] == '\0' )
       {
-         bug( "%s: EOF encountered reading file!", __FUNCTION__ );
+         bug( "%s: EOF encountered reading file!", __func__ );
          word = "End";
       }
       fMatch = FALSE;
@@ -975,7 +958,6 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                break;
             }
 
-
             if( !str_cmp( word, "Affect" ) || !str_cmp( word, "AffectData" ) )
             {
                AFFECT_DATA *paf;
@@ -998,7 +980,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                   if( ( sn = skill_lookup( sname ) ) < 0 )
                   {
                      if( ( sn = herb_lookup( sname ) ) < 0 )
-                        bug( "Fread_char: unknown skill.", 0 );
+                        bug( "%s: unknown skill.", __func__ );
                      else
                         sn += TYPE_HERB;
                   }
@@ -1068,10 +1050,9 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                if( !preload
                    && ch->pcdata->clan_name[0] != '\0' && ( ch->pcdata->clan = get_clan( ch->pcdata->clan_name ) ) == NULL )
                {
-                  sprintf( buf,
+                  ch_printf( ch,
                            "Warning: the organization %s no longer exists, and therefore you no longer\r\nbelong to that organization.\r\n",
                            ch->pcdata->clan_name );
-                  send_to_char( buf, ch );
                   STRFREE( ch->pcdata->clan_name );
                   ch->pcdata->clan_name = STRALLOC( "" );
                }
@@ -1159,10 +1140,9 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                if( !preload
                    && ch->pcdata->clan_name[0] != '\0' && ( ch->pcdata->clan = get_clan( ch->pcdata->clan_name ) ) == NULL )
                {
-                  sprintf( buf,
+                  ch_printf( ch,
                            "Warning: the organization %s no longer exists, and therefore you no longer\r\nbelong to that organization.\r\n",
                            ch->pcdata->clan_name );
-                  send_to_char( buf, ch );
                   STRFREE( ch->pcdata->clan_name );
                   ch->pcdata->clan_name = STRALLOC( "" );
                }
@@ -1229,7 +1209,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
             {
                fMatch = TRUE;
                if( killcnt >= MAX_KILLTRACK )
-                  bug( "fread_char: killcnt (%d) >= MAX_KILLTRACK", killcnt );
+                  bug( "%s: killcnt (%d) >= MAX_KILLTRACK", __func__, killcnt );
                else
                {
                   ch->pcdata->killed[killcnt].vnum = fread_number( fp );
@@ -1378,8 +1358,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
             {
                if( !preload && !copyover )
                {
-                  sprintf( buf, "Last connected from: %s\r\n", fread_word( fp ) );
-                  send_to_char( buf, ch );
+                  ch_printf( ch, "Last connected from: %s\r\n", fread_word( fp ) );
                }
                else
                   fread_to_eol( fp );
@@ -1404,7 +1383,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                   else
                      sn = bsearch_skill_exact( fread_word( fp ), gsn_first_skill, gsn_first_weapon - 1 );
                   if( sn < 0 )
-                     bug( "Fread_char: unknown skill.", 0 );
+                     bug( "%s: unknown skill.", __func__ );
                   else
                   {
                      ch->pcdata->learned[sn] = value;
@@ -1427,7 +1406,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
 
                   sn = bsearch_skill_exact( fread_word( fp ), gsn_first_spell, gsn_first_skill - 1 );
                   if( sn < 0 )
-                     bug( "Fread_char: unknown spell.", 0 );
+                     bug( "%s: unknown spell.", __func__ );
                   else
                   {
                      ch->pcdata->learned[sn] = value;
@@ -1537,11 +1516,10 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
 
                   sn = bsearch_skill_exact( fread_word( fp ), gsn_first_tongue, gsn_top_sn - 1 );
                   if( sn < 0 )
-                     bug( "Fread_char: unknown tongue.", 0 );
+                     bug( "%s: unknown tongue.", __func__ );
                   else
                   {
                      ch->pcdata->learned[sn] = value;
-
                   }
                   fMatch = TRUE;
                }
@@ -1558,7 +1536,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                ch->pcdata->title = fread_string( fp );
                if( isalpha( ch->pcdata->title[0] ) || isdigit( ch->pcdata->title[0] ) )
                {
-                  sprintf( buf, " %s", ch->pcdata->title );
+                  snprintf( buf, MAX_STRING_LENGTH, " %s", ch->pcdata->title );
                   if( ch->pcdata->title )
                      STRFREE( ch->pcdata->title );
                   ch->pcdata->title = STRALLOC( buf );
@@ -1586,7 +1564,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
 
                   sn = bsearch_skill_exact( fread_word( fp ), gsn_first_weapon, gsn_first_tongue - 1 );
                   if( sn < 0 )
-                     bug( "Fread_char: unknown weapon.", 0 );
+                     bug( "%s: unknown weapon.", __func__ );
                   else
                   {
                      ch->pcdata->learned[sn] = value;
@@ -1604,12 +1582,10 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_char: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
-
 
 void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
 {
@@ -1643,7 +1619,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
 
       if( word[0] == '\0' )
       {
-         bug( "%s: EOF encountered reading file!", __FUNCTION__ );
+         bug( "%s: EOF encountered reading file!", __func__ );
          word = "End";
       }
       fMatch = FALSE;
@@ -1672,7 +1648,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
 
                   sn = skill_lookup( fread_word( fp ) );
                   if( sn < 0 )
-                     bug( "Fread_obj: unknown skill.", 0 );
+                     bug( "%s: unknown skill.", __func__ );
                   else
                      paf->type = sn;
                }
@@ -1720,9 +1696,9 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                if( !fNest || !fVnum )
                {
                   if( obj->name )
-                     bug( "%s: %s incomplete object.", __FUNCTION__, obj->name );
+                     bug( "%s: %s incomplete object.", __func__, obj->name );
                   else
-                     bug( "%s: incomplete object.", __FUNCTION__ );
+                     bug( "%s: incomplete object.", __func__ );
                   free_obj( obj );
                   return;
                }
@@ -1758,7 +1734,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                   {
                      if( !room )
                      {
-                        bug( "Fread_obj: Corpse without room", 0 );
+                        bug( "%s: Corpse without room", __func__ );
                         room = get_room_index( ROOM_VNUM_LIMBO );
                      }
                      obj = obj_to_room( obj, room );
@@ -1781,7 +1757,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                               break;
                            }
                         if( x == MAX_LAYERS )
-                           bug( "Fread_obj: too many layers %d", wear_loc );
+                           bug( "%s: too many layers %d", __func__, wear_loc );
                      }
                      obj = obj_to_char( obj, ch );
                      if( reslot )
@@ -1795,7 +1771,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                         obj = obj_to_obj( obj, rgObjNest[iNest - 1] );
                      }
                      else
-                        bug( "Fread_obj: nest layer missing %d", iNest - 1 );
+                        bug( "%s: nest layer missing %d", __func__, iNest - 1 );
                   }
                   if( fNest )
                      rgObjNest[iNest] = obj;
@@ -1820,7 +1796,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                iNest = fread_number( fp );
                if( iNest < 0 || iNest >= MAX_NEST )
                {
-                  bug( "Fread_obj: bad nest %d.", iNest );
+                  bug( "%s: bad nest %d.", __func__, iNest );
                   iNest = 0;
                   fNest = FALSE;
                }
@@ -1843,9 +1819,9 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                iValue = fread_number( fp );
                sn = skill_lookup( fread_word( fp ) );
                if( iValue < 0 || iValue > 5 )
-                  bug( "Fread_obj: bad iValue %d.", iValue );
+                  bug( "%s: bad iValue %d.", __func__, iValue );
                else if( sn < 0 )
-                  bug( "Fread_obj: unknown skill.", 0 );
+                  bug( "%s: unknown skill.", __func__ );
                else
                   obj->value[iValue] = sn;
                fMatch = TRUE;
@@ -1885,7 +1861,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
                if( ( obj->pIndexData = get_obj_index( vnum ) ) == NULL )
                {
                   fVnum = FALSE;
-                  bug( "Fread_obj: bad vnum %d.", vnum );
+                  bug( "%s: bad vnum %d.", __func__, vnum );
                }
                else
                {
@@ -1906,7 +1882,6 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
             KEY( "WearLoc", obj->wear_loc, fread_number( fp ) );
             KEY( "Weight", obj->weight, fread_number( fp ) );
             break;
-
       }
 
       if( !fMatch )
@@ -1914,8 +1889,7 @@ void fread_obj( CHAR_DATA * ch, FILE * fp, short os_type )
          EXTRA_DESCR_DATA *ed;
          AFFECT_DATA *paf;
 
-         bug( "Fread_obj: no match.", 0 );
-         bug( word, 0 );
+         bug( "%s: no match: %s", __func__, word );
          fread_to_eol( fp );
          if( obj->name )
             STRFREE( obj->name );
@@ -1951,9 +1925,8 @@ void set_alarm( long seconds )
  */
 void do_last( CHAR_DATA * ch, const char *argument )
 {
-   char buf[MAX_STRING_LENGTH];
    char arg[MAX_INPUT_LENGTH];
-   char name[MAX_INPUT_LENGTH];
+   char filename[256];
    struct stat fst;
 
    one_argument( argument, arg );
@@ -1962,13 +1935,12 @@ void do_last( CHAR_DATA * ch, const char *argument )
       send_to_char( "Usage: last <playername>\r\n", ch );
       return;
    }
-   strcpy( name, capitalize( arg ) );
-   sprintf( buf, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), name );
-   if( stat( buf, &fst ) != -1 && check_parse_name( capitalize( name ) ) )
-      sprintf( buf, "%s was last on: %s\r", name, ctime( &fst.st_mtime ) );
+
+   snprintf( filename, 256, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), capitalize( arg ) );
+   if( stat( filename, &fst ) != -1 && check_parse_name( capitalize( arg ) ) )
+      ch_printf( ch, "%s was last on: %s\r\n", arg, ctime( &fst.st_mtime ) );
    else
-      sprintf( buf, "%s was not found.\r\n", name );
-   send_to_char( buf, ch );
+      ch_printf( ch, "%s was not found.\r\n", arg );
 }
 
 void write_corpses( CHAR_DATA * ch, const char *name )
@@ -1982,7 +1954,7 @@ void write_corpses( CHAR_DATA * ch, const char *name )
     */
    if( ch && IS_NPC( ch ) )
    {
-      bug( "Write_corpses: writing NPC corpse.", 0 );
+      bug( "%s: writing NPC corpse.", __func__ );
       return;
    }
    if( ch )
@@ -1996,12 +1968,12 @@ void write_corpses( CHAR_DATA * ch, const char *name )
       {
          if( !fp )
          {
-            char buf[127];
+            char buf[256];
 
-            sprintf( buf, "%s%s", CORPSE_DIR, capitalize( name ) );
+            snprintf( buf, 256, "%s%s", CORPSE_DIR, capitalize( name ) );
             if( !( fp = fopen( buf, "w" ) ) )
             {
-               bug( "Write_corpses: Cannot open file.", 0 );
+               bug( "%s: Cannot open file.", __func__ );
                perror( buf );
                return;
             }
@@ -2015,12 +1987,11 @@ void write_corpses( CHAR_DATA * ch, const char *name )
    }
    else
    {
-      char buf[127];
+      char buf[256];
 
-      sprintf( buf, "%s%s", CORPSE_DIR, capitalize( name ) );
+      snprintf( buf, 256, "%s%s", CORPSE_DIR, capitalize( name ) );
       remove( buf );
    }
-   return;
 }
 
 void load_corpses( void )
@@ -2031,7 +2002,7 @@ void load_corpses( void )
 
    if( !( dp = opendir( CORPSE_DIR ) ) )
    {
-      bug( "Load_corpses: can't open CORPSE_DIR", 0 );
+      bug( "%s: can't open CORPSE_DIR", __func__ );
       perror( CORPSE_DIR );
       return;
    }
@@ -2041,7 +2012,7 @@ void load_corpses( void )
    {
       if( de->d_name[0] != '.' )
       {
-         sprintf( strArea, "%s%s", CORPSE_DIR, de->d_name );
+         snprintf( strArea, MAX_INPUT_LENGTH, "%s%s", CORPSE_DIR, de->d_name );
          fprintf( stderr, "Corpse -> %s\n", strArea );
          if( !( fpArea = fopen( strArea, "r" ) ) )
          {
@@ -2061,7 +2032,7 @@ void load_corpses( void )
             }
             if( letter != '#' )
             {
-               bug( "Load_corpses: # not found.", 0 );
+               bug( "%s: # not found.", __func__ );
                break;
             }
             word = fread_word( fpArea );
@@ -2073,7 +2044,7 @@ void load_corpses( void )
                break;
             else
             {
-               bug( "Load_corpses: bad section.", 0 );
+               bug( "%s: bad section.", __func__ );
                break;
             }
          }
@@ -2081,10 +2052,9 @@ void load_corpses( void )
       }
    }
    fpArea = NULL;
-   strcpy( strArea, "$" );
+   mudstrlcpy( strArea, "$", MAX_INPUT_LENGTH );
    closedir( dp );
    falling = 0;
-   return;
 }
 
 void load_plr_home( CHAR_DATA * ch )
@@ -2104,7 +2074,7 @@ void load_plr_home( CHAR_DATA * ch )
         extract_obj( obj );
     }
 
-    sprintf( filename, "%s%c/%s.home", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
+    snprintf( filename, 256, "%s%c/%s.home", PLAYER_DIR, tolower( ch->name[0] ), capitalize( ch->name ) );
     if( ( fph = fopen( filename, "r" ) ) != NULL )
     {
         int iNest;
@@ -2128,8 +2098,7 @@ void load_plr_home( CHAR_DATA * ch )
 
             if( letter != '#' )
             {
-                bug( "Load_plr_home: # not found.", 0 );
-                bug( ch->name, 0 );
+                bug( "%s: # not found. %s", __func__, ch->name );
                 break;
             }
 
@@ -2140,8 +2109,7 @@ void load_plr_home( CHAR_DATA * ch )
                 break;
             else
             {
-                bug( "Load_plr_home: bad section.", 0 );
-                bug( ch->name, 0 );
+                bug( "%s: bad section: %s", __func__, ch->name );
                 break;
             }
         }
@@ -2158,4 +2126,3 @@ void load_plr_home( CHAR_DATA * ch )
         release_supermob(  );
     }
 }
-

@@ -77,11 +77,11 @@ void write_clan_list(  )
    FILE *fpout;
    char filename[256];
 
-   sprintf( filename, "%s%s", CLAN_DIR, CLAN_LIST );
+   snprintf( filename, 256, "%s%s", CLAN_DIR, CLAN_LIST );
    fpout = fopen( filename, "w" );
    if( !fpout )
    {
-      bug( "FATAL: cannot open clan.lst for writing!\r\n", 0 );
+      bug( "%s: FATAL: cannot open clan.lst for writing!\r\n", __func__ );
       return;
    }
    for( tclan = first_clan; tclan; tclan = tclan->next )
@@ -96,11 +96,11 @@ void write_planet_list(  )
    FILE *fpout;
    char filename[256];
 
-   sprintf( filename, "%s%s", PLANET_DIR, PLANET_LIST );
+   snprintf( filename, 256, "%s%s", PLANET_DIR, PLANET_LIST );
    fpout = fopen( filename, "w" );
    if( !fpout )
    {
-      bug( "FATAL: cannot open planet.lst for writing!\r\n", 0 );
+      bug( "%s: FATAL: cannot open planet.lst for writing!\r\n", __func__ );
       return;
    }
    for( tplanet = first_planet; tplanet; tplanet = tplanet->next )
@@ -119,21 +119,21 @@ void save_clan( CLAN_DATA * clan )
 
    if( !clan )
    {
-      bug( "save_clan: null clan pointer!", 0 );
+      bug( "%s: null clan pointer!", __func__ );
       return;
    }
 
    if( !clan->filename || clan->filename[0] == '\0' )
    {
-      bug( "save_clan: %s has no filename", clan->name );
+      bug( "%s: %s has no filename", __func__, clan->name );
       return;
    }
 
-   sprintf( filename, "%s%s", CLAN_DIR, clan->filename );
+   snprintf( filename, 256, "%s%s", CLAN_DIR, clan->filename );
 
    if( ( fp = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "save_clan: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( filename );
    }
    else
@@ -168,7 +168,6 @@ void save_clan( CLAN_DATA * clan )
       fclose( fp );
       fp = NULL;
    }
-   return;
 }
 
 void save_planet( PLANET_DATA * planet )
@@ -178,21 +177,21 @@ void save_planet( PLANET_DATA * planet )
 
    if( !planet )
    {
-      bug( "save_planet: null planet pointer!", 0 );
+      bug( "%s: null planet pointer!", __func__ );
       return;
    }
 
    if( !planet->filename || planet->filename[0] == '\0' )
    {
-      bug( "save_planet: %s has no filename", planet->name );
+      bug( "%s: %s has no filename", __func__, planet->name );
       return;
    }
 
-   sprintf( filename, "%s%s", PLANET_DIR, planet->filename );
+   snprintf( filename, 256, "%s%s", PLANET_DIR, planet->filename );
 
    if( ( fp = fopen( filename, "w" ) ) == NULL )
    {
-      bug( "save_planet: fopen", 0 );
+      bug( "%s: fopen", __func__ );
       perror( filename );
    }
    else
@@ -217,7 +216,6 @@ void save_planet( PLANET_DATA * planet )
       fclose( fp );
       fp = NULL;
    }
-   return;
 }
 
 /*
@@ -225,7 +223,6 @@ void save_planet( PLANET_DATA * planet )
  */
 void fread_clan( CLAN_DATA * clan, FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
 
@@ -319,16 +316,13 @@ void fread_clan( CLAN_DATA * clan, FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_clan: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
-
    }
 }
 
 void fread_planet( PLANET_DATA * planet, FILE * fp )
 {
-   char buf[MAX_STRING_LENGTH];
    const char *word;
    bool fMatch;
 
@@ -423,8 +417,7 @@ void fread_planet( PLANET_DATA * planet, FILE * fp )
 
       if( !fMatch )
       {
-         sprintf( buf, "Fread_planet: no match: %s", word );
-         bug( buf, 0 );
+         bug( "%s: no match: %s", __func__, word );
       }
    }
 }
@@ -447,7 +440,7 @@ bool load_clan_file( const char *clanfile )
    clan->mainclan = NULL;
 
    found = FALSE;
-   sprintf( filename, "%s%s", CLAN_DIR, clanfile );
+   snprintf( filename, 256, "%s%s", CLAN_DIR, clanfile );
 
    if( ( fp = fopen( filename, "r" ) ) != NULL )
    {
@@ -466,7 +459,7 @@ bool load_clan_file( const char *clanfile )
 
          if( letter != '#' )
          {
-            bug( "Load_clan_file: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -480,10 +473,7 @@ bool load_clan_file( const char *clanfile )
             break;
          else
          {
-            char buf[MAX_STRING_LENGTH];
-
-            sprintf( buf, "Load_clan_file: bad section: %s.", word );
-            bug( buf, 0 );
+            bug( "%s: bad section: %s.", __func__, word );
             break;
          }
       }
@@ -502,7 +492,7 @@ bool load_clan_file( const char *clanfile )
          return found;
       }
 
-      sprintf( filename, "%s%s.vault", CLAN_DIR, clan->filename );
+      snprintf( filename, 256, "%s%s.vault", CLAN_DIR, clan->filename );
       if( ( fp = fopen( filename, "r" ) ) != NULL )
       {
          int iNest;
@@ -527,8 +517,7 @@ bool load_clan_file( const char *clanfile )
 
             if( letter != '#' )
             {
-               bug( "Load_clan_vault: # not found.", 0 );
-               bug( clan->name, 0 );
+               bug( "%s: # not found. %s", __func__, clan->name );
                break;
             }
 
@@ -539,8 +528,7 @@ bool load_clan_file( const char *clanfile )
                break;
             else
             {
-               bug( "Load_clan_vault: bad section.", 0 );
-               bug( clan->name, 0 );
+               bug( "%s: bad section. %s", __func__, clan->name );
                break;
             }
          }
@@ -581,7 +569,7 @@ bool load_planet_file( const char *planetfile )
    planet->last_guard = NULL;
 
    found = FALSE;
-   sprintf( filename, "%s%s", PLANET_DIR, planetfile );
+   snprintf( filename, 256, "%s%s", PLANET_DIR, planetfile );
 
    if( ( fp = fopen( filename, "r" ) ) != NULL )
    {
@@ -601,7 +589,7 @@ bool load_planet_file( const char *planetfile )
 
          if( letter != '#' )
          {
-            bug( "Load_planet_file: # not found.", 0 );
+            bug( "%s: # not found.", __func__ );
             break;
          }
 
@@ -615,10 +603,7 @@ bool load_planet_file( const char *planetfile )
             break;
          else
          {
-            char buf[MAX_STRING_LENGTH];
-
-            sprintf( buf, "Load_planet_file: bad section: %s.", word );
-            bug( buf, 0 );
+            bug( "%s: bad section: %s.", __func__, word );
             break;
          }
       }
@@ -641,7 +626,6 @@ void load_clans()
    FILE *fpList;
    const char *filename;
    char clanlist[256];
-   char buf[MAX_STRING_LENGTH];
    CLAN_DATA *clan;
    CLAN_DATA *bosclan;
 
@@ -650,7 +634,7 @@ void load_clans()
 
    log_string( "Loading clans..." );
 
-   sprintf( clanlist, "%s%s", CLAN_DIR, CLAN_LIST );
+   snprintf( clanlist, 256, "%s%s", CLAN_DIR, CLAN_LIST );
    if( ( fpList = fopen( clanlist, "r" ) ) == NULL )
    {
       perror( clanlist );
@@ -666,8 +650,7 @@ void load_clans()
 
       if( !load_clan_file( filename ) )
       {
-         sprintf( buf, "Cannot load clan file: %s", filename );
-         bug( buf, 0 );
+         bug( "%s: Cannot load clan file: %s", __func__, filename );
       }
    }
    fclose( fpList );
@@ -687,7 +670,6 @@ void load_clans()
    }
 
    log_string( " Done sorting" );
-   return;
 }
 
 void load_planets()
@@ -695,14 +677,13 @@ void load_planets()
    FILE *fpList;
    const char *filename;
    char planetlist[256];
-   char buf[MAX_STRING_LENGTH];
 
    first_planet = NULL;
    last_planet = NULL;
 
    log_string( "Loading planets..." );
 
-   sprintf( planetlist, "%s%s", PLANET_DIR, PLANET_LIST );
+   snprintf( planetlist, 256, "%s%s", PLANET_DIR, PLANET_LIST );
    if( ( fpList = fopen( planetlist, "r" ) ) == NULL )
    {
       perror( planetlist );
@@ -718,19 +699,16 @@ void load_planets()
 
       if( !load_planet_file( filename ) )
       {
-         sprintf( buf, "Cannot load planet file: %s", filename );
-         bug( buf, 0 );
+         bug( "%s: Cannot load planet file: %s", __func__, filename );
       }
    }
    fclose( fpList );
    log_string( " Done planets " );
-   return;
 }
 
 void do_make( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "Huh?\r\n", ch );
-   return;
 }
 
 void do_induct( CHAR_DATA * ch, const char *argument )
@@ -815,7 +793,6 @@ void do_induct( CHAR_DATA * ch, const char *argument )
    act( AT_MAGIC, "$n inducts $N into $t", ch, clan->name, victim, TO_NOTVICT );
    act( AT_MAGIC, "$n inducts you into $t", ch, clan->name, victim, TO_VICT );
    save_char_obj( victim );
-   return;
 }
 
 /* Can the character outcast the victim? */
@@ -923,14 +900,13 @@ void do_outcast( CHAR_DATA * ch, const char *argument )
    act( AT_MAGIC, "You outcast $N from $t", ch, clan->name, victim, TO_CHAR );
    act( AT_MAGIC, "$n outcasts $N from $t", ch, clan->name, victim, TO_ROOM );
    act( AT_MAGIC, "$n outcasts you from $t", ch, clan->name, victim, TO_VICT );
-   sprintf( buf, "%s has been outcast from %s!", victim->name, clan->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s has been outcast from %s!", victim->name, clan->name );
    echo_to_all( AT_MAGIC, buf, ECHOTAR_ALL );
 
    DISPOSE( victim->pcdata->bestowments );
    victim->pcdata->bestowments = str_dup( "" );
 
    save_char_obj( victim );   /* clan gets saved when pfile is saved */
-   return;
 }
 
 void do_setclan( CHAR_DATA * ch, const char *argument )
@@ -1187,7 +1163,6 @@ void do_setclan( CHAR_DATA * ch, const char *argument )
    }
 
    do_setclan( ch, "" );
-   return;
 }
 
 void do_setplanet( CHAR_DATA * ch, const char *argument )
@@ -1335,7 +1310,6 @@ void do_setplanet( CHAR_DATA * ch, const char *argument )
    }
 
    do_setplanet( ch, "" );
-   return;
 }
 
 void do_showclan( CHAR_DATA * ch, const char *argument )
@@ -1375,7 +1349,6 @@ void do_showclan( CHAR_DATA * ch, const char *argument )
    ch_printf( ch, "Patrol1: %5d  Patrol2: %5d\r\n", clan->patrol1, clan->patrol2 );
    ch_printf( ch, "Trooper1: %5d  Trooper2: %5d\r\n", clan->trooper1, clan->trooper2 );
    ch_printf( ch, "Funds: %ld\r\n", clan->funds );
-   return;
 }
 
 void do_showplanet( CHAR_DATA * ch, const char *argument )
@@ -1402,7 +1375,6 @@ void do_showplanet( CHAR_DATA * ch, const char *argument )
    }
 
    ch_printf( ch, "%s\r\nFilename: %s\r\n", planet->name, planet->filename );
-   return;
 }
 
 void do_makeclan( CHAR_DATA * ch, const char *argument )
@@ -1545,7 +1517,6 @@ void do_clans( CHAR_DATA * ch, const char *argument )
 
    set_char_color( AT_WHITE, ch );
    send_to_char( "\r\nSee also: Planets and Senate\r\n", ch );
-
 }
 
 void do_planets( CHAR_DATA * ch, const char *argument )
@@ -1580,7 +1551,6 @@ void do_planets( CHAR_DATA * ch, const char *argument )
       set_char_color( AT_BLOOD, ch );
       send_to_char( "There are no planets currently formed.\r\n", ch );
    }
-
 }
 
 void do_orders( CHAR_DATA * ch, const char *argument )
@@ -1673,17 +1643,10 @@ void do_shove( CHAR_DATA * ch, const char *argument )
 
    schance = 50;
 
-/* Add 3 points to chance for every str point above 15, subtract for 
-below 15 */
+   /* Add 3 points to chance for every str point above 15, subtract for below 15 */
    schance += ( ( get_curr_str( ch ) - 15 ) * 3 );
 
    schance += ( ch->top_level - victim->top_level );
-
-/* Debugging purposes - show percentage for testing */
-
-/* sprintf(buf, "Shove percentage of %s = %d", ch->name, chance);
-act( AT_ACTION, buf, ch, NULL, NULL, TO_ROOM );
-*/
 
    if( schance < number_percent(  ) )
    {
@@ -1786,11 +1749,6 @@ void do_drag( CHAR_DATA * ch, const char *argument )
 
    schance = 50;
 
-
-/*
-sprintf(buf, "Drag percentage of %s = %d", ch->name, chance);
-act( AT_ACTION, buf, ch, NULL, NULL, TO_ROOM );
-*/
    if( schance < number_percent(  ) )
    {
       send_to_char( "You failed.\r\n", ch );
@@ -1808,13 +1766,12 @@ act( AT_ACTION, buf, ch, NULL, NULL, TO_ROOM );
       move_char( victim, get_exit( ch->in_room, exit_dir ), 0 );
       if( !char_died( victim ) )
          victim->position = temp;
-/* Move ch to the room too.. they are doing dragging - Scryn */
+      /* Move ch to the room too.. they are doing dragging - Scryn */
       move_char( ch, get_exit( ch->in_room, exit_dir ), 0 );
       WAIT_STATE( ch, 12 );
       return;
    }
    send_to_char( "You cannot do that to someone who is standing.\r\n", ch );
-   return;
 }
 
 void do_enlist( CHAR_DATA * ch, const char *argument )
@@ -1859,8 +1816,6 @@ void do_enlist( CHAR_DATA * ch, const char *argument )
    ch_printf( ch, "Welcome to %s.\r\n", clan->name );
 
    save_clan( clan );
-   return;
-
 }
 
 void do_resign( CHAR_DATA * ch, const char *argument )
@@ -1908,7 +1863,7 @@ void do_resign( CHAR_DATA * ch, const char *argument )
    STRFREE( ch->pcdata->clan_name );
    ch->pcdata->clan_name = STRALLOC( "" );
    act( AT_MAGIC, "You resign your position in $t", ch, clan->name, NULL, TO_CHAR );
-   sprintf( buf, "%s has quit %s!", ch->name, clan->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s has quit %s!", ch->name, clan->name );
    echo_to_all( AT_MAGIC, buf, ECHOTAR_ALL );
 
    lose_exp = UMAX( ch->experience[DIPLOMACY_ABILITY] - exp_level( ch->skill_level[DIPLOMACY_ABILITY] ), 0 );
@@ -1919,9 +1874,6 @@ void do_resign( CHAR_DATA * ch, const char *argument )
    ch->pcdata->bestowments = str_dup( "" );
 
    save_char_obj( ch ); /* clan gets saved when pfile is saved */
-
-   return;
-
 }
 
 void do_clan_withdraw( CHAR_DATA * ch, const char *argument )
@@ -1979,7 +1931,6 @@ void do_clan_withdraw( CHAR_DATA * ch, const char *argument )
    save_char_obj( ch );
 }
 
-
 void do_clan_donate( CHAR_DATA * ch, const char *argument )
 {
    CLAN_DATA *clan;
@@ -2029,7 +1980,6 @@ void do_clan_donate( CHAR_DATA * ch, const char *argument )
 void do_newclan( CHAR_DATA * ch, const char *argument )
 {
    send_to_char( "This command is being recycled to conserve thought.\r\n", ch );
-   return;
 }
 
 void do_appoint( CHAR_DATA * ch, const char *argument )
@@ -2084,7 +2034,6 @@ void do_appoint( CHAR_DATA * ch, const char *argument )
    else
       do_appoint( ch, "" );
    save_clan( ch->pcdata->clan );
-
 }
 
 void do_demote( CHAR_DATA * ch, const char *argument )
@@ -2131,7 +2080,6 @@ void do_demote( CHAR_DATA * ch, const char *argument )
       return;
    }
    save_clan( ch->pcdata->clan );
-
 }
 
 void do_capture( CHAR_DATA * ch, const char *argument )
@@ -2237,12 +2185,10 @@ void do_capture( CHAR_DATA * ch, const char *argument )
    planet->governed_by = clan;
    planet->pop_support = 50;
 
-   sprintf( buf, "%s has been captured by %s!", planet->name, clan->name );
+   snprintf( buf, MAX_STRING_LENGTH, "%s has been captured by %s!", planet->name, clan->name );
    echo_to_all( AT_RED, buf, 0 );
 
    save_planet( planet );
-
-   return;
 }
 
 void do_empower( CHAR_DATA * ch, const char *argument )
@@ -2331,7 +2277,7 @@ void do_empower( CHAR_DATA * ch, const char *argument )
    }
    else if( !str_cmp( arg2, "pilot" ) )
    {
-      sprintf( buf, "%s %s", victim->pcdata->bestowments, arg2 );
+      snprintf( buf, MAX_STRING_LENGTH, "%s %s", victim->pcdata->bestowments, arg2 );
       DISPOSE( victim->pcdata->bestowments );
       victim->pcdata->bestowments = str_dup( buf );
       ch_printf( victim, "%s has given you permission to fly clan ships.\r\n", ch->name );
@@ -2339,7 +2285,7 @@ void do_empower( CHAR_DATA * ch, const char *argument )
    }
    else if( !str_cmp( arg2, "withdraw" ) )
    {
-      sprintf( buf, "%s %s", victim->pcdata->bestowments, arg2 );
+      snprintf( buf, MAX_STRING_LENGTH, "%s %s", victim->pcdata->bestowments, arg2 );
       DISPOSE( victim->pcdata->bestowments );
       victim->pcdata->bestowments = str_dup( buf );
       ch_printf( victim, "%s has given you permission to withdraw clan funds.\r\n", ch->name );
@@ -2347,7 +2293,7 @@ void do_empower( CHAR_DATA * ch, const char *argument )
    }
    else if( !str_cmp( arg2, "clanbuyship" ) )
    {
-      sprintf( buf, "%s %s", victim->pcdata->bestowments, arg2 );
+      snprintf( buf, MAX_STRING_LENGTH, "%s %s", victim->pcdata->bestowments, arg2 );
       DISPOSE( victim->pcdata->bestowments );
       victim->pcdata->bestowments = str_dup( buf );
       ch_printf( victim, "%s has given you permission to buy clan ships.\r\n", ch->name );
@@ -2355,7 +2301,7 @@ void do_empower( CHAR_DATA * ch, const char *argument )
    }
    else if( !str_cmp( arg2, "induct" ) )
    {
-      sprintf( buf, "%s %s", victim->pcdata->bestowments, arg2 );
+      snprintf( buf, MAX_STRING_LENGTH, "%s %s", victim->pcdata->bestowments, arg2 );
       DISPOSE( victim->pcdata->bestowments );
       victim->pcdata->bestowments = str_dup( buf );
       ch_printf( victim, "%s has given you permission to induct new members.\r\n", ch->name );
@@ -2372,7 +2318,6 @@ void do_empower( CHAR_DATA * ch, const char *argument )
    }
 
    save_char_obj( victim );   /* clan gets saved when pfile is saved */
-   return;
 }
 
 void save_senate(  )
@@ -2382,11 +2327,11 @@ void save_senate(  )
     FILE *fpout;
     char filename[256];
     
-    sprintf( filename, "%s%s", SYSTEM_DIR, BOUNTY_LIST );
+    snprintf( filename, 256, %s%s", SYSTEM_DIR, BOUNTY_LIST );
     fpout = fopen( filename, "w" );
     if ( !fpout )
     {
-         bug( "FATAL: cannot open bounty.lst for writing!\r\n", 0 );
+         bug( "%s: FATAL: cannot open bounty.lst for writing!\r\n", __func__ );
          return;
     }
     for ( tbounty = first_bounty; tbounty; tbounty = tbounty->next )
@@ -2418,7 +2363,7 @@ void load_senate(  )
 
     log_string( "Loading disintigrations..." );
 
-    sprintf( bountylist, "%s%s", SYSTEM_DIR, DISINTIGRATION_LIST );
+    snprintf( bountylist, 256, "%s%s", SYSTEM_DIR, DISINTIGRATION_LIST );
     if ( ( fpList = fopen( bountylist, "r" ) ) == NULL )
     {
 	perror( bountylist );

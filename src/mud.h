@@ -365,7 +365,6 @@ struct weather_data
    int sunlight;
 };
 
-
 /*
 * Structure used to build wizlist
 */
@@ -376,7 +375,6 @@ struct wizent
    const char *name;
    short level;
 };
-
 
 /*
 * Connected state for a channel.
@@ -529,7 +527,6 @@ struct frc_app_type
 #define RACE_DUINUOGWUIN       16   /* big mistake was causing mass chaos */
 #define RACE_QUARREN           15
 
-
 /*
 * Languages -- Altrag
 */
@@ -589,8 +586,6 @@ struct help_data
    const char *text;
 };
 
-
-
 /*
 * Shop types.
 */
@@ -623,7 +618,6 @@ struct repairshop_data
    short open_hour;  /* First opening hour      */
    short close_hour; /* First closing hour      */
 };
-
 
 /* Mob program structures */
 struct act_prog_data
@@ -949,7 +943,6 @@ struct missile_data
    int mx, my, mz;
 };
 
-
 struct tourney_data
 {
    int open;
@@ -995,7 +988,6 @@ struct board_data
    int type;   /* Normal board or mail board? */
 };
 
-
 /*
 * An affect.
 */
@@ -1009,7 +1001,6 @@ struct affect_data
    int modifier;
    int bitvector;
 };
-
 
 /*
 * A SMAUG spell
@@ -1431,7 +1422,6 @@ typedef enum
    ITEM_GRENADE, ITEM_LANDMINE, ITEM_GOVERNMENT, ITEM_DROID_CORPSE, ITEM_BOLT, ITEM_CHEMICAL
 } item_types;
 
-
 #define MAX_ITEM_TYPE		     ITEM_CHEMICAL
 /*
 * Extra flags.
@@ -1576,7 +1566,6 @@ typedef enum
 #define ITEM_WEAR_EYES		BV17
 #define ITEM_MISSILE_WIELD	BV18
 
-
 /*
 * Apply types (for affects).
 * Used in #OBJECTS.
@@ -1697,7 +1686,6 @@ typedef enum
 
 #define MAX_DIR			DIR_SOUTHWEST  /* max for normal walking */
 #define DIR_PORTAL		DIR_SOMEWHERE  /* portal direction    */
-
 
 /*
 * Exit flags.
@@ -1859,7 +1847,6 @@ struct timer_data
    short type;
    short count;
 };
-
 
 /*
 * Channel bits.
@@ -2211,8 +2198,6 @@ struct pc_data
    bool hotboot;  /* hotboot tracker */
 };
 
-
-
 /*
 * Liquids.
 */
@@ -2226,8 +2211,6 @@ struct liq_type
    short liq_affect[3];
 };
 
-
-
 /*
 * Extra description data for a room or object.
 */
@@ -2238,8 +2221,6 @@ struct extra_descr_data
    const char *keyword; /* Keyword in look/examine          */
    const char *description;   /* What to see                      */
 };
-
-
 
 /*
 * Prototype for an object.
@@ -2272,7 +2253,6 @@ struct obj_index_data
    short layers;
    int rent;   /* Unused */
 };
-
 
 /*
 * One object.
@@ -2317,7 +2297,6 @@ struct obj_data
    int room_vnum; /* hotboot tracker */
 };
 
-
 /*
 * Exit data.
 */
@@ -2336,8 +2315,6 @@ struct exit_data
    short vdir; /* Physical "direction"    */
    short distance;   /* how far to the next room   */
 };
-
-
 
 /*
 * Reset commands:
@@ -2471,7 +2448,6 @@ struct system_data
    void *dlHandle;
 };
 
-
 /*
 * Room type.
 */
@@ -2602,7 +2578,6 @@ struct skill_type
    int alignment; /* for jedi powers */
 };
 
-
 struct auction_data
 {
    OBJ_DATA *item;   /* a pointer to the item */
@@ -2613,7 +2588,6 @@ struct auction_data
    short pulse;   /* how many pulses (.25 sec) until another call-out ? */
    int starting;
 };
-
 
 /*
 * These are skill_lookup return values for common skills and spells.
@@ -2696,7 +2670,6 @@ extern short gsn_rescue;
 extern short gsn_second_attack;
 extern short gsn_third_attack;
 extern short gsn_dual_wield;
-
 
 extern short gsn_aid;
 
@@ -2944,7 +2917,6 @@ int urange( int mincheck, int check, int maxcheck );
 }								\
    } while(0)
 
-
 #define ASSIGN_GSN(gsn, skill)					\
    do								\
 {								\
@@ -2962,7 +2934,6 @@ int urange( int mincheck, int check, int maxcheck );
    return;							\
 }								\
 } while(0)
-
 
 /*
 * Character macros.
@@ -3051,7 +3022,6 @@ Will need to add some || stuff for spells that need a special GSN. */
 
 #define IS_POISON(dt)		( IS_VALID_SN(dt) &&			     \
    SPELL_DAMAGE(skill_table[(dt)]) == SD_POISON )
-
 
 #define NOT_AUTHED(ch)		(!IS_NPC(ch) && ch->pcdata->auth_state <= 3  \
    && IS_SET(ch->pcdata->flags, PCFLAG_UNAUTHED) )
@@ -4048,7 +4018,6 @@ int get_secflag( const char *flag );
 int get_npc_position( const char *position );
 int get_npc_sex( const char *sex );
 
-
 /* clans.c */
 CL *get_clan( const char *name );
 void load_clans args( ( void ) );
@@ -4286,7 +4255,6 @@ bool check_dodge( CHAR_DATA * ch, CHAR_DATA * victim );
 bool check_grip( CHAR_DATA * ch, CHAR_DATA * victim );
 void disarm( CHAR_DATA * ch, CHAR_DATA * victim );
 void trip( CHAR_DATA * ch, CHAR_DATA * victim );
-
 
 /* handler.c */
 void free_obj( OBJ_DATA * obj );
