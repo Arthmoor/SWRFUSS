@@ -317,7 +317,7 @@ void shutdown_mud( const char *reason )
    if( ( fp = fopen( SHUTDOWN_FILE, "a" ) ) != NULL )
    {
       fprintf( fp, "%s\n", reason );
-      fclose( fp );
+      FCLOSE( fp );
    }
 }
 
@@ -662,8 +662,7 @@ void boot_db( bool fCopyOver )
 
          load_area_file( NULL, strArea );
       }
-      fclose( fpList );
-      fpList = NULL;
+      FCLOSE( fpList );
    }
 
    /*
@@ -3787,7 +3786,7 @@ void append_file( CHAR_DATA * ch, const char *file, const char *str )
    else
    {
       fprintf( fp, "[%5d] %s: %s\n", ch->in_room ? ch->in_room->vnum : 0, ch->name, str );
-      fclose( fp );
+      FCLOSE( fp );
    }
 }
 
@@ -3804,7 +3803,7 @@ void append_to_file( const char *file, const char *str )
    else
    {
       fprintf( fp, "%s\n", str );
-      fclose( fp );
+      FCLOSE( fp );
    }
 }
 
@@ -3848,7 +3847,7 @@ void bug( const char *str, ... )
          if( ( fp = fopen( SHUTDOWN_FILE, "a" ) ) != NULL )
          {
             fprintf( fp, "[*****] %s\n", buf );
-            fclose( fp );
+            FCLOSE( fp );
          }
       }
    }
@@ -3882,7 +3881,7 @@ void boot_log( const char *str, ... )
    if( ( fp = fopen( BOOTLOG_FILE, "a" ) ) != NULL )
    {
       fprintf( fp, "%s\n", buf );
-      fclose( fp );
+      FCLOSE( fp );
    }
 }
 
@@ -3912,7 +3911,7 @@ void show_file( CHAR_DATA * ch, const char *filename )
          send_to_pager( buf, ch );
          num = 0;
       }
-      fclose( fp );
+      FCLOSE( fp );
    }
 }
 
@@ -4007,7 +4006,7 @@ void towizfile( const char *line )
    if( wfp )
    {
       fputs( outline, wfp );
-      fclose( wfp );
+      FCLOSE( wfp );
    }
 }
 
@@ -4090,7 +4089,7 @@ void make_wizlist(  )
                iflags = fread_number( gfp );
             else
                iflags = 0;
-            fclose( gfp );
+            FCLOSE( gfp );
             if( IS_SET( iflags, PCFLAG_RETIRED ) )
                ilevel = MAX_LEVEL - 4;
             if( IS_SET( iflags, PCFLAG_GUEST ) )
@@ -4306,8 +4305,7 @@ void mobprog_file_read( MOB_INDEX_DATA *mob, const char *f )
             break;
       }
    }
-   fclose( progfile );
-   progfile = NULL;
+   FCLOSE( progfile );
 }
 
 /* This procedure is responsible for reading any in_file MUDprograms.
@@ -4419,8 +4417,7 @@ void objprog_file_read( OBJ_INDEX_DATA *obj, const char *f )
             break;
       }
    }
-   fclose( progfile );
-   progfile = NULL;
+   FCLOSE( progfile );
 }
 
 /* This procedure is responsible for reading any in_file OBJprograms.
@@ -4532,8 +4529,7 @@ void roomprog_file_read( ROOM_INDEX_DATA *room, const char *f )
             break;
       }
    }
-   fclose( progfile );
-   progfile = NULL;
+   FCLOSE( progfile );
 }
 
 /* This procedure is responsible for reading any in_file ROOMprograms.
@@ -5550,8 +5546,7 @@ void rprog_file_read( ROOM_INDEX_DATA * prog_target, const char *f )
          fread_to_eol( progfile );
       }
    }
-   fclose( progfile );
-   progfile = NULL;
+   FCLOSE( progfile );
 }
 
 void fread_fuss_roomprog( FILE * fp, MPROG_DATA * mprg, ROOM_INDEX_DATA * prog_target )
@@ -5947,8 +5942,7 @@ void oprog_file_read( OBJ_INDEX_DATA * prog_target, const char *f )
          fread_to_eol( progfile );
       }
    }
-   fclose( progfile );
-   progfile = NULL;
+   FCLOSE( progfile );
 }
 
 void fread_fuss_objprog( FILE * fp, MPROG_DATA * mprg, OBJ_INDEX_DATA * prog_target )
@@ -6403,8 +6397,7 @@ void mprog_file_read( MOB_INDEX_DATA * prog_target, const char *f )
          fread_to_eol( progfile );
       }
    }
-   fclose( progfile );
-   progfile = NULL;
+   FCLOSE( progfile );
 }
 
 void fread_fuss_mobprog( FILE * fp, MPROG_DATA * mprg, MOB_INDEX_DATA * prog_target )
@@ -7281,8 +7274,7 @@ void load_area_file( AREA_DATA * tarea, const char *filename )
       else
       {
          bug( "%s: No # found at start of area file.", __func__ );
-         fclose( fpArea );
-         fpArea = NULL;
+         FCLOSE( fpArea );
          return;
       }
    }
@@ -7293,8 +7285,7 @@ void load_area_file( AREA_DATA * tarea, const char *filename )
    if( !str_cmp( word, "FUSSAREA" ) )
    {
       tarea = fread_fuss_area( tarea, fpArea );
-      fclose( fpArea );
-      fpArea = NULL;
+      FCLOSE( fpArea );
 
       if( tarea )
          process_sorting( tarea );
@@ -7372,14 +7363,12 @@ void load_area_file( AREA_DATA * tarea, const char *filename )
             exit( 1 );
          else
          {
-            fclose( fpArea );
-            fpArea = NULL;
+            FCLOSE( fpArea );
             return;
          }
       }
    }
-   fclose( fpArea );
-   fpArea = NULL;
+   FCLOSE( fpArea );
 
    if( tarea )
       process_sorting( tarea );
@@ -7448,7 +7437,7 @@ void load_buildlist( void )
             else if( !strcmp( word, "ObjRange" ) )
                olow = low, ohi = hi;
          }
-         fclose( fp );
+         FCLOSE( fp );
          if( rlow && rhi && !badfile )
          {
             snprintf( buf, MAX_STRING_LENGTH, "%s%s.are", BUILD_DIR, dentry->d_name );
@@ -7464,7 +7453,7 @@ void load_buildlist( void )
             if( word[0] != '#' || strcmp( &word[1], "AREA" ) )
             {
                snprintf( buf, MAX_STRING_LENGTH,  "Make_buildlist: %s.are: no #AREA found.", dentry->d_name );
-               fclose( fp );
+               FCLOSE( fp );
                dentry = readdir( dp );
                continue;
             }
@@ -7479,7 +7468,7 @@ void load_buildlist( void )
             snprintf( buf, MAX_STRING_LENGTH "{PROTO} %s's area in progress", dentry->d_name );
             pArea->name = str_dup( buf );
 #endif
-            fclose( fp );
+            FCLOSE( fp );
             pArea->low_r_vnum = rlow;
             pArea->hi_r_vnum = rhi;
             pArea->low_m_vnum = mlow;
@@ -7762,8 +7751,7 @@ void save_sysdata( SYSTEM_DATA sys )
       fprintf( fp, "Savefreq       %d\n", sys.save_frequency );
       fprintf( fp, "End\n\n" );
       fprintf( fp, "#END\n" );
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 
@@ -7918,7 +7906,7 @@ bool load_systemdata( SYSTEM_DATA * sys )
             break;
          }
       }
-      fclose( fp );
+      FCLOSE( fp );
    }
 
    if( !sysdata.guild_overseer )
@@ -7943,13 +7931,13 @@ void load_banlist( void )
       if( feof( fp ) )
       {
          bug( "%s: no -1 found.", __func__ );
-         fclose( fp );
+         FCLOSE( fp );
          return;
       }
       number = fread_number( fp );
       if( number == -1 )
       {
-         fclose( fp );
+         FCLOSE( fp );
          return;
       }
       CREATE( pban, BAN_DATA, 1 );

@@ -82,7 +82,7 @@ void save_home( CHAR_DATA * ch )
             fwrite_obj( ch, contents, fp, 0, OS_CARRY, FALSE );
          fprintf( fp, "#END\n" );
          ch->top_level = templvl;
-         fclose( fp );
+         FCLOSE( fp );
       }
    }
 }
@@ -207,7 +207,7 @@ void save_char_obj( CHAR_DATA * ch )
             fprintf( fp, "ObjRange     %d %d\n", ch->pcdata->o_range_lo, ch->pcdata->o_range_hi );
          if( ch->pcdata->m_range_lo && ch->pcdata->m_range_hi )
             fprintf( fp, "MobRange     %d %d\n", ch->pcdata->m_range_lo, ch->pcdata->m_range_hi );
-         fclose( fp );
+         FCLOSE( fp );
       }
    }
 
@@ -224,7 +224,7 @@ void save_char_obj( CHAR_DATA * ch )
       if( ch->comments )   /* comments */
          fwrite_comments( ch, fp ); /* comments */
       fprintf( fp, "#END\n" );
-      fclose( fp );
+      FCLOSE( fp );
    }
 
    re_equip_char( ch );
@@ -277,7 +277,7 @@ void save_clone( CHAR_DATA * ch )
       if( ch->comments )   /* comments */
          fwrite_comments( ch, fp ); /* comments */
       fprintf( fp, "#END\n" );
-      fclose( fp );
+      FCLOSE( fp );
    }
 
    re_equip_char( ch );
@@ -802,7 +802,7 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
             break;
          }
       }
-      fclose( fp );
+      FCLOSE( fp );
       fpArea = NULL;
       mudstrlcpy( strArea, "$", MAX_INPUT_LENGTH );
    }
@@ -1983,7 +1983,7 @@ void write_corpses( CHAR_DATA * ch, const char *name )
    if( fp )
    {
       fprintf( fp, "#END\n\n" );
-      fclose( fp );
+      FCLOSE( fp );
    }
    else
    {
@@ -2048,10 +2048,9 @@ void load_corpses( void )
                break;
             }
          }
-         fclose( fpArea );
+         FCLOSE( fpArea );
       }
    }
-   fpArea = NULL;
    mudstrlcpy( strArea, "$", MAX_INPUT_LENGTH );
    closedir( dp );
    falling = 0;
@@ -2114,7 +2113,7 @@ void load_plr_home( CHAR_DATA * ch )
             }
         }
 
-        fclose( fph );
+        FCLOSE( fph );
 
         for( tobj = supermob->first_carrying; tobj; tobj = tobj_next )
         {

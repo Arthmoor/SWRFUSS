@@ -1108,7 +1108,7 @@ void write_starsystem_list(  )
    for( tstarsystem = first_starsystem; tstarsystem; tstarsystem = tstarsystem->next )
       fprintf( fpout, "%s\n", tstarsystem->filename );
    fprintf( fpout, "$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 /*
@@ -1229,8 +1229,7 @@ void save_starsystem( SPACE_DATA * starsystem )
       fprintf( fp, "Ypos          %d\n", starsystem->ypos );
       fprintf( fp, "End\n\n" );
       fprintf( fp, "#END\n" );
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 
@@ -1422,7 +1421,7 @@ bool load_starsystem( const char *starsystemfile )
             break;
          }
       }
-      fclose( fp );
+      FCLOSE( fp );
    }
 
    if( !( found ) )
@@ -1463,7 +1462,7 @@ void load_space(  )
          bug( "%s: Cannot load starsystem file: %s", __func__, filename );
       }
    }
-   fclose( fpList );
+   FCLOSE( fpList );
    log_string( " Done starsystems " );
 }
 
@@ -2144,7 +2143,7 @@ void write_ship_list(  )
    for( tship = first_ship; tship; tship = tship->next )
       fprintf( fpout, "%s\n", tship->filename );
    fprintf( fpout, "$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 SHIP_DATA *ship_in_room( ROOM_INDEX_DATA * room, const char *name )
@@ -2408,8 +2407,7 @@ void save_ship( SHIP_DATA * ship )
       fprintf( fp, "Home         %s~\n", ship->home );
       fprintf( fp, "End\n\n" );
       fprintf( fp, "#END\n" );
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 
@@ -2645,7 +2643,7 @@ bool load_ship_file( const char *shipfile )
             break;
          }
       }
-      fclose( fp );
+      FCLOSE( fp );
    }
    if( !( found ) )
       DISPOSE( ship );
@@ -2767,7 +2765,7 @@ void load_ships(  )
          bug( "%s: Cannot load ship file: %s", __func__, filename );
       }
    }
-   fclose( fpList );
+   FCLOSE( fpList );
    log_string( " Done ships " );
 }
 

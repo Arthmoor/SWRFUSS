@@ -188,8 +188,7 @@ void load_dns( void )
             continue;
          }
       }
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
    prune_dns(  ); /* Clean out entries beyond 14 days */
 }
@@ -218,8 +217,7 @@ void save_dns( void )
          fprintf( fp, "End\n\n" );
       }
       fprintf( fp, "#END\n" );
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 

@@ -1389,7 +1389,7 @@ void send_rip_screen( CHAR_DATA * ch )
    {
       while( ( BUFF[num] = fgetc( rpfile ) ) != EOF )
          num++;
-      fclose( rpfile );
+      FCLOSE( rpfile );
       BUFF[num] = 0;
       write_to_buffer( ch->desc, BUFF, num );
    }
@@ -1405,7 +1405,7 @@ void send_rip_title( CHAR_DATA * ch )
    {
       while( ( BUFF[num] = fgetc( rpfile ) ) != EOF )
          num++;
-      fclose( rpfile );
+      FCLOSE( rpfile );
       BUFF[num] = 0;
       write_to_buffer( ch->desc, BUFF, num );
    }
@@ -1421,7 +1421,7 @@ void send_ansi_title( CHAR_DATA * ch )
    {
       while( ( BUFF[num] = fgetc( rpfile ) ) != EOF )
          num++;
-      fclose( rpfile );
+      FCLOSE( rpfile );
       BUFF[num] = 0;
       write_to_buffer( ch->desc, BUFF, num );
    }
@@ -1437,7 +1437,7 @@ void send_ascii_title( CHAR_DATA * ch )
    {
       while( ( BUFF[num] = fgetc( rpfile ) ) != EOF )
          num++;
-      fclose( rpfile );
+      FCLOSE( rpfile );
       BUFF[num] = 0;
       write_to_buffer( ch->desc, BUFF, num );
    }

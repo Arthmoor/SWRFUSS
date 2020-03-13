@@ -55,7 +55,7 @@ void save_disintigrations(  )
       fprintf( fpout, "%ld\n", tbounty->amount );
    }
    fprintf( fpout, "$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 bool is_disintigration( CHAR_DATA * victim )
@@ -109,7 +109,7 @@ void load_bounties(  )
       amount = fread_number( fpList );
       bounty->amount = amount;
    }
-   fclose( fpList );
+   FCLOSE( fpList );
    log_string( " Done bounties " );
 }
 

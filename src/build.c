@@ -5831,8 +5831,7 @@ void fold_area( AREA_DATA * tarea, const char *fname, bool install )
    }
 
    fprintf( fpout, "%s", "#ENDAREA\n" );
-   fclose( fpout );
-   fpout = NULL;
+   FCLOSE( fpout );
 }
 
 void old_fold_area( AREA_DATA * tarea, const char *filename, bool install )
@@ -6288,7 +6287,7 @@ void old_fold_area( AREA_DATA * tarea, const char *filename, bool install )
     * END 
     */
    fprintf( fpout, "#$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 void do_savearea( CHAR_DATA * ch, const char *argument )
@@ -6488,7 +6487,7 @@ void write_area_list( void )
    for( tarea = first_area; tarea; tarea = tarea->next )
       fprintf( fpout, "%s\n", tarea->filename );
    fprintf( fpout, "$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 /*

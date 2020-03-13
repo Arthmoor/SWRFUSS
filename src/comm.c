@@ -2348,7 +2348,7 @@ void nanny_read_motd( DESCRIPTOR_DATA *d, const char *argument )
 		}
 	    }
 
-	  fclose( fph );
+	  FCLOSE( fph );
 
 	  for( tobj = supermob->first_carrying; tobj; tobj = tobj_next )
 	    {

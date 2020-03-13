@@ -2263,7 +2263,7 @@ void save_clan_storeroom( CHAR_DATA * ch, CLAN_DATA * clan )
          fwrite_obj( ch, contents, fp, 0, OS_CARRY, FALSE );
       fprintf( fp, "#END\n" );
       ch->top_level = templvl;
-      fclose( fp );
+      FCLOSE( fp );
    }
 }
 

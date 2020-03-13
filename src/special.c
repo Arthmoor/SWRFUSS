@@ -103,8 +103,7 @@ void load_specfuns( void )
          if( feof( fp ) )
 	 {
 	    bug( "%s: Premature end of file!", __func__ );
-	    fclose( fp );
-            fp = NULL;
+	    FCLOSE( fp );
 	    return;
 	 }
          word = fread_word( fp );
@@ -115,8 +114,7 @@ void load_specfuns( void )
          specfun->name = str_dup( word );
          LINK( specfun, first_specfun, last_specfun, next, prev );
       }
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 

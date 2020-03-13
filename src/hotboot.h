@@ -48,10 +48,6 @@
  *                          SWR Hotboot module                                           *
  ****************************************************************************************/
 
-#ifndef FCLOSE
-#define FCLOSE(fp)  fclose(fp); fp=NULL;
-#endif
-
 #ifndef CH
 #define CH(d)			((d)->original ? (d)->original : (d)->character)
 #endif

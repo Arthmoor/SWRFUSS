@@ -2882,7 +2882,7 @@ void save_banlist( void )
    for( pban = first_ban; pban; pban = pban->next )
       fprintf( fp, "%d %s~~%s~\n", pban->level, pban->name, pban->ban_time );
    fprintf( fp, "-1\n" );
-   fclose( fp );
+   FCLOSE( fp );
 }
 
 void do_ban( CHAR_DATA * ch, const char *argument )

@@ -87,7 +87,7 @@ void write_clan_list(  )
    for( tclan = first_clan; tclan; tclan = tclan->next )
       fprintf( fpout, "%s\n", tclan->filename );
    fprintf( fpout, "$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 void write_planet_list(  )
@@ -106,7 +106,7 @@ void write_planet_list(  )
    for( tplanet = first_planet; tplanet; tplanet = tplanet->next )
       fprintf( fpout, "%s\n", tplanet->filename );
    fprintf( fpout, "$\n" );
-   fclose( fpout );
+   FCLOSE( fpout );
 }
 
 /*
@@ -165,8 +165,7 @@ void save_clan( CLAN_DATA * clan )
          fprintf( fp, "MainClan     %s~\n", clan->mainclan->name );
       fprintf( fp, "End\n\n" );
       fprintf( fp, "#END\n" );
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 
@@ -213,8 +212,7 @@ void save_planet( PLANET_DATA * planet )
             fprintf( fp, "Area         %s~\n", pArea->filename );
       fprintf( fp, "End\n\n" );
       fprintf( fp, "#END\n" );
-      fclose( fp );
-      fp = NULL;
+      FCLOSE( fp );
    }
 }
 
@@ -477,7 +475,7 @@ bool load_clan_file( const char *clanfile )
             break;
          }
       }
-      fclose( fp );
+      FCLOSE( fp );
    }
 
    if( found )
@@ -532,7 +530,7 @@ bool load_clan_file( const char *clanfile )
                break;
             }
          }
-         fclose( fp );
+         FCLOSE( fp );
          for( tobj = supermob->first_carrying; tobj; tobj = tobj_next )
          {
             tobj_next = tobj->next_content;
@@ -607,7 +605,7 @@ bool load_planet_file( const char *planetfile )
             break;
          }
       }
-      fclose( fp );
+      FCLOSE( fp );
    }
 
    if( !found )
@@ -653,7 +651,7 @@ void load_clans()
          bug( "%s: Cannot load clan file: %s", __func__, filename );
       }
    }
-   fclose( fpList );
+   FCLOSE( fpList );
    log_string( " Done clans\r\nSorting clans...." );
 
    for( clan = first_clan; clan; clan = clan->next )
@@ -702,7 +700,7 @@ void load_planets()
          bug( "%s: Cannot load planet file: %s", __func__, filename );
       }
    }
-   fclose( fpList );
+   FCLOSE( fpList );
    log_string( " Done planets " );
 }
 
@@ -2340,7 +2338,7 @@ void save_senate(  )
         fprintf( fpout, "%ld\n", tbounty->amount );
     }
     fprintf( fpout, "$\n" );
-    fclose( fpout );
+    FCLOSE( fpout );
 */
 }
 
@@ -2381,7 +2379,7 @@ void load_senate(  )
 	amount = fread_number( fpList );
 	bounty->amount = amount;
     }
-    fclose( fpList );
+    FCLOSE( fpList );
     log_string(" Done bounties " );
     return;
 */

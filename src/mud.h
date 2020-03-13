@@ -66,6 +66,9 @@ typedef int obj_ret;
    break;                              \
 }
 
+/* Macro taken from DOTD codebase. Fcloses a file, then nulls its pointer for safety. */
+#define FCLOSE(fp)  fclose((fp)); (fp)=NULL;
+
 /*
 * Structure types.
 */

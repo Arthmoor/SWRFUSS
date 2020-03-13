@@ -467,7 +467,7 @@ void fread_comment( CHAR_DATA * ch, FILE * fp )
          letter = getc( fp );
          if( feof( fp ) )
          {
-            fclose( fp );
+            FCLOSE( fp );
             return;
          }
       }
