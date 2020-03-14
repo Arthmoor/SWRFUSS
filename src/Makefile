@@ -22,7 +22,7 @@ L_FLAGS = $(PROF) $(NEED_MATH) -lz $(NEED_DL)
 #D_FLAGS : For the DNS Slave process. No need in linking all the extra libs for this.
 D_FLAGS = -g2 -O $(PROF) $(SOLARIS_LINK)
 
-W_FLAGS = -Wall -Wshadow -Wformat-security -Wpointer-arith -Wcast-align -Wredundant-decls
+W_FLAGS = -std=c++1z -Wall -Wshadow -Wformat-security -Wpointer-arith -Wcast-align -Wredundant-decls
 
 C_FILES = act_comm.c act_info.c act_move.c act_obj.c act_wiz.c boards.c bounty.c \
 	  build.c clans.c color.c comm.c comments.c const.c db.c dns.c fight.c \
