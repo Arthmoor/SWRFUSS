@@ -2046,36 +2046,35 @@ void do_low_purge( CHAR_DATA * ch, const char *argument )
    extract_char( victim, TRUE );
 }
 
-void do_balzhur( CHAR_DATA * ch, const char *argument )
+void do_balzhur( CHAR_DATA* ch, const char* argument )
 {
+   char ebuf[MAX_STRING_LENGTH];
    char arg[MAX_INPUT_LENGTH];
-   char areafile[MAX_INPUT_LENGTH];
-   char buf[MAX_INPUT_LENGTH];
-   char buf2[MAX_STRING_LENGTH];
+   char godfile[256];
+   char areafile[256];
+   char *name;
    CHAR_DATA *victim;
    AREA_DATA *pArea;
    int sn;
 
-   argument = one_argument( argument, arg );
+   set_char_color( AT_BLOOD, ch );
 
+   argument = one_argument( argument, arg );
    if( arg[0] == '\0' )
    {
       send_to_char( "Who is deserving of such a fate?\r\n", ch );
       return;
    }
-
    if( ( victim = get_char_world( ch, arg ) ) == NULL )
    {
-      send_to_char( "They aren't playing.\r\n", ch );
+      send_to_char( "They aren't currently playing.\r\n", ch );
       return;
    }
-
    if( IS_NPC( victim ) )
    {
       send_to_char( "Not on NPC's.\r\n", ch );
       return;
    }
-
    if( get_trust( victim ) >= get_trust( ch ) )
    {
       send_to_char( "I wouldn't even think of that if I were you...\r\n", ch );
@@ -2090,9 +2089,8 @@ void do_balzhur( CHAR_DATA * ch, const char *argument )
    send_to_char( "Balzhur sneers at you evilly, then vanishes in a puff of smoke.\r\n", ch );
    set_char_color( AT_IMMORT, victim );
    send_to_char( "You hear an ungodly sound in the distance that makes your blood run cold!\r\n", victim );
-
-   snprintf( buf2, MAX_STRING_LENGTH, "Balzhur screams, 'You are MINE %s!!!'", victim->name );
-   echo_to_all( AT_IMMORT, buf2, ECHOTAR_ALL );
+   snprintf( ebuf, MAX_STRING_LENGTH, "Balzhur screams, 'You are MINE %s!!!'", victim->name );
+   echo_to_all( AT_IMMORT, ebuf, ECHOTAR_ALL );
 
    for( int ability = 0; ability < MAX_ABILITY; ability++ )
    {
@@ -2109,39 +2107,49 @@ void do_balzhur( CHAR_DATA * ch, const char *argument )
    victim->mana = victim->max_mana;
    victim->move = victim->max_move;
 
-   snprintf( buf, MAX_INPUT_LENGTH, "%s%s", GOD_DIR, capitalize( victim->name ) );
+   name = capitalize( victim->name );
+   snprintf( godfile, 256, "%s%s", GOD_DIR, name );
 
-   if( !remove( buf ) )
+   set_char_color( AT_RED, ch );
+   if( !remove( godfile ) )
       send_to_char( "Player's immortal data destroyed.\r\n", ch );
    else if( errno != ENOENT )
    {
-      ch_printf( ch, "Unknown error #%d - %s (immortal data). Report to Thoric\r\n", errno, strerror( errno ) );
-      snprintf( buf2, MAX_STRING_LENGTH, "%s balzhuring %s", ch->name, buf );
-      perror( buf2 );
+      ch_printf( ch, "Unknown error #%d - %s (immortal data). Report to the admins.\r\n", errno, strerror( errno ) );
+      snprintf( ebuf, MAX_STRING_LENGTH, "%s balzhuring %s", ch->name, name );
+      perror( ebuf );
    }
 
-   snprintf( areafile, MAX_INPUT_LENGTH, "%s.are", capitalize( arg ) );
+   snprintf( areafile, 256, "%s.are", name );
    for( pArea = first_build; pArea; pArea = pArea->next )
    {
-      if( !strcmp( pArea->filename, buf2 ) )
+      if( !str_cmp( pArea->filename, areafile ) )
       {
-         snprintf( buf2, MAX_STRING_LENGTH, "%s%s", BUILD_DIR, areafile );
-         if( IS_SET( pArea->status, AREA_LOADED ) )
-         {
-            fold_area( pArea, buf2, FALSE );
-            close_area( pArea );
-         }
+         char buildfile[256];
+         char buildbackup[256];
 
-         snprintf( buf2, MAX_STRING_LENGTH, "%s.bak", areafile );
+         int bc = snprintf( buildfile, 256, "%s%s", BUILD_DIR, areafile );
+         if( bc < 0 )
+            bug( "%s: Output buffer error!", __func__ );
+
+         if( IS_SET( pArea->status, AREA_LOADED ) )
+            fold_area( pArea, buildfile, FALSE );
+         close_area( pArea );
+
+         bc = snprintf( buildbackup, 256, "%s.bak", buildfile );
+         if( bc < 0 )
+            bug( "%s: Output buffer error!", __func__ );
+
          set_char_color( AT_RED, ch ); /* Log message changes colors */
-         if( !rename( areafile, buf2 ) )
+         if( !rename( buildfile, buildbackup ) )
             send_to_char( "Player's area data destroyed.  Area saved as backup.\r\n", ch );
          else if( errno != ENOENT )
          {
-            ch_printf( ch, "Unknown error #%d - %s (area data).  Report to Thoric.\r\n", errno, strerror( errno ) );
-            snprintf( buf2, MAX_STRING_LENGTH, "%s destroying %s", ch->name, areafile );
-            perror( buf2 );
+            ch_printf( ch, "Unknown error #%d - %s (area data). Report to the admins.\r\n", errno, strerror( errno ) );
+            snprintf( ebuf, MAX_STRING_LENGTH, "%s destroying %s", ch->name, buildfile );
+            perror( ebuf );
          }
+         break;
       }
    }
 
@@ -4318,15 +4326,17 @@ void close_all_areas( void )
    }
 }
 
-void do_destroy( CHAR_DATA * ch, const char *argument )
+void do_destroy( CHAR_DATA* ch, const char* argument )
 {
    CHAR_DATA *victim;
-   char *name;
    char arg[MAX_INPUT_LENGTH];
-   char buf[MAX_INPUT_LENGTH];
-   char areafile[MAX_INPUT_LENGTH];
-   char buf2[MAX_STRING_LENGTH];
+   char pfile[256];
+   char backup[256];
+   char ebuf[MAX_STRING_LENGTH];
+   char *name;
    struct stat fst;
+
+   set_char_color( AT_RED, ch );
 
    one_argument( argument, arg );
    if( arg[0] == '\0' )
@@ -4339,14 +4349,14 @@ void do_destroy( CHAR_DATA * ch, const char *argument )
     * Set the file points.
     */
    name = capitalize( arg );
-   snprintf( buf, MAX_INPUT_LENGTH, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), name );
-   snprintf( buf2, MAX_STRING_LENGTH, "%s%c/%s", BACKUP_DIR, tolower( arg[0] ), name );
+   snprintf( pfile, 256, "%s%c/%s", PLAYER_DIR, tolower( arg[0] ), name );
+   snprintf( backup, 256, "%s%c/%s", BACKUP_DIR, tolower( arg[0] ), name );
 
    /*
     * This check makes sure the name is valid and that the file is there, else there
     * is no need to go on. -Orion
     */
-   if( !check_parse_name( name ) || lstat( buf, &fst ) == -1 )
+   if( !check_parse_name( name ) || lstat( pfile, &fst ) == -1 )
    {
       ch_printf( ch, "No player exists by the name %s.\r\n", name );
       return;
@@ -4355,6 +4365,7 @@ void do_destroy( CHAR_DATA * ch, const char *argument )
    for( victim = first_char; victim; victim = victim->next )
       if( !IS_NPC( victim ) && !str_cmp( victim->name, arg ) )
          break;
+
    if( !victim )
    {
       DESCRIPTOR_DATA *d;
@@ -4381,44 +4392,51 @@ void do_destroy( CHAR_DATA * ch, const char *argument )
             save_equipment[x][y] = NULL;
    }
 
-   if( !rename( buf, buf2 ) )
+   if( !rename( pfile, backup ) )
    {
       AREA_DATA *pArea;
+      char godfile[256];
+      char areafile[256];
+      char buildfile[256];
+      char buildbackup[256];
 
       set_char_color( AT_RED, ch );
-      send_to_char( "Player destroyed.  Pfile saved in backup directory.\r\n", ch );
-      snprintf( buf, MAX_INPUT_LENGTH, "%s%s", GOD_DIR, capitalize( arg ) );
-      if( !remove( buf ) )
+      ch_printf( ch, "Player %s destroyed.  Pfile saved in backup directory.\r\n", name );
+
+      snprintf( godfile, 256, "%s%s", GOD_DIR, name );
+      if( !remove( godfile ) )
          send_to_char( "Player's immortal data destroyed.\r\n", ch );
       else if( errno != ENOENT )
       {
-         ch_printf( ch, "Unknown error #%d - %s (immortal data).  Report to Thoric.\r\n", errno, strerror( errno ) );
-         snprintf( buf2, MAX_STRING_LENGTH, "%s destroying %s", ch->name, buf );
-         perror( buf2 );
+         ch_printf( ch, "Unknown error #%d - %s (immortal data). Report to smaugmuds.afkmods.com\r\n", errno, strerror( errno ) );
+         snprintf( ebuf, MAX_STRING_LENGTH, "%s destroying %s", ch->name, godfile );
+         perror( ebuf );
       }
 
-      snprintf( areafile, MAX_INPUT_LENGTH, "%s.are", capitalize( arg ) );
+      snprintf( areafile, 256, "%s.are", name );
       for( pArea = first_build; pArea; pArea = pArea->next )
       {
-         if( !strcmp( pArea->filename, buf2 ) )
+         if( !str_cmp( pArea->filename, areafile ) )
          {
-            snprintf( buf2, MAX_STRING_LENGTH, "%s%s", BUILD_DIR, areafile );
-            if( IS_SET( pArea->status, AREA_LOADED ) )
-            {
-               fold_area( pArea, buf2, FALSE );
-               close_area( pArea );
-            }
+            int bc = snprintf( buildfile, 256, "%s%s", BUILD_DIR, areafile );
+            if( bc < 0 )
+               bug( "%s: Output buffer error!", __func__ );
 
-            snprintf( buf2, MAX_STRING_LENGTH, "%s.bak", areafile );
+            if( IS_SET( pArea->status, AREA_LOADED ) )
+               fold_area( pArea, buildfile, FALSE );
+            close_area( pArea );
+
+            snprintf( buildbackup, MAX_STRING_LENGTH, "%s.bak", buildfile );
             set_char_color( AT_RED, ch ); /* Log message changes colors */
-            if( !rename( areafile, buf2 ) )
+            if( !rename( buildfile, buildfile ) )
                send_to_char( "Player's area data destroyed.  Area saved as backup.\r\n", ch );
             else if( errno != ENOENT )
             {
-               ch_printf( ch, "Unknown error #%d - %s (area data).  Report to Thoric.\r\n", errno, strerror( errno ) );
-               snprintf( buf2, MAX_STRING_LENGTH, "%s destroying %s", ch->name, areafile );
-               perror( buf2 );
+               ch_printf( ch, "Unknown error #%d - %s (area data). Report to smaugmuds.afkmods.com\r\n", errno, strerror( errno ) );
+               snprintf( ebuf, MAX_STRING_LENGTH, "%s destroying %s", ch->name, buildfile );
+               perror( ebuf );
             }
+            break;
          }
       }
    }
@@ -4430,9 +4448,9 @@ void do_destroy( CHAR_DATA * ch, const char *argument )
    else
    {
       set_char_color( AT_WHITE, ch );
-      ch_printf( ch, "Unknown error #%d - %s.  Report to Thoric.\r\n", errno, strerror( errno ) );
-      snprintf( buf2, MAX_STRING_LENGTH, "%s destroying %s", ch->name, arg );
-      perror( buf );
+      ch_printf( ch, "Unknown error #%d - %s. Report to smaugmuds.afkmods.com\r\n", errno, strerror( errno ) );
+      snprintf( ebuf, MAX_STRING_LENGTH, "%s destroying %s", ch->name, arg );
+      perror( ebuf );
    }
 }
 
