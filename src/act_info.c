@@ -920,8 +920,6 @@ void do_look( CHAR_DATA * ch, const char *argument )
                   char_to_room( ch, original );
                }
             }
-
-
          }
 
       return;
