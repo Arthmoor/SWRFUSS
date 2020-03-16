@@ -7384,6 +7384,8 @@ void load_buildlist( void )
    DIR *dp;
    struct dirent *dentry;
    FILE *fp;
+   char godfile[270];
+   char buildfile[280];
    char buf[MAX_STRING_LENGTH];
    AREA_DATA *pArea;
    char line[81];
@@ -7399,14 +7401,14 @@ void load_buildlist( void )
    {
       if( dentry->d_name[0] != '.' )
       {
-         snprintf( buf, MAX_STRING_LENGTH, "%s%s", GOD_DIR, dentry->d_name );
-         if( !( fp = fopen( buf, "r" ) ) )
+         snprintf( godfile, 270, "%s%s", GOD_DIR, dentry->d_name );
+         if( !( fp = fopen( godfile, "r" ) ) )
          {
             bug( "%s: invalid file", __func__ );
             dentry = readdir( dp );
             continue;
          }
-         log_string( buf );
+         log_string( godfile );
          badfile = FALSE;
          rlow = rhi = olow = ohi = mlow = mhi = 0;
          while( !feof( fp ) && !ferror( fp ) )
@@ -7440,8 +7442,8 @@ void load_buildlist( void )
          FCLOSE( fp );
          if( rlow && rhi && !badfile )
          {
-            snprintf( buf, MAX_STRING_LENGTH, "%s%s.are", BUILD_DIR, dentry->d_name );
-            if( !( fp = fopen( buf, "r" ) ) )
+            snprintf( buildfile, 280, "%s%s.are", BUILD_DIR, dentry->d_name );
+            if( !( fp = fopen( buildfile, "r" ) ) )
             {
                bug( "%s: cannot open area file for read", __func__ );
                dentry = readdir( dp );
@@ -7452,7 +7454,7 @@ void load_buildlist( void )
             mudstrlcpy( word, fread_word( fp ), 81 );
             if( word[0] != '#' || strcmp( &word[1], "AREA" ) )
             {
-               snprintf( buf, MAX_STRING_LENGTH,  "Make_buildlist: %s.are: no #AREA found.", dentry->d_name );
+               bug( "%s: %s.are: no #AREA found.", __func__, dentry->d_name );
                FCLOSE( fp );
                dentry = readdir( dp );
                continue;
