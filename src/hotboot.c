@@ -69,7 +69,6 @@
 #define MAX_NEST	100
 static OBJ_DATA *rgObjNest[MAX_NEST];
 
-bool write_to_descriptor( DESCRIPTOR_DATA * d, const char *txt, int length );
 bool write_to_descriptor_old( int desc, const char *txt, int length );
 void update_room_reset( CHAR_DATA *ch, bool setting );
 
@@ -1017,6 +1016,7 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
    log_string( "Saving player files and connection states...." );
    if( ch && ch->desc )
       write_to_descriptor( ch->desc, "\033[0m", 0 );
+
    mudstrlcpy( buf, "\r\nYou feel a great disturbance in the Force.", 100 );
    /*
     * For each playing descriptor, save its state 
@@ -1033,8 +1033,6 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
       }
       else
       {
-/* 			For test purposes
-			flush_buffer(d, TRUE);*/
          fprintf( fp, "%d %d %d %d %d %s %s\n", d->can_compress, d->descriptor, och->in_room->vnum, d->port, d->idle, och->name, d->host );
          /*
           * One of two places this gets changed 
@@ -1073,9 +1071,9 @@ void do_hotboot( CHAR_DATA * ch, const char *argument )
    if( this_imcmud )
       snprintf( buf3, 100, "%d", this_imcmud->desc );
    else
-      strncpy( buf3, "-1", 100 );
+      mudstrlcpy( buf3, "-1", 100 );
 #else
-   strncpy( buf3, "-1", 100 );
+   mudstrlcpy( buf3, "-1", 100 );
 #endif
 
    dlclose( sysdata.dlHandle );
