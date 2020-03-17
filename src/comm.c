@@ -91,7 +91,6 @@ void game_loop args( ( void ) );
 int init_socket args( ( int gport ) );
 void new_descriptor args( ( int new_desc ) );
 bool read_from_descriptor args( ( DESCRIPTOR_DATA * d ) );
-bool write_to_descriptor( DESCRIPTOR_DATA * d, const char *txt, int length );
 
 /*
  * Other local functions (OS-independent).
@@ -1390,6 +1389,19 @@ bool write_to_descriptor( DESCRIPTOR_DATA * d, const char *txt, int length )
       }
    }
    return TRUE;
+}
+
+void descriptor_printf( DESCRIPTOR_DATA * d, const char *fmt, ... )
+{
+    char buf[MAX_STRING_LENGTH * 2];
+
+    va_list args;
+
+    va_start( args, fmt );
+    vsprintf( buf, fmt, args );
+    va_end( args );
+
+    write_to_descriptor( d, buf, strlen( buf ) );
 }
 
 /*

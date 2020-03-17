@@ -4088,6 +4088,7 @@ SHIP_DATA *ship_in_room( ROOM_INDEX_DATA * room, const char *name );
 
 /* comm.c */
 void close_socket( DESCRIPTOR_DATA * dclose, bool force );
+bool write_to_descriptor( DESCRIPTOR_DATA * d, const char *txt, int length );
 void write_to_buffer( DESCRIPTOR_DATA * d, const char *txt, size_t length );
 void write_to_pager( DESCRIPTOR_DATA * d, const char *txt, size_t length );
 void send_to_char( const char *txt, CHAR_DATA * ch );
