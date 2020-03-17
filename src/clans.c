@@ -1530,7 +1530,7 @@ void do_planets( CHAR_DATA * ch, const char *argument )
                  planet->name,
                  planet->governed_by ? planet->governed_by->name : "",
                  IS_SET( planet->flags, PLANET_NOCAPTURE ) ? "(permanent)" : "" );
-      ch_printf( ch, "&WValue: &G%-10ld&W/&G%-10d   ", get_taxes( planet ), planet->base_value );
+      ch_printf( ch, "&WValue: &G%-10ld&W/&G%-10ld   ", get_taxes( planet ), planet->base_value );
       ch_printf( ch, "&WPopulation: &G%-5d   &W Pop Support: &G%.1f\r\n", planet->population, planet->pop_support );
       if( IS_IMMORTAL( ch ) )
       {

@@ -4095,8 +4095,10 @@ void send_to_char_color( const char *txt, CHAR_DATA * ch );
 void send_to_desc_color( const char *txt, DESCRIPTOR_DATA *d );
 void send_to_pager( const char *txt, CHAR_DATA * ch );
 void send_to_pager_color( const char *txt, CHAR_DATA * ch );
-void ch_printf( CHAR_DATA * ch, const char *fmt, ... );
-void pager_printf( CHAR_DATA * ch, const char *fmt, ... );
+void ch_printf( CHAR_DATA * ch, const char *fmt, ... ) __attribute__ ( ( format( printf, 2, 3 ) ) );
+void pager_printf( CHAR_DATA * ch, const char *fmt, ... ) __attribute__ ( ( format( printf, 2, 3 ) ) );
+void descriptor_printf( DESCRIPTOR_DATA * d, const char *fmt, ... ) __attribute__ ( ( format( printf, 2, 3 ) ) );
+void buffer_printf( DESCRIPTOR_DATA * d, const char *fmt, ... ) __attribute__ ( ( format( printf, 2, 3 ) ) );
 void act( short AType, const char *format, CHAR_DATA * ch, const void *arg1, const void *arg2, int type );
 
 /* reset.c */

@@ -84,17 +84,17 @@ void do_score( CHAR_DATA * ch, const char *argument )
 
       for( ability = 0; ability < MAX_ABILITY; ability++ )
          if( ability != FORCE_ABILITY || ch->skill_level[FORCE_ABILITY] > 1 )
-            ch_printf( ch, "%-15s   Level: %-3d   Max: %-3d   Exp: %-10ld   Next: %-10ld\r\n",
+            ch_printf( ch, "%-15s   Level: %-3d   Max: %-3d   Exp: %-10ld   Next: %-10d\r\n",
                        ability_name[ability], ch->skill_level[ability], max_level( ch, ability ), ch->experience[ability],
                        exp_level( ch->skill_level[ability] + 1 ) );
          else
-            ch_printf( ch, "%-15s   Level: %-3d   Max: ???   Exp: ???          Next: ???\r\n",
+            ch_printf( ch, "%-15s   Level: %-3d   Max: ???   Exp: %-10ld          Next: ???\r\n",
                        ability_name[ability], ch->skill_level[ability], ch->experience[ability] );
    }
 
    send_to_char( "----------------------------------------------------------------------------\r\n", ch );
 
-   ch_printf( ch, "CREDITS: %-10d   BANK: %-10d    Pkills: %-5.5d   Mkills: %-5.5d\r\n",
+   ch_printf( ch, "CREDITS: %-10d   BANK: %-10ld    Pkills: %-5.5d   Mkills: %-5.5d\r\n",
               ch->gold, ch->pcdata->bank, ch->pcdata->pkills, ch->pcdata->mkills );
 
    ch_printf( ch, "Weight: %5.5d (max %7.7d)    Items: %5.5d (max %5.5d)\r\n",
@@ -260,13 +260,12 @@ void do_score( CHAR_DATA * ch, const char *argument )
       send_to_char( "----------------------------------------------------------------------------\r\n", ch );
 
       ch_printf( ch, "IMMORTAL DATA:  Wizinvis [%s]  Wizlevel (%d)\r\n",
-                 IS_SET( ch->act, PLR_WIZINVIS ) ? "X" : " ", ch->pcdata->wizinvis );
+                    IS_SET( ch->act, PLR_WIZINVIS ) ? "X" : " ", ch->pcdata->wizinvis );
 
-      ch_printf( ch, "Bamfin:  %s\r\n", ( ch->pcdata->bamfin[0] != '\0' )
-                 ? ch->pcdata->bamfin : "%s appears in a swirling mist.", ch->name );
-      ch_printf( ch, "Bamfout: %s\r\n", ( ch->pcdata->bamfout[0] != '\0' )
-                 ? ch->pcdata->bamfout : "%s leaves in a swirling mist.", ch->name );
-
+      ch_printf( ch, "Bamfin:  %s %s\r\n", ch->name, ( ch->pcdata->bamfin[0] != '\0' )
+                    ? ch->pcdata->bamfin : "appears in a swirling mist." );
+      ch_printf( ch, "Bamfout: %s %s\r\n", ch->name, ( ch->pcdata->bamfout[0] != '\0' )
+                    ? ch->pcdata->bamfout : "leaves in a swirling mist." );
 
       /*
        * Area Loaded info - Scryn 8/11
@@ -730,11 +729,11 @@ void do_level( CHAR_DATA * ch, const char *argument )
 
    for( ability = 0; ability < MAX_ABILITY; ability++ )
       if( ability != FORCE_ABILITY || ch->skill_level[FORCE_ABILITY] > 1 )
-         ch_printf( ch, "%-15s   Level: %-3d   Max: %-3d   Exp: %-10ld   Next: %-10ld\r\n",
+         ch_printf( ch, "%-15s   Level: %-3d   Max: %-3d   Exp: %-10ld   Next: %-10d\r\n",
                     ability_name[ability], ch->skill_level[ability], max_level( ch, ability ), ch->experience[ability],
                     exp_level( ch->skill_level[ability] + 1 ) );
       else
-         ch_printf( ch, "%-15s   Level: %-3d   Max: ???   Exp: ???          Next: ???\r\n",
+         ch_printf( ch, "%-15s   Level: %-3d   Max: ???   Exp: %-10ld          Next: ???\r\n",
                     ability_name[ability], ch->skill_level[ability], ch->experience[ability] );
 }
 

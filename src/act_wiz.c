@@ -1189,7 +1189,7 @@ void do_mstat( CHAR_DATA * ch, const char *argument )
       int ability;
 
       for( ability = 0; ability < MAX_ABILITY; ability++ )
-         ch_printf( ch, "%-15s   Level: %-3d   Max: %-3d   Exp: %-10ld   Next: %-10ld\r\n",
+         ch_printf( ch, "%-15s   Level: %-3d   Max: %-3d   Exp: %-10ld   Next: %-10d\r\n",
                     ability_name[ability], victim->skill_level[ability], max_level( victim, ability ),
                     victim->experience[ability], exp_level( victim->skill_level[ability] + 1 ) );
    }

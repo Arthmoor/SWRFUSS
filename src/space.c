@@ -3684,9 +3684,9 @@ void do_ships( CHAR_DATA * ch, const char *argument )
             set_char_color( AT_BLUE, ch );
 
          if( ship->in_room )
-            ch_printf( ch, "%s (%s) - %s\r\n", ship->name, ship->in_room->name );
+            ch_printf( ch, "%s - %s\r\n", ship->name, ship->in_room->name );
          else
-            ch_printf( ch, "%s (%s)\r\n", ship->name );
+            ch_printf( ch, "%s\r\n", ship->name );
 
          count++;
       }
@@ -3695,7 +3695,6 @@ void do_ships( CHAR_DATA * ch, const char *argument )
       {
          send_to_char( "There are no ships owned by you.\r\n", ch );
       }
-
    }
 
    count = 0;
@@ -4925,7 +4924,7 @@ void do_land( CHAR_DATA * ch, const char *argument )
          int xp = ( exp_level( ch->skill_level[PILOTING_ABILITY] + 1 ) - exp_level( ch->skill_level[PILOTING_ABILITY] ) );
          xp = UMIN( get_ship_value( ship ), xp );
          gain_exp( ch, xp, PILOTING_ABILITY );
-         ch_printf( ch, "&WYou gain %ld points of flight experience!\r\n", UMIN( get_ship_value( ship ), xp ) );
+         ch_printf( ch, "&WYou gain %d points of flight experience!\r\n", xp );
       }
       return;
    }
@@ -5506,7 +5505,7 @@ void do_info( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-   ch_printf( ch, "&Y%s %s : %s\r\n&B",
+   ch_printf( ch, "&Y%s %s : %s %s\r\n&B",
               target->type == SHIP_REPUBLIC ? "New Republic" :
               ( target->type == SHIP_IMPERIAL ? "Imperial" : "Civilian" ),
               target->ship_class == FIGHTER_SHIP ? "Starfighter" :
