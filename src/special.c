@@ -869,7 +869,7 @@ bool spec_police_jail( CHAR_DATA * ch )
     * VIP_CHAD                BV15
     */
 
-   jail = get_room_index( ROOM_JAIL_CORUSCANT );
+   // jail = get_room_index( ROOM_JAIL_CORUSCANT );
 }
 
 bool spec_jedi_healer( CHAR_DATA * ch )

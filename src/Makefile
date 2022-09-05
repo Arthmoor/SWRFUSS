@@ -18,11 +18,11 @@ NEED_MATH = -lm
 IMC = 1
 
 C_FLAGS = -g2 $(W_FLAGS) $(PROF) $(EXPORT_SYMBOLS)
-L_FLAGS = $(PROF) $(NEED_MATH) -lz $(NEED_DL)
+L_FLAGS = -fsanitize=address $(PROF) $(NEED_MATH) -lz $(NEED_DL)
 #D_FLAGS : For the DNS Slave process. No need in linking all the extra libs for this.
-D_FLAGS = -g2 -O $(PROF) $(SOLARIS_LINK)
+D_FLAGS = -g2 -O -fsanitize=address $(PROF) $(SOLARIS_LINK)
 
-W_FLAGS = -std=c++1z -Wall -Wshadow -Wformat-security -Wpointer-arith -Wcast-align -Wredundant-decls
+W_FLAGS = -std=c++1z -Wall -Wshadow -Wformat-security -Wpointer-arith -Wcast-align -Wredundant-decls -fsanitize=address
 
 C_FILES = act_comm.c act_info.c act_move.c act_obj.c act_wiz.c boards.c bounty.c \
 	  build.c clans.c color.c comm.c comments.c const.c db.c dns.c fight.c \
@@ -86,9 +86,6 @@ dns: resolver.o
 	chmod g+w resolver
 	chmod a+x resolver
 	chmod g+w resolver.o
-
-.c.o: mud.h
-	$(CC) -c $(C_FLAGS) $<
 
 indent:
 	indent -ts3 -nut -nsaf -nsai -nsaw -npcs -npsl -ncs -nbc -bls -prs -bap -cbi0 -cli3 -bli0 -l125 -lp -i3 -cdb -c1 -cd1 -sc -pmt $(C_FILES)

@@ -2645,6 +2645,7 @@ bool load_ship_file( const char *shipfile )
       }
       FCLOSE( fp );
    }
+
    if( !( found ) )
       DISPOSE( ship );
    else
@@ -2652,7 +2653,7 @@ bool load_ship_file( const char *shipfile )
       LINK( ship, first_ship, last_ship, next, prev );
       if( !str_cmp( "Public", ship->owner ) || ship->type == MOB_SHIP )
       {
-	if( ship->ship_class != SHIP_PLATFORM && ship->type != MOB_SHIP && ship->ship_class != CAPITAL_SHIP )
+         if( ship->ship_class != SHIP_PLATFORM && ship->type != MOB_SHIP && ship->ship_class != CAPITAL_SHIP )
          {
             extract_ship( ship );
             ship_to_room( ship, ship->shipyard );
@@ -2697,14 +2698,14 @@ bool load_ship_file( const char *shipfile )
       else if( ( pRoomIndex = get_room_index( ship->lastdoc ) ) != NULL
                && ship->ship_class != CAPITAL_SHIP
 	       && ship->ship_class != SHIP_PLATFORM )
-	{
+      {
          LINK( ship, pRoomIndex->first_ship, pRoomIndex->last_ship, next_in_room, prev_in_room );
          ship->in_room = pRoomIndex;
          ship->location = ship->lastdoc;
       }
 
       if( ship->ship_class == SHIP_PLATFORM
-	  || ship->type == MOB_SHIP || ship->ship_class == CAPITAL_SHIP )
+         || ship->type == MOB_SHIP || ship->ship_class == CAPITAL_SHIP )
       {
          ship_to_starsystem( ship, starsystem_from_name( ship->home ) );
          ship->vx = number_range( -5000, 5000 );
@@ -2721,7 +2722,7 @@ bool load_ship_file( const char *shipfile )
 
       if( ship->type != MOB_SHIP && ( clan = get_clan( ship->owner ) ) != NULL )
       {
-	if( ship->ship_class <= SHIP_PLATFORM )
+         if( ship->ship_class <= SHIP_PLATFORM )
             clan->spacecraft++;
          else
             clan->vehicles++;
