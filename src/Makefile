@@ -22,7 +22,7 @@ ifndef CYGWIN
 M_FLAGS = -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer
 endif
 
-W_FLAGS = -std=c++1z -Wall -Wshadow -Wformat-security -Wpointer-arith -Wcast-align -Wredundant-decls -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer
+W_FLAGS = -std=c++1z -Wall -Wshadow -Wformat-security -Winline -Wpointer-arith -Wcast-align -Wredundant-decls
 
 C_FLAGS = -g2 $(W_FLAGS) $(M_FLAGS) $(PROF) $(EXPORT_SYMBOLS)
 L_FLAGS = $(M_FLAGS) $(PROF) $(NEED_MATH) -lz $(NEED_DL)
