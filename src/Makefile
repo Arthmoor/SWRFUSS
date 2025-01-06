@@ -1,5 +1,5 @@
 CC      = g++
-PROF    = 
+#PROF    = -p
 
 #Uncomment to compile in Cygwin
 #CYGWIN = -DCYGWIN
@@ -17,12 +17,17 @@ NEED_MATH = -lm
 #IMC2 - Comment out to disable IMC2 support
 IMC = 1
 
-C_FLAGS = -g2 $(W_FLAGS) $(PROF) $(EXPORT_SYMBOLS)
-L_FLAGS = -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(PROF) $(NEED_MATH) -lz $(NEED_DL)
-#D_FLAGS : For the DNS Slave process. No need in linking all the extra libs for this.
-D_FLAGS = -g2 -O -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer $(PROF) $(SOLARIS_LINK)
+#Memory debugging flags. Cygwin lacks libasan support required for this to work.
+ifndef CYGWIN
+M_FLAGS = -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer
+endif
 
 W_FLAGS = -std=c++1z -Wall -Wshadow -Wformat-security -Wpointer-arith -Wcast-align -Wredundant-decls -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer
+
+C_FLAGS = -g2 $(W_FLAGS) $(M_FLAGS) $(PROF) $(EXPORT_SYMBOLS)
+L_FLAGS = $(M_FLAGS) $(PROF) $(NEED_MATH) -lz $(NEED_DL)
+#D_FLAGS : For the DNS Slave process. No need in linking all the extra libs for this.
+D_FLAGS = -g2 -O $(M_FLAGS) $(PROF) $(SOLARIS_LINK)
 
 C_FILES = act_comm.c act_info.c act_move.c act_obj.c act_wiz.c boards.c bounty.c \
 	  build.c clans.c color.c comm.c comments.c const.c db.c dns.c fight.c \
@@ -40,6 +45,7 @@ O_FILES := $(patsubst %.c,o/%.o,$(C_FILES))
 H_FILES = $(wildcard *.h) 
 
 all:
+	$(info    Using flags: $(C_FLAGS))
 	$(MAKE) -s swreality
 	$(MAKE) -s dns
 
