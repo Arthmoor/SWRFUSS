@@ -2678,9 +2678,6 @@ void free_char( CHAR_DATA * ch )
       STRFREE( ch->pcdata->prompt );
       if( ch->pcdata->subprompt )
          STRFREE( ch->pcdata->subprompt );
-#ifdef IMC
-      imc_freechardata( ch );
-#endif
       DISPOSE( ch->pcdata );
    }
 

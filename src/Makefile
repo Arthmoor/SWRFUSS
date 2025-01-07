@@ -14,9 +14,6 @@ EXPORT_SYMBOLS = -export-dynamic
 #Uncomment the line below if you are getting warnings about undefined math functions
 NEED_MATH = -lm
 
-#IMC2 - Comment out to disable IMC2 support
-IMC = 1
-
 #Memory debugging flags. Cygwin lacks libasan support required for this to work.
 ifndef CYGWIN
 M_FLAGS = -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer
@@ -34,11 +31,6 @@ C_FILES = act_comm.c act_info.c act_move.c act_obj.c act_wiz.c boards.c bounty.c
 	  handler.c hashstr.c hotboot.c interp.c magic.c makeobjs.c mccp.c \
 	  misc.c mssp.c mud_comm.c mud_prog.c player.c reset.c save.c sha256.c shops.c \
 	  skills.c space.c special.c swskills.c tables.c track.c update.c
-
-ifdef IMC
-   C_FILES := imc.c $(C_FILES)
-   C_FLAGS := $(C_FLAGS) -DIMC -DIMCSMAUG
-endif
 
 O_FILES := $(patsubst %.c,o/%.o,$(C_FILES))
 
