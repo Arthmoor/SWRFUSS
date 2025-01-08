@@ -186,7 +186,8 @@ char *scramble( const char *argument, int modifier )
    short conversion = 0;
 
    modifier %= number_range( 80, 300 );   /* Bitvectors get way too large #s */
-   for( position = 0; position < MAX_INPUT_LENGTH; position++ )
+   // Bugfix - CPPCheck flagged this as an out of bounds access. Changed to < MIL -1 by Samson.
+   for( position = 0; position < (MAX_INPUT_LENGTH - 1); position++ )
    {
       if( argument[position] == '\0' )
       {
@@ -1133,7 +1134,7 @@ void do_tell( CHAR_DATA * ch, const char *argument )
    victim->reply = ch;
    if( IS_SET( ch->in_room->room_flags, ROOM_LOGSPEECH ) )
    {
-      snprintf( buf, MAX_STRING_LENGTH, "%s: %s (tell to) %s.",
+      snprintf( buf, MAX_INPUT_LENGTH, "%s: %s (tell to) %s.",
                IS_NPC( ch ) ? ch->short_descr : ch->name, argument, IS_NPC( victim ) ? victim->short_descr : victim->name );
       append_to_file( LOG_FILE, buf );
    }

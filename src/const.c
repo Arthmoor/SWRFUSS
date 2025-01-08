@@ -71,7 +71,7 @@ const struct race_type race_table[MAX_RACE] = {
    {
     "Chadra-Fan", AFF_INFRARED, -3, +3, 0, +2, -1, 0, 0, 0, 0, 0, 0, 0, 0, LANG_CHADRA_FAN},
    {
-    "Quarren", AFF_AQUA_BREATH + AFF_INFRARED, -1, +1, 0, +1, -1, 0, 0, 0, 0, 0, 0, 0, 0, LANG_MON_CALAMARI},
+    "Quarren", AFF_AQUA_BREATH | AFF_INFRARED, -1, +1, 0, +1, -1, 0, 0, 0, 0, 0, 0, 0, 0, LANG_MON_CALAMARI},
    {
     "Duinuogwuin", AFF_FLYING, 0, -1, +3, 0, +8, +1, 0, 0, 0, +10, 0, 0, 0, LANG_DUINUOGWUIN}
 

@@ -26,10 +26,6 @@
 #define CODENAME "SWRFUSS"
 #define CODEVERSION "1.4.2"
 
-#ifndef __cplusplus
-typedef unsigned char bool;
-#endif
-
 typedef int ch_ret;
 typedef int obj_ret;
 
@@ -46,20 +42,14 @@ typedef int obj_ret;
 #endif
 
 /*
-* Short scalar types.
-* Diavolo reports AIX compiler has bugs with short types.
-*/
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE)
-#define TRUE 1
-#endif
-
-#if !defined(BERR)
-#define BERR 255
-#endif
+ * Short scalar types.
+ * Diavolo reports AIX compiler has bugs with short types. [2025 here - this hasn't been an issue for 20 years now]
+ *
+ * Left the definitions in for backward compatibility to old code. - Samson 6/27/07
+ */
+const bool TRUE = true;
+const bool FALSE = false;
+const short BERR = 255;
 
 #define KEY( literal, field, value )   \
    if ( !str_cmp( word, (literal) ) )     \
@@ -4222,10 +4212,6 @@ void sith_penalty args( ( CHAR_DATA * ch ) );
 const char *mprog_type_to_name( int type );
 
 /* mud_prog.c */
-#ifdef DUNNO_STRSTR
-char *strstr args( ( const char *s1, const char *s2 ) );
-#endif
-
 void mprog_wordlist_check args( ( const char *arg, CHAR_DATA * mob, CHAR_DATA * actor, OBJ_DATA * object, void *vo, int type ) );
 void mprog_percent_check args( ( CHAR_DATA * mob, CHAR_DATA * actor, OBJ_DATA * object, void *vo, int type ) );
 void mprog_act_trigger( const char *buf, CHAR_DATA * mob, CHAR_DATA * ch,

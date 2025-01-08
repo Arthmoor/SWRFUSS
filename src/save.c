@@ -969,7 +969,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
                }
                else
                {
-		 const char *sname = fread_word( fp );
+                  const char *sname = fread_word( fp );
 
                   if( ( sn = skill_lookup( sname ) ) < 0 )
                   {

@@ -191,12 +191,12 @@ char *sprint_reset( RESET_DATA *pReset, short *num )
          if( !( room = get_room_index( pReset->arg1 ) ) )
          {
             mudstrlcpy( roomname, "Room: *BAD VNUM*", MAX_INPUT_LENGTH );
-            snprintf( objname, MAX_STRING_LENGTH, "%s (no exit)", dir_name[pReset->arg2] );
+            snprintf( objname, MAX_INPUT_LENGTH, "%s (no exit)", dir_name[pReset->arg2] );
          }
          else
          {
             mudstrlcpy( roomname, room->name, MAX_INPUT_LENGTH );
-            snprintf( objname, MAX_STRING_LENGTH, "%s%s", dir_name[pReset->arg2], get_exit( room, pReset->arg2 ) ? "" : " (NO EXIT!)" );
+            snprintf( objname, MAX_INPUT_LENGTH, "%s%s", dir_name[pReset->arg2], get_exit( room, pReset->arg2 ) ? "" : " (NO EXIT!)" );
          }
          switch ( pReset->arg3 )
          {

@@ -128,8 +128,8 @@ const char *const a_types[] = {
    "immune", "susceptible", "weaponspell", "luck", "backstab", "pick", "track",
    "steal", "sneak", "hide", "palm", "detrap", "dodge", "peek", "scan", "gouge",
    "search", "mount", "disarm", "kick", "parry", "bash", "stun", "punch", "climb",
-   "grip", "scribe", "brew", "wearspell", "removespell", "emotion", "mentalstate"
-      "stripsn", "remove", "dig", "full", "thirst", "drunk", "blood"
+   "grip", "scribe", "brew", "wearspell", "removespell", "emotion", "mentalstate",
+   "stripsn", "remove", "dig", "full", "thirst", "drunk", "blood"
 };
 
 const char *const a_flags[] = {
@@ -168,7 +168,7 @@ const char *const trap_flags[] = {
    "room", "obj", "enter", "leave", "open", "close", "get", "put", "pick",
    "unlock", "north", "south", "east", "west", "up", "down", "examine",
    "northeast", "northwest", "southeast", "southwest", "r6", "r7", "r8",
-   "r9", "r10", "r11", "r12", "r13", "r14", "r15"
+   "r9", "r10", "r11", "r12", "r13", "r14", "r15", "r16"
 };
 
 const char *const wear_locs[] = {

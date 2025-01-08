@@ -35,13 +35,9 @@
 #include <string.h>
 #include <sys/types.h>
 
-#if !defined(FALSE)
-#define FALSE 0
-#endif
-
-#if !defined(TRUE)
-#define TRUE 1
-#endif
+const bool TRUE = true;
+const bool FALSE = false;
+const short BERR = 255;
 
 #define STR_HASH_SIZE	1024
 
@@ -51,10 +47,6 @@ struct hashstr_data
    unsigned short int links;  /* number of links to this string */
    unsigned short int length; /* length of string */
 };
-
-#ifndef __cplusplus
-typedef unsigned char bool;
-#endif
 
 const char *str_alloc( const char *str );
 const char *quick_link( const char *str );

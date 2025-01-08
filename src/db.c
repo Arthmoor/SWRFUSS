@@ -7464,7 +7464,7 @@ void load_buildlist( void )
 #if !defined(READ_AREA)
             pArea->name = fread_string_nohash( fp );
 #else
-            snprintf( buf, MAX_STRING_LENGTH "{PROTO} %s's area in progress", dentry->d_name );
+            snprintf( buf, MAX_STRING_LENGTH, "{PROTO} %s's area in progress", dentry->d_name );
             pArea->name = str_dup( buf );
 #endif
             FCLOSE( fp );
