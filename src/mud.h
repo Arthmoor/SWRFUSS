@@ -24,7 +24,7 @@
 #include <sys/time.h>
 
 #define CODENAME "SWRFUSS"
-#define CODEVERSION "1.4.2"
+#define CODEVERSION "1.4.3"
 
 typedef int ch_ret;
 typedef int obj_ret;
