@@ -253,7 +253,7 @@ void do_bamfin( CHAR_DATA * ch, const char *argument )
     {
       argument = smash_tilde_static( argument );
       DISPOSE( ch->pcdata->bamfin );
-      ch->pcdata->bamfin = str_dup( argument );
+      ch->pcdata->bamfin = strdup( argument );
       send_to_char( "Ok.\r\n", ch );
     }
 }
@@ -264,7 +264,7 @@ void do_bamfout( CHAR_DATA * ch, const char *argument )
     {
       argument = smash_tilde_static( argument );
       DISPOSE( ch->pcdata->bamfout );
-      ch->pcdata->bamfout = str_dup( argument );
+      ch->pcdata->bamfout = strdup( argument );
       send_to_char( "Ok.\r\n", ch );
     }
 }
@@ -284,9 +284,9 @@ void do_rank( CHAR_DATA * ch, const char *argument )
    argument = smash_tilde_static( argument );
    DISPOSE( ch->pcdata->rank );
    if( !str_cmp( argument, "none" ) )
-      ch->pcdata->rank = str_dup( "" );
+      ch->pcdata->rank = strdup( "" );
    else
-      ch->pcdata->rank = str_dup( argument );
+      ch->pcdata->rank = strdup( argument );
    send_to_char( "Ok.\r\n", ch );
 }
 
@@ -2994,10 +2994,10 @@ void do_ban( CHAR_DATA * ch, const char *argument )
 
    CREATE( pban, BAN_DATA, 1 );
    LINK( pban, first_ban, last_ban, next, prev );
-   pban->name = str_dup( arg );
+   pban->name = strdup( arg );
    pban->level = LEVEL_AVATAR;
    snprintf( buf, MAX_STRING_LENGTH, "%24.24s", ctime( &current_time ) );
-   pban->ban_time = str_dup( buf );
+   pban->ban_time = strdup( buf );
    save_banlist(  );
    send_to_char( "Ban created.  Mortals banned from site.\r\n", ch );
 }
@@ -3761,7 +3761,7 @@ void do_bestowarea( CHAR_DATA * ch, const char *argument )
    }
 
    if( !victim->pcdata->bestowments )
-      victim->pcdata->bestowments = str_dup( "" );
+      victim->pcdata->bestowments = strdup( "" );
 
    if( !*argument || !str_cmp( argument, "list" ) )
    {
@@ -3774,7 +3774,7 @@ void do_bestowarea( CHAR_DATA * ch, const char *argument )
    {
       remove_area_names( victim->pcdata->bestowments, buf );
       DISPOSE( victim->pcdata->bestowments );
-      victim->pcdata->bestowments = str_dup( buf );
+      victim->pcdata->bestowments = strdup( buf );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -3792,7 +3792,7 @@ void do_bestowarea( CHAR_DATA * ch, const char *argument )
    snprintf( buf, MAX_STRING_LENGTH, "%s %s", victim->pcdata->bestowments, argument );
    DISPOSE( victim->pcdata->bestowments );
    smash_tilde( buf );
-   victim->pcdata->bestowments = str_dup( buf );
+   victim->pcdata->bestowments = strdup( buf );
    ch_printf( victim, "%s has bestowed on you the area: %s\r\n", ch->name, argument );
    send_to_char( "Done.\r\n", ch );
 }
@@ -3830,7 +3830,7 @@ void do_bestow( CHAR_DATA * ch, const char *argument )
    }
 
    if( !victim->pcdata->bestowments )
-      victim->pcdata->bestowments = str_dup( "" );
+      victim->pcdata->bestowments = strdup( "" );
 
    if( argument[0] == '\0' || !str_cmp( argument, "show list" ) )
    {
@@ -3841,7 +3841,7 @@ void do_bestow( CHAR_DATA * ch, const char *argument )
    if( !str_cmp( argument, "none" ) )
    {
       DISPOSE( victim->pcdata->bestowments );
-      victim->pcdata->bestowments = str_dup( "" );
+      victim->pcdata->bestowments = strdup( "" );
       ch_printf( ch, "Bestowments removed from %s.\r\n", victim->name );
       ch_printf( victim, "%s has removed your bestowed commands.\r\n", ch->name );
       check_switch( victim, FALSE );
@@ -3908,7 +3908,7 @@ void do_bestow( CHAR_DATA * ch, const char *argument )
    snprintf( buf, MAX_STRING_LENGTH, "%s %s", victim->pcdata->bestowments, arg_buf );
    DISPOSE( victim->pcdata->bestowments );
    smash_tilde( buf );
-   victim->pcdata->bestowments = str_dup( buf );
+   victim->pcdata->bestowments = strdup( buf );
    set_char_color( AT_IMMORT, victim );
    ch_printf( victim, "%s has bestowed on you the command(s): %s\r\n", ch->name, arg_buf );
    send_to_char( "Done.\r\n", ch );
@@ -4759,14 +4759,14 @@ void do_cset( CHAR_DATA * ch, const char *argument )
    if( !str_prefix( arg, "guild_overseer" ) )
    {
       STRFREE( sysdata.guild_overseer );
-      sysdata.guild_overseer = str_dup( argument );
+      sysdata.guild_overseer = strdup( argument );
       send_to_char( "Ok.\r\n", ch );
       return;
    }
    if( !str_prefix( arg, "guild_advisor" ) )
    {
       STRFREE( sysdata.guild_advisor );
-      sysdata.guild_advisor = str_dup( argument );
+      sysdata.guild_advisor = strdup( argument );
       send_to_char( "Ok.\r\n", ch );
       return;
    }
@@ -5309,9 +5309,9 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
          return;
       }
       CREATE( social, SOCIALTYPE, 1 );
-      social->name = str_dup( arg1 );
+      social->name = strdup( arg1 );
       snprintf( snoarg, MAX_INPUT_LENGTH+5, "You %s.", arg1 );
-      social->char_no_arg = str_dup( snoarg );
+      social->char_no_arg = strdup( snoarg );
       add_social( social );
       send_to_char( "Social added.\r\n", ch );
       return;
@@ -5354,7 +5354,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       }
       if( social->char_no_arg )
          DISPOSE( social->char_no_arg );
-      social->char_no_arg = str_dup( argument );
+      social->char_no_arg = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5364,7 +5364,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       if( social->others_no_arg )
          DISPOSE( social->others_no_arg );
       if( argument[0] != '\0' && str_cmp( argument, "clear" ) )
-         social->others_no_arg = str_dup( argument );
+         social->others_no_arg = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5374,7 +5374,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       if( social->char_found )
          DISPOSE( social->char_found );
       if( argument[0] != '\0' && str_cmp( argument, "clear" ) )
-         social->char_found = str_dup( argument );
+         social->char_found = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5384,7 +5384,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       if( social->others_found )
          DISPOSE( social->others_found );
       if( argument[0] != '\0' && str_cmp( argument, "clear" ) )
-         social->others_found = str_dup( argument );
+         social->others_found = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5394,7 +5394,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       if( social->vict_found )
          DISPOSE( social->vict_found );
       if( argument[0] != '\0' && str_cmp( argument, "clear" ) )
-         social->vict_found = str_dup( argument );
+         social->vict_found = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5404,7 +5404,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       if( social->char_auto )
          DISPOSE( social->char_auto );
       if( argument[0] != '\0' && str_cmp( argument, "clear" ) )
-         social->char_auto = str_dup( argument );
+         social->char_auto = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5414,7 +5414,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
       if( social->others_auto )
          DISPOSE( social->others_auto );
       if( argument[0] != '\0' && str_cmp( argument, "clear" ) )
-         social->others_auto = str_dup( argument );
+         social->others_auto = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5444,7 +5444,7 @@ void do_sedit( CHAR_DATA * ch, const char *argument )
          relocate = FALSE;
       if( social->name )
          DISPOSE( social->name );
-      social->name = str_dup( arg1 );
+      social->name = strdup( arg1 );
       if( relocate )
          add_social( social );
       send_to_char( "Done.\r\n", ch );
@@ -5603,14 +5603,14 @@ void do_cedit( CHAR_DATA * ch, const char *argument )
          return;
       }
       CREATE( command, CMDTYPE, 1 );
-      command->name = str_dup( arg1 );
+      command->name = strdup( arg1 );
       command->level = get_trust( ch );
       if( *argument )
          one_argument( argument, arg2 );
       else
          snprintf( arg2, MAX_INPUT_LENGTH+3, "do_%s", arg1 );
       command->do_fun = skill_function( arg2 );
-      command->fun_name = str_dup( arg2 );
+      command->fun_name = strdup( arg2 );
       add_command( command );
       send_to_char( "Command added.\r\n", ch );
       if( command->do_fun == skill_notfound )
@@ -5663,7 +5663,7 @@ void do_cedit( CHAR_DATA * ch, const char *argument )
       }
       command->do_fun = fun;
       DISPOSE( command->fun_name );
-      command->fun_name = str_dup( argument );
+      command->fun_name = strdup( argument );
       send_to_char( "Done.\r\n", ch );
       return;
    }
@@ -5742,7 +5742,7 @@ void do_cedit( CHAR_DATA * ch, const char *argument )
          relocate = FALSE;
       if( command->name )
          DISPOSE( command->name );
-      command->name = str_dup( arg1 );
+      command->name = strdup( arg1 );
       if( relocate )
          add_command( command );
       send_to_char( "Done.\r\n", ch );

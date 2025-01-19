@@ -26,6 +26,11 @@
 #define CODENAME "SWRFUSS"
 #define CODEVERSION "1.4.3"
 
+// Backward compatibility for snippets and such.
+#define mudstrlcpy strlcpy
+#define mudstrlcat strlcat
+#define str_dup strdup
+
 typedef int ch_ret;
 typedef int obj_ret;
 
@@ -2785,8 +2790,8 @@ int urange( int mincheck, int check, int maxcheck );
 }                                            \
 } while(0)
 #else
-#define STRALLOC(point)		str_dup((point))
-#define QUICKLINK(point)	str_dup((point))
+#define STRALLOC(point)		strdup((point))
+#define QUICKLINK(point)	strdup((point))
 #define STRFREE(point)		DISPOSE((point))
 #endif
 
@@ -4098,7 +4103,6 @@ void reset_area args( ( AREA_DATA * pArea ) );
 char *fread_flagstring( FILE * fp );
 void show_file( CHAR_DATA * ch, const char *filename );
 bool is_valid_filename( CHAR_DATA *ch, const char *direct, const char *filename );
-char *str_dup args( ( char const *str ) );
 void boot_db args( ( bool fCopyOver ) );
 void area_update args( ( void ) );
 void add_char args( ( CHAR_DATA * ch ) );

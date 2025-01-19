@@ -287,7 +287,7 @@ void show_list_to_char( OBJ_DATA * list, CHAR_DATA * ch, bool fShort, bool fShow
          break;
       if( tmp > 0 && number_bits( 1 ) == 0 )
       {
-         prgpstrShow[nShow] = str_dup( halucinated_object( ms, fShort ) );
+         prgpstrShow[nShow] = strdup( halucinated_object( ms, fShort ) );
          prgnShow[nShow] = 1;
          pitShow[nShow] = number_range( ITEM_LIGHT, ITEM_BOOK );
          nShow++;
@@ -322,7 +322,7 @@ void show_list_to_char( OBJ_DATA * list, CHAR_DATA * ch, bool fShort, bool fShow
           */
          if( !fCombine )
          {
-            prgpstrShow[nShow] = str_dup( pstrShow );
+            prgpstrShow[nShow] = strdup( pstrShow );
             prgnShow[nShow] = obj->count;
             nShow++;
          }
@@ -333,7 +333,7 @@ void show_list_to_char( OBJ_DATA * list, CHAR_DATA * ch, bool fShort, bool fShow
       int x;
       for( x = 0; x < tmp; x++ )
       {
-         prgpstrShow[nShow] = str_dup( halucinated_object( ms, fShort ) );
+         prgpstrShow[nShow] = strdup( halucinated_object( ms, fShort ) );
          prgnShow[nShow] = 1;
          pitShow[nShow] = number_range( ITEM_LIGHT, ITEM_BOOK );
          nShow++;
@@ -2296,7 +2296,7 @@ void do_who( CHAR_DATA * ch, const char *argument )
        * First make the structure. 
        */
       CREATE( cur_who, WHO_DATA, 1 );
-      cur_who->text = str_dup( buf );
+      cur_who->text = strdup( buf );
       if( IS_IMMORTAL( wch ) )
          cur_who->type = WT_IMM;
       else if( get_trust( wch ) <= 5 )
@@ -2960,7 +2960,7 @@ void do_password( CHAR_DATA * ch, const char *argument )
    pwdnew = sha256_crypt( arg2 );
 
    DISPOSE( ch->pcdata->pwd );
-   ch->pcdata->pwd = str_dup( pwdnew );
+   ch->pcdata->pwd = strdup( pwdnew );
    if( IS_SET( sysdata.save_flags, SV_PASSCHG ) )
       save_char_obj( ch );
    send_to_char( "Ok.\r\n", ch );

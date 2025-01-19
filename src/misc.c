@@ -152,12 +152,12 @@ void do_clone( CHAR_DATA * ch, const char *argument )
       ch->pcdata->clan_name = STRALLOC( "" );
       strlcpy( bestowments, ch->pcdata->bestowments, MAX_STRING_LENGTH );
       DISPOSE( ch->pcdata->bestowments );
-      ch->pcdata->bestowments = str_dup( "" );
+      ch->pcdata->bestowments = strdup( "" );
       save_clone( ch );
       STRFREE( ch->pcdata->clan_name );
       ch->pcdata->clan_name = STRALLOC( clanname );
       DISPOSE( ch->pcdata->bestowments );
-      ch->pcdata->bestowments = str_dup( clanname );
+      ch->pcdata->bestowments = strdup( clanname );
    }
    else
       save_clone( ch );
@@ -2695,7 +2695,7 @@ void do_train( CHAR_DATA * ch, const char *argument )
             send_to_char( "&GYou begin lessons in maners and ettiquite.\r\n", ch );
          }
          add_timer( ch, TIMER_DO_FUN, 10, do_train, 1 );
-         ch->dest_buf = str_dup( arg );
+         ch->dest_buf = strdup( arg );
          return;
 
       case 1:

@@ -1891,7 +1891,7 @@ void mprog_act_trigger( const char *buf, CHAR_DATA * mob, CHAR_DATA * ch, OBJ_DA
          mob->mpact = tmp_act;
 
       tmp_act->next = NULL;
-      tmp_act->buf = str_dup( buf );
+      tmp_act->buf = strdup( buf );
       tmp_act->ch = ch;
       tmp_act->obj = obj;
       tmp_act->vo = vo;
@@ -2450,7 +2450,7 @@ void oprog_act_trigger( const char *buf, OBJ_DATA * mobj, CHAR_DATA * ch,  OBJ_D
          mobj->mpact = tmp_act;
 
       tmp_act->next = NULL;
-      tmp_act->buf = str_dup( buf );
+      tmp_act->buf = strdup( buf );
       tmp_act->ch = ch;
       tmp_act->obj = obj;
       tmp_act->vo = vo;
@@ -2599,7 +2599,7 @@ void rprog_act_trigger( const char *buf, ROOM_INDEX_DATA * room, CHAR_DATA * ch,
          room->mpact = tmp_act;
 
       tmp_act->next = NULL;
-      tmp_act->buf = str_dup( buf );
+      tmp_act->buf = strdup( buf );
       tmp_act->ch = ch;
       tmp_act->obj = obj;
       tmp_act->vo = vo;

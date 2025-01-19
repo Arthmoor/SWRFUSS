@@ -974,7 +974,7 @@ void do_homepage( CHAR_DATA * ch, const char *argument )
    if( argument[0] == '\0' )
    {
       if( !ch->pcdata->homepage )
-         ch->pcdata->homepage = str_dup( "" );
+         ch->pcdata->homepage = strdup( "" );
       ch_printf( ch, "Your homepage is: %s\r\n", show_tilde( ch->pcdata->homepage ) );
       return;
    }
@@ -983,7 +983,7 @@ void do_homepage( CHAR_DATA * ch, const char *argument )
    {
       if( ch->pcdata->homepage )
          DISPOSE( ch->pcdata->homepage );
-      ch->pcdata->homepage = str_dup( "" );
+      ch->pcdata->homepage = strdup( "" );
       send_to_char( "Homepage cleared.\r\n", ch );
       return;
    }
@@ -998,7 +998,7 @@ void do_homepage( CHAR_DATA * ch, const char *argument )
    hide_tilde( buf );
    if( ch->pcdata->homepage )
       DISPOSE( ch->pcdata->homepage );
-   ch->pcdata->homepage = str_dup( buf );
+   ch->pcdata->homepage = strdup( buf );
    send_to_char( "Homepage set.\r\n", ch );
 }
 
