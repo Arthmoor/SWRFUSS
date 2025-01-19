@@ -1043,7 +1043,7 @@ void do_ostat( CHAR_DATA * ch, const char *argument )
       return;
    }
    if( arg[0] != '\'' && arg[0] != '"' && strlen( argument ) > strlen( arg ) )
-      mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
+      strlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    if( ( obj = get_obj_world( ch, arg ) ) == NULL )
    {
@@ -1147,7 +1147,7 @@ void do_mstat( CHAR_DATA * ch, const char *argument )
       return;
    }
    if( arg[0] != '\'' && arg[0] != '"' && strlen( argument ) > strlen( arg ) )
-      mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
+      strlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    if( ( victim = get_char_world( ch, arg ) ) == NULL )
    {
@@ -1471,12 +1471,12 @@ void do_owhere( CHAR_DATA * ch, const char *argument )
       else if( obj->in_obj )
       {
          bug( "%s: obj->in_obj after NULL!", __func__ );
-         mudstrlcat( buf, "object??\r\n", MAX_STRING_LENGTH );
+         strlcat( buf, "object??\r\n", MAX_STRING_LENGTH );
       }
       else
       {
          bug( "%s: object doesnt have location!", __func__ );
-         mudstrlcat( buf, "nowhere??\r\n", MAX_STRING_LENGTH );
+         strlcat( buf, "nowhere??\r\n", MAX_STRING_LENGTH );
       }
       send_to_pager( buf, ch );
       ++icnt;
@@ -1502,7 +1502,7 @@ void do_owhere( CHAR_DATA * ch, const char *argument )
       else
       {
          bug( "%s: object doesnt have location!", __func__ );
-         mudstrlcat( buf, "nowhere??\r\n", MAX_STRING_LENGTH );
+         strlcat( buf, "nowhere??\r\n", MAX_STRING_LENGTH );
       }
       send_to_pager( buf, ch );
    }
@@ -1573,7 +1573,7 @@ void do_shutdown( CHAR_DATA * ch, const char *argument )
 
    snprintf( buf, MAX_STRING_LENGTH, "Shutdown by %s.", ch->name );
    append_file( ch, SHUTDOWN_FILE, buf );
-   mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
+   strlcat( buf, "\r\n", MAX_STRING_LENGTH );
    do_echo( ch, buf );
 
    /*
@@ -3688,8 +3688,8 @@ void extract_area_names( const char *inp, char *out )
       if( ( len = strlen( buf ) ) >= 5 && !strcmp( ".are", pbuf + len - 4 ) )
       {
          if( *out )
-            mudstrlcat( out, " ", MAX_INPUT_LENGTH );
-         mudstrlcat( out, buf, MAX_INPUT_LENGTH );
+            strlcat( out, " ", MAX_INPUT_LENGTH );
+         strlcat( out, buf, MAX_INPUT_LENGTH );
       }
    }
 }
@@ -3711,8 +3711,8 @@ void remove_area_names( const char *inp, char *out )
       if( ( len = strlen( buf ) ) < 5 || strcmp( ".are", pbuf + len - 4 ) )
       {
          if( *out )
-            mudstrlcat( out, " ", MAX_INPUT_LENGTH );
-         mudstrlcat( out, buf, MAX_INPUT_LENGTH );
+            strlcat( out, " ", MAX_INPUT_LENGTH );
+         strlcat( out, buf, MAX_INPUT_LENGTH );
       }
    }
 }
@@ -3891,7 +3891,7 @@ void do_bestow( CHAR_DATA * ch, const char *argument )
       }
 
       snprintf( tmparg, MAX_STRING_LENGTH, "%s ", arg );
-      mudstrlcat( arg_buf, tmparg, MAX_STRING_LENGTH-30 );
+      strlcat( arg_buf, tmparg, MAX_STRING_LENGTH-30 );
       argument = one_argument( argument, arg );
       fComm = TRUE;
    }
@@ -4508,7 +4508,7 @@ const char *name_expand( CHAR_DATA * ch )
 
    if( !name[0] ) /* weird mob .. no keywords */
    {
-      mudstrlcpy( outbuf, "", MAX_STRING_LENGTH );   /* Do not return NULL, just an empty buffer */
+      strlcpy( outbuf, "", MAX_STRING_LENGTH );   /* Do not return NULL, just an empty buffer */
       return outbuf;
    }
 

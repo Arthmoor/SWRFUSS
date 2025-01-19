@@ -9,7 +9,6 @@ cd ../area
 
 # Set limits.
 limit coredumpsize unlimited
-
 if ( -e shutdown.txt ) rm -f shutdown.txt
 
 while ( 1 )

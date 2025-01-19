@@ -894,9 +894,9 @@ void do_give( CHAR_DATA * ch, const char *argument )
 
       ch->gold -= amount;
       victim->gold += amount;
-      mudstrlcpy( buf, "$n gives you ", MAX_STRING_LENGTH );
-      mudstrlcat( buf, arg1, MAX_STRING_LENGTH );
-      mudstrlcat( buf, ( amount > 1 ) ? " credits." : " credit.", MAX_STRING_LENGTH );
+      strlcpy( buf, "$n gives you ", MAX_STRING_LENGTH );
+      strlcat( buf, arg1, MAX_STRING_LENGTH );
+      strlcat( buf, ( amount > 1 ) ? " credits." : " credit.", MAX_STRING_LENGTH );
 
       act( AT_ACTION, buf, ch, NULL, victim, TO_VICT );
       act( AT_ACTION, "$n gives $N some credits.", ch, NULL, victim, TO_NOTVICT );
@@ -2307,7 +2307,7 @@ void do_auction( CHAR_DATA * ch, const char *argument )
          if( auction->bet > 0 )
             snprintf( buf, MAX_STRING_LENGTH, "Current bid on this item is %d credits.\r\n", auction->bet );
          else
-            mudstrlcpy( buf, "No bids on this item have been received.\r\n", MAX_STRING_LENGTH );
+            strlcpy( buf, "No bids on this item have been received.\r\n", MAX_STRING_LENGTH );
          set_char_color( AT_BLUE, ch );
          send_to_char( buf, ch );
 
@@ -2487,7 +2487,7 @@ void do_auction( CHAR_DATA * ch, const char *argument )
    if( arg2[0] == '\0' )
    {
       auction->starting = 0;
-      mudstrlcpy( arg2, "0", MAX_INPUT_LENGTH );
+      strlcpy( arg2, "0", MAX_INPUT_LENGTH );
    }
 
    if( !is_number( arg2 ) )

@@ -246,28 +246,28 @@ char *wordwrap( char *txt, short wrap )
          if( ( ln + x + 1 ) < wrap )
          {
             if( line[ln - 1] == '.' )
-               mudstrlcat( line, "  ", MAX_INPUT_LENGTH );
+               strlcat( line, "  ", MAX_INPUT_LENGTH );
             else
-               mudstrlcat( line, " ", MAX_INPUT_LENGTH );
-            mudstrlcat( line, temp, MAX_INPUT_LENGTH );
+               strlcat( line, " ", MAX_INPUT_LENGTH );
+            strlcat( line, temp, MAX_INPUT_LENGTH );
             p = strchr( line, '\n' );
             if( !p )
                p = strchr( line, '\r' );
             if( p )
             {
-               mudstrlcat( buf, line, MAX_STRING_LENGTH );
+               strlcat( buf, line, MAX_STRING_LENGTH );
                line[0] = '\0';
             }
          }
          else
          {
-            mudstrlcat( line, "\r\n", MAX_INPUT_LENGTH );
-            mudstrlcat( buf, line, MAX_STRING_LENGTH );
-            mudstrlcpy( line, temp, MAX_INPUT_LENGTH );
+            strlcat( line, "\r\n", MAX_INPUT_LENGTH );
+            strlcat( buf, line, MAX_STRING_LENGTH );
+            strlcpy( line, temp, MAX_INPUT_LENGTH );
          }
       }
       if( line[0] != '\0' )
-         mudstrlcat( buf, line, MAX_STRING_LENGTH );
+         strlcat( buf, line, MAX_STRING_LENGTH );
    }
    return bufp;
 }
@@ -314,12 +314,12 @@ void decorate_room( ROOM_INDEX_DATA * room )
          snprintf( buf2, MAX_STRING_LENGTH, "%s", room_sents[sector][x] );
          if( len > 5 && buf[len - 1] == '.' )
          {
-            mudstrlcat( buf, "  ", MAX_STRING_LENGTH );
+            strlcat( buf, "  ", MAX_STRING_LENGTH );
             buf2[0] = UPPER( buf2[0] );
          }
          else if( len == 0 )
             buf2[0] = UPPER( buf2[0] );
-         mudstrlcat( buf, buf2, MAX_STRING_LENGTH );
+         strlcat( buf, buf2, MAX_STRING_LENGTH );
       }
    }
    snprintf( buf2, MAX_STRING_LENGTH, "%s\r\n", wordwrap( buf, 78 ) );

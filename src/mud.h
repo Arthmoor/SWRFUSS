@@ -4096,8 +4096,6 @@ void reset_area args( ( AREA_DATA * pArea ) );
 
 /* db.c */
 char *fread_flagstring( FILE * fp );
-size_t mudstrlcat( char * __restrict dst, const char * __restrict src, size_t dsize );
-size_t mudstrlcpy( char * __restrict dst, const char * __restrict src, size_t dsize );
 void show_file( CHAR_DATA * ch, const char *filename );
 bool is_valid_filename( CHAR_DATA *ch, const char *direct, const char *filename );
 char *str_dup args( ( char const *str ) );

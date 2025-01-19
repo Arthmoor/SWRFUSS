@@ -363,7 +363,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "timeskilled" ) )
@@ -400,7 +400,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "otypehere" ) )
@@ -428,7 +428,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "ovnumroom" ) )
@@ -449,7 +449,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "otyperoom" ) )
@@ -474,7 +474,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "ovnumcarry" ) )
@@ -495,7 +495,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "otypecarry" ) )
@@ -520,7 +520,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "ovnumwear" ) )
@@ -541,7 +541,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "otypewear" ) )
@@ -566,7 +566,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "ovnuminv" ) )
@@ -587,7 +587,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( !str_cmp( chck, "otypeinv" ) )
@@ -612,7 +612,7 @@ int mprog_do_ifcheck( const char *ifcheck, CHAR_DATA * mob, CHAR_DATA * actor, O
       if( rhsvl < 1 )
          rhsvl = 1;
       if( !*opr )
-         mudstrlcpy( opr, "==", MAX_INPUT_LENGTH );
+         strlcpy( opr, "==", MAX_INPUT_LENGTH );
       return mprog_veval( lhsvl, opr, rhsvl, mob );
    }
    if( chkchar )
@@ -1270,7 +1270,7 @@ void mprog_driver( const char *com_list, CHAR_DATA * mob, CHAR_DATA * actor, OBJ
          count++;
       }
 
-   mudstrlcpy( tmpcmndlst, com_list, MAX_STRING_LENGTH );
+   strlcpy( tmpcmndlst, com_list, MAX_STRING_LENGTH );
    command_list = tmpcmndlst;
    if( single_step )
    {
@@ -1677,9 +1677,9 @@ bool mprog_keyword_check( const char *argu, const char *argl )
    char *arg, *arglist;
    char *start, *end;
 
-   mudstrlcpy( arg1, strlower( argu ), MAX_INPUT_LENGTH );
+   strlcpy( arg1, strlower( argu ), MAX_INPUT_LENGTH );
    arg = arg1;
-   mudstrlcpy( arg2, strlower( argl ), MAX_INPUT_LENGTH );
+   strlcpy( arg2, strlower( argl ), MAX_INPUT_LENGTH );
    arglist = arg2;
 
    for( i = 0; i < strlen( arglist ); i++ )
@@ -1729,11 +1729,11 @@ void mprog_wordlist_check( const char *arg, CHAR_DATA * mob, CHAR_DATA * actor, 
    for( mprg = mob->pIndexData->mudprogs; mprg; mprg = mprg->next )
       if( mprg->type & type )
       {
-         mudstrlcpy( temp1, mprg->arglist, MAX_STRING_LENGTH );
+         strlcpy( temp1, mprg->arglist, MAX_STRING_LENGTH );
          list = temp1;
          for( i = 0; i < strlen( list ); i++ )
             list[i] = LOWER( list[i] );
-         mudstrlcpy( temp2, arg, MAX_INPUT_LENGTH );
+         strlcpy( temp2, arg, MAX_INPUT_LENGTH );
          dupl = temp2;
          for( i = 0; i < strlen( dupl ); i++ )
             dupl[i] = LOWER( dupl[i] );
@@ -2474,11 +2474,11 @@ void oprog_wordlist_check( const char *arg, CHAR_DATA * mob, CHAR_DATA * actor, 
    for( mprg = iobj->pIndexData->mudprogs; mprg; mprg = mprg->next )
       if( mprg->type & type )
       {
-         mudstrlcpy( temp1, mprg->arglist, MAX_STRING_LENGTH );
+         strlcpy( temp1, mprg->arglist, MAX_STRING_LENGTH );
          list = temp1;
          for( i = 0; i < strlen( list ); i++ )
             list[i] = LOWER( list[i] );
-         mudstrlcpy( temp2, arg, MAX_INPUT_LENGTH );
+         strlcpy( temp2, arg, MAX_INPUT_LENGTH );
          dupl = temp2;
          for( i = 0; i < strlen( dupl ); i++ )
             dupl[i] = LOWER( dupl[i] );
@@ -2708,11 +2708,11 @@ void rprog_wordlist_check( const char *arg, CHAR_DATA * mob, CHAR_DATA * actor, 
    for( mprg = room->mudprogs; mprg; mprg = mprg->next )
       if( mprg->type & type )
       {
-         mudstrlcpy( temp1, mprg->arglist, MAX_STRING_LENGTH );
+         strlcpy( temp1, mprg->arglist, MAX_STRING_LENGTH );
          list = temp1;
          for( i = 0; i < strlen( list ); i++ )
             list[i] = LOWER( list[i] );
-         mudstrlcpy( temp2, arg, MAX_INPUT_LENGTH );
+         strlcpy( temp2, arg, MAX_INPUT_LENGTH );
          dupl = temp2;
          for( i = 0; i < strlen( dupl ); i++ )
             dupl[i] = LOWER( dupl[i] );

@@ -282,7 +282,7 @@ void do_noteroom( CHAR_DATA * ch, const char *argument )
    char arg[MAX_STRING_LENGTH];
    char arg_passed[MAX_STRING_LENGTH];
 
-   mudstrlcpy( arg_passed, argument, MAX_STRING_LENGTH );
+   strlcpy( arg_passed, argument, MAX_STRING_LENGTH );
 
    switch ( ch->substate )
    {
@@ -326,7 +326,7 @@ void do_mailroom( CHAR_DATA * ch, const char *argument )
    char arg[MAX_STRING_LENGTH];
    char arg_passed[MAX_STRING_LENGTH];
 
-   mudstrlcpy( arg_passed, argument, MAX_STRING_LENGTH );
+   strlcpy( arg_passed, argument, MAX_STRING_LENGTH );
 
    switch ( ch->substate )
    {
@@ -849,7 +849,7 @@ void do_note( CHAR_DATA * ch, const char *arg_passed, bool IS_MAIL )
       }
 
       char ucase_arg_passed[ MAX_STRING_LENGTH ];
-      mudstrlcpy( ucase_arg_passed, arg_passed, MAX_STRING_LENGTH );
+      strlcpy( ucase_arg_passed, arg_passed, MAX_STRING_LENGTH );
       ucase_arg_passed[0] = UPPER( arg_passed[0] );
 
       snprintf( fname, 256, "%s%c/%s", PLAYER_DIR, tolower( ucase_arg_passed[0] ), capitalize( ucase_arg_passed ) );
@@ -1061,15 +1061,15 @@ void do_note( CHAR_DATA * ch, const char *arg_passed, bool IS_MAIL )
                ed->description = QUICKLINK( pnote->date );
                ed = SetOExtra( paper, "note" );
                STRFREE( ed->description );
-               mudstrlcpy( notebuf, "From: ", MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, pnote->sender, MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, "\r\nTo: ", MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, pnote->to_list, MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, "\r\nSubject: ", MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, pnote->subject, MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, "\r\n\r\n", MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, pnote->text, MAX_STRING_LENGTH );
-               mudstrlcat( notebuf, "\r\n", MAX_STRING_LENGTH );
+               strlcpy( notebuf, "From: ", MAX_STRING_LENGTH );
+               strlcat( notebuf, pnote->sender, MAX_STRING_LENGTH );
+               strlcat( notebuf, "\r\nTo: ", MAX_STRING_LENGTH );
+               strlcat( notebuf, pnote->to_list, MAX_STRING_LENGTH );
+               strlcat( notebuf, "\r\nSubject: ", MAX_STRING_LENGTH );
+               strlcat( notebuf, pnote->subject, MAX_STRING_LENGTH );
+               strlcat( notebuf, "\r\n\r\n", MAX_STRING_LENGTH );
+               strlcat( notebuf, pnote->text, MAX_STRING_LENGTH );
+               strlcat( notebuf, "\r\n", MAX_STRING_LENGTH );
                ed->description = STRALLOC( notebuf );
                paper->value[0] = 2;
                paper->value[1] = 2;

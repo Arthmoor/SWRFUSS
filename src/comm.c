@@ -182,7 +182,7 @@ int main( int argc, char **argv )
    current_time = ( time_t ) now_time.tv_sec;
 /*  gettimeofday( &boot_time, NULL);   okay, so it's kludgy, sue me :) */
    boot_time = time( 0 );  /*  <-- I think this is what you wanted */
-   mudstrlcpy( str_boot_time, ctime( &current_time ), MAX_INPUT_LENGTH );
+   strlcpy( str_boot_time, ctime( &current_time ), MAX_INPUT_LENGTH );
 
    /*
     * Init boot time.
@@ -386,7 +386,7 @@ static void caught_alarm( int signum )
    char buf[MAX_STRING_LENGTH];
 
    bug( "%s: ALARM CLOCK!", __func__ );
-   mudstrlcpy( buf, "Alas, the hideous malevalent entity known only as 'Lag' rises once more!\r\n", MAX_STRING_LENGTH );
+   strlcpy( buf, "Alas, the hideous malevalent entity known only as 'Lag' rises once more!\r\n", MAX_STRING_LENGTH );
    echo_to_all( AT_IMMORT, buf, ECHOTAR_ALL );
 
    if( newdesc )
@@ -560,7 +560,7 @@ void game_loop( void )
                d->fcommand = TRUE;
                stop_idling( d->character );
 
-               mudstrlcpy( cmdline, d->incomm , MAX_INPUT_LENGTH);
+               strlcpy( cmdline, d->incomm , MAX_INPUT_LENGTH);
                d->incomm[0] = '\0';
 
                if( d->character )
@@ -724,11 +724,11 @@ void new_descriptor( int new_desc )
    CREATE( dnew, DESCRIPTOR_DATA, 1 );
    init_descriptor( dnew, desc );
    dnew->port = ntohs( sock.sin_port );
-   mudstrlcpy( log_buf, inet_ntoa( sock.sin_addr ), MAX_STRING_LENGTH );
+   strlcpy( log_buf, inet_ntoa( sock.sin_addr ), MAX_STRING_LENGTH );
    dnew->host = STRALLOC( log_buf );
    if( !sysdata.NO_NAME_RESOLVING )
    {
-      mudstrlcpy( buf, in_dns_cache( log_buf ), MAX_STRING_LENGTH );
+      strlcpy( buf, in_dns_cache( log_buf ), MAX_STRING_LENGTH );
 
       if( buf[0] == '\0' )
          resolve_dns( dnew, sock.sin_addr.s_addr );
@@ -1107,9 +1107,9 @@ void read_from_buffer( DESCRIPTOR_DATA * d )
     * Do '!' substitution.
     */
    if( d->incomm[0] == '!' )
-      mudstrlcpy( d->incomm, d->inlast, MAX_INPUT_LENGTH );
+      strlcpy( d->incomm, d->inlast, MAX_INPUT_LENGTH );
    else
-      mudstrlcpy( d->inlast, d->incomm, MAX_INPUT_LENGTH );
+      strlcpy( d->inlast, d->incomm, MAX_INPUT_LENGTH );
 
    /*
     * Shift the input buffer.
@@ -1576,7 +1576,7 @@ void nanny_get_name( DESCRIPTOR_DATA *d, const char *orig_argument )
    }
 
    char argument[MAX_STRING_LENGTH-30];
-   mudstrlcpy( argument, orig_argument, MAX_STRING_LENGTH-30 );
+   strlcpy( argument, orig_argument, MAX_STRING_LENGTH-30 );
 
    argument[0] = UPPER( argument[0] );
 
@@ -1747,7 +1747,7 @@ void nanny_get_old_password( DESCRIPTOR_DATA *d, const char *argument )
       return;
    }
 
-   mudstrlcpy( buf, ch->name, MAX_STRING_LENGTH );
+   strlcpy( buf, ch->name, MAX_STRING_LENGTH );
    d->character->desc = NULL;
    free_char( d->character );
    fOld = load_char_obj( d, buf, FALSE, FALSE );
@@ -1890,17 +1890,17 @@ void nanny_get_new_sex( DESCRIPTOR_DATA *d, const char *argument )
 	    {
 	      if( strlen( buf ) + strlen( race_table[iRace].race_name ) > 77 )
 		{
-		  mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
+		  strlcat( buf, "\r\n", MAX_STRING_LENGTH );
 		  write_to_buffer( d, buf, 0 );
 		  buf[0] = '\0';
 		}
 	      else
-		mudstrlcat( buf, " ", MAX_STRING_LENGTH );
+		strlcat( buf, " ", MAX_STRING_LENGTH );
 	    }
-	  mudstrlcat( buf, race_table[iRace].race_name, MAX_STRING_LENGTH );
+	  strlcat( buf, race_table[iRace].race_name, MAX_STRING_LENGTH );
 	}
     }
-  mudstrlcat( buf, "]\r\n: ", MAX_STRING_LENGTH );
+  strlcat( buf, "]\r\n: ", MAX_STRING_LENGTH );
   write_to_buffer( d, buf, 0 );
   d->connected = CON_GET_NEW_RACE;
 }
@@ -1949,18 +1949,18 @@ void nanny_get_new_race( DESCRIPTOR_DATA *d, const char *argument )
 	    {
 	      if( strlen( buf ) + strlen( ability_name[iClass] ) > 77 )
 		{
-		  mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
+		  strlcat( buf, "\r\n", MAX_STRING_LENGTH );
 		  write_to_buffer( d, buf, 0 );
 		  buf[0] = '\0';
 		}
 	      else
-		mudstrlcat( buf, " ", MAX_STRING_LENGTH );
+		strlcat( buf, " ", MAX_STRING_LENGTH );
 	    }
-	  mudstrlcat( buf, ability_name[iClass], MAX_STRING_LENGTH );
+	  strlcat( buf, ability_name[iClass], MAX_STRING_LENGTH );
 	}
     }
 
-  mudstrlcat( buf, "]\r\n: ", MAX_STRING_LENGTH );
+  strlcat( buf, "]\r\n: ", MAX_STRING_LENGTH );
   write_to_buffer( d, buf, 0 );
   d->connected = CON_GET_NEW_CLASS;
 }
@@ -2821,7 +2821,7 @@ char *act_string( const char *format, CHAR_DATA * to, CHAR_DATA * ch, const void
       while( ( *point = *i ) != '\0' )
          ++point, ++i;
    }
-   mudstrlcpy( point, "\r\n", MAX_STRING_LENGTH );
+   strlcpy( point, "\r\n", MAX_STRING_LENGTH );
    if( !DONT_UPPER )
    {
       bool bUppercase = true;     //Always uppercase first letter
@@ -2959,7 +2959,7 @@ void do_name( CHAR_DATA * ch, const char *argument )
       return;
    }
 
-   mudstrlcpy( ucase_argument, argument, MAX_STRING_LENGTH );
+   strlcpy( ucase_argument, argument, MAX_STRING_LENGTH );
    ucase_argument[0] = UPPER( argument[0] );
 
    if( !check_parse_name( ucase_argument ) )
@@ -3003,11 +3003,11 @@ char *default_prompt( CHAR_DATA * ch )
 {
    static char buf[MAX_STRING_LENGTH];
 
-   mudstrlcpy( buf, "", MAX_STRING_LENGTH );
+   strlcpy( buf, "", MAX_STRING_LENGTH );
    if( ch->skill_level[FORCE_ABILITY] > 1 || get_trust( ch ) >= LEVEL_IMMORTAL )
-      mudstrlcat( buf, "&pForce:&P%m/&p%M  &pAlign:&P%a\r\n", MAX_STRING_LENGTH );
-   mudstrlcat( buf, "&BHealth:&C%h&B/%H  &BMovement:&C%v&B/%V", MAX_STRING_LENGTH );
-   mudstrlcat( buf, "&C >&w", MAX_STRING_LENGTH );
+      strlcat( buf, "&pForce:&P%m/&p%M  &pAlign:&P%a\r\n", MAX_STRING_LENGTH );
+   strlcat( buf, "&BHealth:&C%h&B/%H  &BMovement:&C%v&B/%V", MAX_STRING_LENGTH );
+   strlcat( buf, "&C >&w", MAX_STRING_LENGTH );
    return buf;
 }
 
@@ -3047,7 +3047,7 @@ void display_prompt( DESCRIPTOR_DATA * d )
 
    if( ansi )
    {
-      mudstrlcpy( pbuf, ANSI_RESET, MAX_STRING_LENGTH );
+      strlcpy( pbuf, ANSI_RESET, MAX_STRING_LENGTH );
       d->prevcolor = 0x08;
       pbuf += 4;
    }
@@ -3088,11 +3088,11 @@ void display_prompt( DESCRIPTOR_DATA * d )
                   if( ch->top_level >= 10 )
                      pstat = ch->alignment;
                   else if( IS_GOOD( ch ) )
-                     mudstrlcpy( pbuf, "good", MAX_STRING_LENGTH );
+                     strlcpy( pbuf, "good", MAX_STRING_LENGTH );
                   else if( IS_EVIL( ch ) )
-                     mudstrlcpy( pbuf, "evil", MAX_STRING_LENGTH );
+                     strlcpy( pbuf, "evil", MAX_STRING_LENGTH );
                   else
-                     mudstrlcpy( pbuf, "neutral", MAX_STRING_LENGTH );
+                     strlcpy( pbuf, "neutral", MAX_STRING_LENGTH );
                   break;
                case 'h':
                   pstat = ch->hit;
@@ -3140,7 +3140,7 @@ void display_prompt( DESCRIPTOR_DATA * d )
                       ( IS_NPC( ch ) && IS_SET( ch->act, ACT_MOBINVIS ) ) )
                      snprintf( pbuf, MAX_STRING_LENGTH, "(Invis %d) ", ( IS_NPC( ch ) ? ch->mobinvis : ch->pcdata->wizinvis ) );
                   else if( IS_AFFECTED( ch, AFF_INVISIBLE ) )
-                     mudstrlcpy( pbuf, "(Invis) ", MAX_STRING_LENGTH );
+                     strlcpy( pbuf, "(Invis) ", MAX_STRING_LENGTH );
                   break;
                case 'I':
                   pstat = ( IS_NPC( ch ) ? ( IS_SET( ch->act, ACT_MOBINVIS ) ? ch->mobinvis : 0 )

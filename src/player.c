@@ -836,7 +836,7 @@ void do_equipment( CHAR_DATA * ch, const char *argument )
             if( can_see_obj( ch, obj ) )
             {
                send_to_char( format_obj_to_char( obj, ch, TRUE ), ch );
-               mudstrlcpy( buf, "", MAX_STRING_LENGTH );
+               strlcpy( buf, "", MAX_STRING_LENGTH );
                switch ( obj->item_type )
                {
                   default:
@@ -849,34 +849,34 @@ void do_equipment( CHAR_DATA * ch, const char *argument )
                         obj->value[1] = 1;
                      dam = ( short )( ( obj->value[0] * 10 ) / obj->value[1] );
                      if( dam >= 10 )
-                        mudstrlcat( buf, " (superb) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (superb) ", MAX_STRING_LENGTH );
                      else if( dam >= 7 )
-                        mudstrlcat( buf, " (good) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (good) ", MAX_STRING_LENGTH );
                      else if( dam >= 5 )
-                        mudstrlcat( buf, " (worn) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (worn) ", MAX_STRING_LENGTH );
                      else if( dam >= 3 )
-                        mudstrlcat( buf, " (poor) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (poor) ", MAX_STRING_LENGTH );
                      else if( dam >= 1 )
-                        mudstrlcat( buf, " (awful) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (awful) ", MAX_STRING_LENGTH );
                      else if( dam == 0 )
-                        mudstrlcat( buf, " (broken) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (broken) ", MAX_STRING_LENGTH );
                      send_to_char( buf, ch );
                      break;
 
                   case ITEM_WEAPON:
                      dam = INIT_WEAPON_CONDITION - obj->value[0];
                      if( dam < 2 )
-                        mudstrlcat( buf, " (superb) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (superb) ", MAX_STRING_LENGTH );
                      else if( dam < 4 )
-                        mudstrlcat( buf, " (good) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (good) ", MAX_STRING_LENGTH );
                      else if( dam < 7 )
-                        mudstrlcat( buf, " (worn) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (worn) ", MAX_STRING_LENGTH );
                      else if( dam < 10 )
-                        mudstrlcat( buf, " (poor) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (poor) ", MAX_STRING_LENGTH );
                      else if( dam < 12 )
-                        mudstrlcat( buf, " (awful) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (awful) ", MAX_STRING_LENGTH );
                      else if( dam == 12 )
-                        mudstrlcat( buf, " (broken) ", MAX_STRING_LENGTH );
+                        strlcat( buf, " (broken) ", MAX_STRING_LENGTH );
                      send_to_char( buf, ch );
                      if( obj->value[3] == WEAPON_BLASTER )
                      {
@@ -927,10 +927,10 @@ void set_title( CHAR_DATA * ch, const char *title )
    if( isalpha( title[0] ) || isdigit( title[0] ) )
    {
       buf[0] = ' ';
-      mudstrlcpy( buf + 1, title, MAX_STRING_LENGTH );
+      strlcpy( buf + 1, title, MAX_STRING_LENGTH - 1 );
    }
    else
-      mudstrlcpy( buf, title, MAX_STRING_LENGTH );
+      strlcpy( buf, title, MAX_STRING_LENGTH );
 
    STRFREE( ch->pcdata->title );
    ch->pcdata->title = STRALLOC( buf );
@@ -989,7 +989,7 @@ void do_homepage( CHAR_DATA * ch, const char *argument )
    }
 
    if( strstr( argument, "://" ) )
-      mudstrlcpy( buf, argument, MAX_STRING_LENGTH );
+      strlcpy( buf, argument, MAX_STRING_LENGTH );
    else
       snprintf( buf, MAX_STRING_LENGTH, "http://%s", argument );
    if( strlen( buf ) > 70 )
@@ -1119,7 +1119,7 @@ void do_prompt( CHAR_DATA * ch, const char *argument )
       STRFREE( ch->pcdata->prompt );
 
    char prompt[128];
-   mudstrlcpy(prompt, argument, 128);
+   strlcpy(prompt, argument, 128);
 
    /*
     * Can add a list of pre-set prompts here if wanted.. perhaps

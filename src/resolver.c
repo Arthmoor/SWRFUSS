@@ -23,7 +23,7 @@
  * Original DikuMUD code by: Hans Staerfeldt, Katja Nyboe, Tom Madsen,      *
  * Michael Seifert, and Sebastian Hammer.                                   *
  ****************************************************************************
- *                       External DNS Resolver Module                       *
+ *                      External DNS Resolver Module                        *
  ****************************************************************************/
 
 /***************************************************************************
@@ -56,12 +56,12 @@ char *resolve_address( int address )
     
    if( ( from = gethostbyaddr( (char*)&address, sizeof(address), AF_INET ) ) != NULL )
    {
-      strncpy( addr_str, strcmp( from->h_name, "localhost" ) ? from->h_name : "local-host", 256 );
+      strlcpy( addr_str, strcmp( from->h_name, "localhost" ) ? from->h_name : "local-host", 256 );
    }
    else
    {
-      addr = ntohl( address );
-      snprintf( addr_str, 256, "%d.%d.%d.%d",
+    	addr = ntohl( address );
+    	snprintf( addr_str, 256, "%d.%d.%d.%d",
 	    ( addr >> 24 ) & 0xFF, ( addr >> 16 ) & 0xFF,
 	    ( addr >>  8 ) & 0xFF, ( addr       ) & 0xFF );
    } 

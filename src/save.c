@@ -758,7 +758,7 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
        * Cheat so that bug will show line #'s -- Altrag 
        */
       fpArea = fp;
-      mudstrlcpy( strArea, strsave, MAX_INPUT_LENGTH );
+      strlcpy( strArea, strsave, MAX_INPUT_LENGTH );
       for( ;; )
       {
          char letter;
@@ -798,7 +798,7 @@ bool load_char_obj( DESCRIPTOR_DATA * d, char *name, bool preload, bool copyover
       }
       FCLOSE( fp );
       fpArea = NULL;
-      mudstrlcpy( strArea, "$", MAX_INPUT_LENGTH );
+      strlcpy( strArea, "$", MAX_INPUT_LENGTH );
    }
 
    if( !found )
@@ -2041,7 +2041,7 @@ void load_corpses( void )
          FCLOSE( fpArea );
       }
    }
-   mudstrlcpy( strArea, "$", MAX_INPUT_LENGTH );
+   strlcpy( strArea, "$", MAX_INPUT_LENGTH );
    closedir( dp );
    falling = 0;
 }

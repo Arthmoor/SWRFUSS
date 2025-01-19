@@ -4708,7 +4708,7 @@ void do_land( CHAR_DATA * ch, const char *argument )
    SHIP_DATA *target;
    int vx = 0, vy = 0, vz = 0;
 
-   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
+   strlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    if( ( ship = ship_from_cockpit( ch->in_room->vnum ) ) == NULL )
    {
@@ -6020,7 +6020,7 @@ void do_target( CHAR_DATA * ch, const char *argument )
    SHIP_DATA *target;
    char buf[MAX_STRING_LENGTH];
 
-   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
+   strlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    switch ( ch->substate )
    {
@@ -6115,7 +6115,7 @@ void do_target( CHAR_DATA * ch, const char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
+         strlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -6918,7 +6918,7 @@ void do_repairship( CHAR_DATA * ch, const char *argument )
    int schance, change;
    SHIP_DATA *ship;
 
-   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
+   strlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    switch ( ch->substate )
    {
@@ -6957,7 +6957,7 @@ void do_repairship( CHAR_DATA * ch, const char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
+         strlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 
@@ -7846,7 +7846,7 @@ void do_hmm( CHAR_DATA *ch, const char *argument )
     int schance;
     SHIP_DATA *ship;
     
-    mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );    
+    strlcpy( arg, argument, MAX_INPUT_LENGTH );    
     
     switch( ch->substate )
     { 
@@ -7914,7 +7914,7 @@ void do_hmm( CHAR_DATA *ch, const char *argument )
     	case 1:
     		if ( !ch->dest_buf )
     		   return;
-    		mudstrlcpy(arg, ch->dest_buf, MAX_INPUT_LENGTH);
+    		strlcpy(arg, ch->dest_buf, MAX_INPUT_LENGTH);
     		DISPOSE( ch->dest_buf);
     		break;
     		

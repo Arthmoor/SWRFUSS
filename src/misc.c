@@ -147,10 +147,10 @@ void do_clone( CHAR_DATA * ch, const char *argument )
    ch->plr_home = NULL;
    if( ch->pcdata->clan_name && ch->pcdata->clan_name[0] != '\0' )
    {
-      mudstrlcpy( clanname, ch->pcdata->clan_name, MAX_STRING_LENGTH );
+      strlcpy( clanname, ch->pcdata->clan_name, MAX_STRING_LENGTH );
       STRFREE( ch->pcdata->clan_name );
       ch->pcdata->clan_name = STRALLOC( "" );
-      mudstrlcpy( bestowments, ch->pcdata->bestowments, MAX_STRING_LENGTH );
+      strlcpy( bestowments, ch->pcdata->bestowments, MAX_STRING_LENGTH );
       DISPOSE( ch->pcdata->bestowments );
       ch->pcdata->bestowments = str_dup( "" );
       save_clone( ch );
@@ -2591,7 +2591,7 @@ void do_train( CHAR_DATA * ch, const char *argument )
    if( IS_NPC( ch ) )
       return;
 
-   mudstrlcpy( arg, argument, MAX_INPUT_LENGTH );
+   strlcpy( arg, argument, MAX_INPUT_LENGTH );
 
    switch ( ch->substate )
    {
@@ -2701,7 +2701,7 @@ void do_train( CHAR_DATA * ch, const char *argument )
       case 1:
          if( !ch->dest_buf )
             return;
-         mudstrlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
+         strlcpy( arg, ( const char* ) ch->dest_buf, MAX_INPUT_LENGTH );
          DISPOSE( ch->dest_buf );
          break;
 

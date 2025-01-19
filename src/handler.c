@@ -2594,69 +2594,69 @@ const char *affect_bit_name( int vector )
 
    buf[0] = '\0';
    if( vector & AFF_BLIND )
-      mudstrlcat( buf, " blind", MAX_STRING_LENGTH );
+      strlcat( buf, " blind", MAX_STRING_LENGTH );
    if( vector & AFF_INVISIBLE )
-      mudstrlcat( buf, " invisible", MAX_STRING_LENGTH );
+      strlcat( buf, " invisible", MAX_STRING_LENGTH );
    if( vector & AFF_DETECT_EVIL )
-      mudstrlcat( buf, " detect_evil", MAX_STRING_LENGTH );
+      strlcat( buf, " detect_evil", MAX_STRING_LENGTH );
    if( vector & AFF_DETECT_INVIS )
-      mudstrlcat( buf, " detect_invis", MAX_STRING_LENGTH );
+      strlcat( buf, " detect_invis", MAX_STRING_LENGTH );
    if( vector & AFF_DETECT_MAGIC )
-      mudstrlcat( buf, " detect_magic", MAX_STRING_LENGTH );
+      strlcat( buf, " detect_magic", MAX_STRING_LENGTH );
    if( vector & AFF_DETECT_HIDDEN )
-      mudstrlcat( buf, " detect_hidden", MAX_STRING_LENGTH );
+      strlcat( buf, " detect_hidden", MAX_STRING_LENGTH );
    if( vector & AFF_WEAKEN )
-      mudstrlcat( buf, " weaken", MAX_STRING_LENGTH );
+      strlcat( buf, " weaken", MAX_STRING_LENGTH );
    if( vector & AFF_SANCTUARY )
-      mudstrlcat( buf, " sanctuary", MAX_STRING_LENGTH );
+      strlcat( buf, " sanctuary", MAX_STRING_LENGTH );
    if( vector & AFF_FAERIE_FIRE )
-      mudstrlcat( buf, " faerie_fire", MAX_STRING_LENGTH );
+      strlcat( buf, " faerie_fire", MAX_STRING_LENGTH );
    if( vector & AFF_INFRARED )
-      mudstrlcat( buf, " infrared", MAX_STRING_LENGTH );
+      strlcat( buf, " infrared", MAX_STRING_LENGTH );
    if( vector & AFF_CURSE )
-      mudstrlcat( buf, " curse", MAX_STRING_LENGTH );
+      strlcat( buf, " curse", MAX_STRING_LENGTH );
    if( vector & AFF_FLAMING )
-      mudstrlcat( buf, " flaming", MAX_STRING_LENGTH );
+      strlcat( buf, " flaming", MAX_STRING_LENGTH );
    if( vector & AFF_POISON )
-      mudstrlcat( buf, " poison", MAX_STRING_LENGTH );
+      strlcat( buf, " poison", MAX_STRING_LENGTH );
    if( vector & AFF_PROTECT )
-      mudstrlcat( buf, " protect", MAX_STRING_LENGTH );
+      strlcat( buf, " protect", MAX_STRING_LENGTH );
    if( vector & AFF_PARALYSIS )
-      mudstrlcat( buf, " paralysis", MAX_STRING_LENGTH );
+      strlcat( buf, " paralysis", MAX_STRING_LENGTH );
    if( vector & AFF_SLEEP )
-      mudstrlcat( buf, " sleep", MAX_STRING_LENGTH );
+      strlcat( buf, " sleep", MAX_STRING_LENGTH );
    if( vector & AFF_SNEAK )
-      mudstrlcat( buf, " sneak", MAX_STRING_LENGTH );
+      strlcat( buf, " sneak", MAX_STRING_LENGTH );
    if( vector & AFF_HIDE )
-      mudstrlcat( buf, " hide", MAX_STRING_LENGTH );
+      strlcat( buf, " hide", MAX_STRING_LENGTH );
    if( vector & AFF_CHARM )
-      mudstrlcat( buf, " charm", MAX_STRING_LENGTH );
+      strlcat( buf, " charm", MAX_STRING_LENGTH );
    if( vector & AFF_POSSESS )
-      mudstrlcat( buf, " possess", MAX_STRING_LENGTH );
+      strlcat( buf, " possess", MAX_STRING_LENGTH );
    if( vector & AFF_FLYING )
-      mudstrlcat( buf, " flying", MAX_STRING_LENGTH );
+      strlcat( buf, " flying", MAX_STRING_LENGTH );
    if( vector & AFF_PASS_DOOR )
-      mudstrlcat( buf, " pass_door", MAX_STRING_LENGTH );
+      strlcat( buf, " pass_door", MAX_STRING_LENGTH );
    if( vector & AFF_FLOATING )
-      mudstrlcat( buf, " floating", MAX_STRING_LENGTH );
+      strlcat( buf, " floating", MAX_STRING_LENGTH );
    if( vector & AFF_TRUESIGHT )
-      mudstrlcat( buf, " true_sight", MAX_STRING_LENGTH );
+      strlcat( buf, " true_sight", MAX_STRING_LENGTH );
    if( vector & AFF_DETECTTRAPS )
-      mudstrlcat( buf, " detect_traps", MAX_STRING_LENGTH );
+      strlcat( buf, " detect_traps", MAX_STRING_LENGTH );
    if( vector & AFF_SCRYING )
-      mudstrlcat( buf, " scrying", MAX_STRING_LENGTH );
+      strlcat( buf, " scrying", MAX_STRING_LENGTH );
    if( vector & AFF_FIRESHIELD )
-      mudstrlcat( buf, " fireshield", MAX_STRING_LENGTH );
+      strlcat( buf, " fireshield", MAX_STRING_LENGTH );
    if( vector & AFF_SHOCKSHIELD )
-      mudstrlcat( buf, " shockshield", MAX_STRING_LENGTH );
+      strlcat( buf, " shockshield", MAX_STRING_LENGTH );
    if( vector & AFF_ICESHIELD )
-      mudstrlcat( buf, " iceshield", MAX_STRING_LENGTH );
+      strlcat( buf, " iceshield", MAX_STRING_LENGTH );
    if( vector & AFF_POSSESS )
-      mudstrlcat( buf, " possess", MAX_STRING_LENGTH );
+      strlcat( buf, " possess", MAX_STRING_LENGTH );
    if( vector & AFF_BERSERK )
-      mudstrlcat( buf, " berserk", MAX_STRING_LENGTH );
+      strlcat( buf, " berserk", MAX_STRING_LENGTH );
    if( vector & AFF_AQUA_BREATH )
-      mudstrlcat( buf, " aqua_breath", MAX_STRING_LENGTH );
+      strlcat( buf, " aqua_breath", MAX_STRING_LENGTH );
    return ( buf[0] != '\0' ) ? buf + 1 : "none";
 }
 
@@ -2669,61 +2669,61 @@ const char *extra_bit_name( int extra_flags )
 
    buf[0] = '\0';
    if( extra_flags & ITEM_GLOW )
-      mudstrlcat( buf, " glow", MAX_STRING_LENGTH );
+      strlcat( buf, " glow", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_HUM )
-      mudstrlcat( buf, " hum", MAX_STRING_LENGTH );
+      strlcat( buf, " hum", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_DARK )
-      mudstrlcat( buf, " dark", MAX_STRING_LENGTH );
+      strlcat( buf, " dark", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_HUTT_SIZE )
-      mudstrlcat( buf, " hutt_size", MAX_STRING_LENGTH );
+      strlcat( buf, " hutt_size", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_CONTRABAND )
-      mudstrlcat( buf, " contraband", MAX_STRING_LENGTH );
+      strlcat( buf, " contraband", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_INVIS )
-      mudstrlcat( buf, " invis", MAX_STRING_LENGTH );
+      strlcat( buf, " invis", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_MAGIC )
-      mudstrlcat( buf, " magic", MAX_STRING_LENGTH );
+      strlcat( buf, " magic", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_NODROP )
-      mudstrlcat( buf, " nodrop", MAX_STRING_LENGTH );
+      strlcat( buf, " nodrop", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_BLESS )
-      mudstrlcat( buf, " bless", MAX_STRING_LENGTH );
+      strlcat( buf, " bless", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_GOOD )
-      mudstrlcat( buf, " anti-good", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-good", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_EVIL )
-      mudstrlcat( buf, " anti-evil", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-evil", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_NEUTRAL )
-      mudstrlcat( buf, " anti-neutral", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-neutral", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_NOREMOVE )
-      mudstrlcat( buf, " noremove", MAX_STRING_LENGTH );
+      strlcat( buf, " noremove", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_INVENTORY )
-      mudstrlcat( buf, " inventory", MAX_STRING_LENGTH );
+      strlcat( buf, " inventory", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_DEATHROT )
-      mudstrlcat( buf, " deathrot", MAX_STRING_LENGTH );
+      strlcat( buf, " deathrot", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_SOLDIER )
-      mudstrlcat( buf, " anti-soldier", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-soldier", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_THIEF )
-      mudstrlcat( buf, " anti-thief", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-thief", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_HUNTER )
-      mudstrlcat( buf, " anti-hunter", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-hunter", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_JEDI )
-      mudstrlcat( buf, " anti-jedi", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-jedi", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_SITH )
-      mudstrlcat( buf, " anti-sith", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-sith", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_PILOT )
-      mudstrlcat( buf, " anti-pilot", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-pilot", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_SMALL_SIZE )
-      mudstrlcat( buf, " small_size", MAX_STRING_LENGTH );
+      strlcat( buf, " small_size", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_LARGE_SIZE )
-      mudstrlcat( buf, " large_size", MAX_STRING_LENGTH );
+      strlcat( buf, " large_size", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_DONATION )
-      mudstrlcat( buf, " donation", MAX_STRING_LENGTH );
+      strlcat( buf, " donation", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_CLANOBJECT )
-      mudstrlcat( buf, " clan", MAX_STRING_LENGTH );
+      strlcat( buf, " clan", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_ANTI_CITIZEN )
-      mudstrlcat( buf, " anti-citizen", MAX_STRING_LENGTH );
+      strlcat( buf, " anti-citizen", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_PROTOTYPE )
-      mudstrlcat( buf, " prototype", MAX_STRING_LENGTH );
+      strlcat( buf, " prototype", MAX_STRING_LENGTH );
    if( extra_flags & ITEM_HUMAN_SIZE )
-      mudstrlcat( buf, " human_size", MAX_STRING_LENGTH );
+      strlcat( buf, " human_size", MAX_STRING_LENGTH );
    return ( buf[0] != '\0' ) ? buf + 1 : "none";
 }
 
@@ -2736,7 +2736,7 @@ const char *magic_bit_name( int magic_flags )
 
    buf[0] = '\0';
    if( magic_flags & ITEM_RETURNING )
-      mudstrlcat( buf, " returning", 512 );
+      strlcat( buf, " returning", 512 );
    return ( buf[0] != '\0' ) ? buf + 1 : "none";
 }
 
@@ -3194,10 +3194,10 @@ void showaffect( CHAR_DATA * ch, AFFECT_DATA * paf )
             for( x = 0; x < 32; x++ )
                if( IS_SET( paf->modifier, 1 << x ) )
                {
-                  mudstrlcat( buf, " ", MAX_STRING_LENGTH );
-                  mudstrlcat( buf, a_flags[x], MAX_STRING_LENGTH );
+                  strlcat( buf, " ", MAX_STRING_LENGTH );
+                  strlcat( buf, a_flags[x], MAX_STRING_LENGTH );
                }
-            mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
+            strlcat( buf, "\r\n", MAX_STRING_LENGTH );
             break;
          case APPLY_WEAPONSPELL:
          case APPLY_WEARSPELL:
@@ -3212,10 +3212,10 @@ void showaffect( CHAR_DATA * ch, AFFECT_DATA * paf )
             for( x = 0; x < 32; x++ )
                if( IS_SET( paf->modifier, 1 << x ) )
                {
-                  mudstrlcat( buf, " ", MAX_STRING_LENGTH );
-                  mudstrlcat( buf, ris_flags[x], MAX_STRING_LENGTH );
+                  strlcat( buf, " ", MAX_STRING_LENGTH );
+                  strlcat( buf, ris_flags[x], MAX_STRING_LENGTH );
                }
-            mudstrlcat( buf, "\r\n", MAX_STRING_LENGTH );
+            strlcat( buf, "\r\n", MAX_STRING_LENGTH );
             break;
       }
       send_to_char( buf, ch );

@@ -1040,31 +1040,31 @@ void weather_update( void )
    {
       case 5:
          weather_info.sunlight = SUN_LIGHT;
-         mudstrlcat( buf, "The day has begun.", MAX_STRING_LENGTH );
+         strlcat( buf, "The day has begun.", MAX_STRING_LENGTH );
          AT_TEMP = AT_YELLOW;
          break;
 
       case 6:
          weather_info.sunlight = SUN_RISE;
-         mudstrlcat( buf, "The sun rises in the east.", MAX_STRING_LENGTH );
+         strlcat( buf, "The sun rises in the east.", MAX_STRING_LENGTH );
          AT_TEMP = AT_ORANGE;
          break;
 
       case 12:
          weather_info.sunlight = SUN_LIGHT;
-         mudstrlcat( buf, "It's noon.", MAX_STRING_LENGTH );
+         strlcat( buf, "It's noon.", MAX_STRING_LENGTH );
          AT_TEMP = AT_YELLOW;
          break;
 
       case 19:
          weather_info.sunlight = SUN_SET;
-         mudstrlcat( buf, "The sun slowly disappears in the west.", MAX_STRING_LENGTH );
+         strlcat( buf, "The sun slowly disappears in the west.", MAX_STRING_LENGTH );
          AT_TEMP = AT_BLOOD;
          break;
 
       case 20:
          weather_info.sunlight = SUN_DARK;
-         mudstrlcat( buf, "The night has begun.", MAX_STRING_LENGTH );
+         strlcat( buf, "The night has begun.", MAX_STRING_LENGTH );
          AT_TEMP = AT_DGREY;
          break;
 
@@ -1128,7 +1128,7 @@ void weather_update( void )
       case SKY_CLOUDLESS:
          if( weather_info.mmhg < 990 || ( weather_info.mmhg < 1010 && number_bits( 2 ) == 0 ) )
          {
-            mudstrlcat( buf, "The sky is getting cloudy.", MAX_STRING_LENGTH );
+            strlcat( buf, "The sky is getting cloudy.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_CLOUDY;
             AT_TEMP = AT_GREY;
          }
@@ -1137,14 +1137,14 @@ void weather_update( void )
       case SKY_CLOUDY:
          if( weather_info.mmhg < 970 || ( weather_info.mmhg < 990 && number_bits( 2 ) == 0 ) )
          {
-            mudstrlcat( buf, "It starts to rain.", MAX_STRING_LENGTH );
+            strlcat( buf, "It starts to rain.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_RAINING;
             AT_TEMP = AT_BLUE;
          }
 
          if( weather_info.mmhg > 1030 && number_bits( 2 ) == 0 )
          {
-            mudstrlcat( buf, "The clouds disappear.", MAX_STRING_LENGTH );
+            strlcat( buf, "The clouds disappear.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_CLOUDLESS;
             AT_TEMP = AT_WHITE;
          }
@@ -1153,14 +1153,14 @@ void weather_update( void )
       case SKY_RAINING:
          if( weather_info.mmhg < 970 && number_bits( 2 ) == 0 )
          {
-            mudstrlcat( buf, "Lightning flashes in the sky.", MAX_STRING_LENGTH );
+            strlcat( buf, "Lightning flashes in the sky.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_LIGHTNING;
             AT_TEMP = AT_YELLOW;
          }
 
          if( weather_info.mmhg > 1030 || ( weather_info.mmhg > 1010 && number_bits( 2 ) == 0 ) )
          {
-            mudstrlcat( buf, "The rain stopped.", MAX_STRING_LENGTH );
+            strlcat( buf, "The rain stopped.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_CLOUDY;
             AT_TEMP = AT_WHITE;
          }
@@ -1169,7 +1169,7 @@ void weather_update( void )
       case SKY_LIGHTNING:
          if( weather_info.mmhg > 1010 || ( weather_info.mmhg > 990 && number_bits( 2 ) == 0 ) )
          {
-            mudstrlcat( buf, "The lightning has stopped.", MAX_STRING_LENGTH );
+            strlcat( buf, "The lightning has stopped.", MAX_STRING_LENGTH );
             weather_info.sky = SKY_RAINING;
             AT_TEMP = AT_GREY;
             break;
@@ -2095,7 +2095,7 @@ void auth_update( void )
          if( first_time )
          {
             first_time = FALSE;
-            mudstrlcpy( log_buf, "Pending authorizations:", MAX_STRING_LENGTH );
+            strlcpy( log_buf, "Pending authorizations:", MAX_STRING_LENGTH );
             to_channel( log_buf, CHANNEL_MONITOR, "Monitor", 1 );
          }
          snprintf( log_buf, MAX_STRING_LENGTH, " %s@%s new %s", victim->name, victim->desc->host, race_table[victim->race].race_name );

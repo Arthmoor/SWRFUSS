@@ -272,7 +272,7 @@ void found_prey( CHAR_DATA * ch, CHAR_DATA * victim )
       return;
    }
 
-   mudstrlcpy( victname, IS_NPC( victim ) ? victim->short_descr : victim->name, MAX_INPUT_LENGTH );
+   strlcpy( victname, IS_NPC( victim ) ? victim->short_descr : victim->name, MAX_INPUT_LENGTH );
 
    if( !can_see( ch, victim ) )
    {
