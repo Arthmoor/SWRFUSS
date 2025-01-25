@@ -23,6 +23,8 @@
 #include <sys/cdefs.h>
 #include <sys/time.h>
 
+using namespace std;
+
 #define CODENAME "SWRFUSS"
 #define CODEVERSION "1.4.3"
 

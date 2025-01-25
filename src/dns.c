@@ -5,7 +5,7 @@
  *                /-----\  |      | \  |  v  | |     | |  /                 *
  *               /       \ |      |  \ |     | +-----+ +-/                  *
  ****************************************************************************
- * AFKMud Copyright 1997-2019 by Roger Libiez (Samson),                     *
+ * AFKMud Copyright 1997-2025 by Roger Libiez (Samson),                     *
  * Levi Beckerson (Whir), Michael Ward (Tarl), Erik Wolfe (Dwip),           *
  * Cameron Carroll (Cam), Cyberfox, Karangi, Rathian, Raine,                *
  * Xorith, and Adjani.                                                      *
@@ -67,7 +67,6 @@ void check_dns( void )
 {
    if( current_time >= new_boot_time_t )
       prune_dns(  );
-   return;
 }
 
 void add_dns( const char *dhost, const char *address )
@@ -83,7 +82,7 @@ void add_dns( const char *dhost, const char *address )
    save_dns(  );
 }
 
-char *in_dns_cache( char *ip )
+char *in_dns_cache( const char *ip )
 {
    DNS_DATA *cache;
    static char dnsbuf[MAX_STRING_LENGTH];
@@ -94,7 +93,7 @@ char *in_dns_cache( char *ip )
    {
       if( !str_cmp( ip, cache->ip ) )
       {
-         strncpy( dnsbuf, cache->name, MAX_STRING_LENGTH );
+         strlcpy( dnsbuf, cache->name, MAX_STRING_LENGTH );
          break;
       }
    }
@@ -330,9 +329,17 @@ void process_dns( DESCRIPTOR_DATA * d )
 
    if( address[0] != '\0' )
    {
-      add_dns( d->host, address );  /* Add entry to DNS cache */
-      STRFREE( d->host );
-      d->host = STRALLOC( address );
+      /*
+       * The resolver will only return 2 error states, described in the string comparisons here.
+       * If either of these come back from it, do not add it to the cache, and do not set the host on the descriptior to it either.
+       * The descriptor's IP will have alredy been set by default before the resolver was called.
+       */
+      if( str_cmp( address, "bad.resolver.call" ) && str_cmp( address, "somehow.has.no.ip?" ) )
+      {
+         add_dns( d->host, address );
+         STRFREE( d->host );
+         d->host = STRALLOC( address );
+      }
    }
 
    /*
@@ -360,7 +367,7 @@ void process_dns( DESCRIPTOR_DATA * d )
 }
 
 /* DNS Resolver hook. Code written by Trax of Forever's End */
-void resolve_dns( DESCRIPTOR_DATA * d, long ip )
+void resolve_dns( DESCRIPTOR_DATA * d, const char *ip )
 {
    int fds[2];
    pid_t pid;
@@ -394,7 +401,6 @@ void resolve_dns( DESCRIPTOR_DATA * d, long ip )
       /*
        * child process 
        */
-      char str_ip[64];
       int i;
 
       d->ifd = fds[0];
@@ -403,8 +409,7 @@ void resolve_dns( DESCRIPTOR_DATA * d, long ip )
       for( i = 2; i < 255; ++i )
          close( i );
 
-      snprintf( str_ip, 64, "%ld", ip );
-      execl( "../src/resolver", "AFKMud Resolver", str_ip, NULL );
+      execl( "../src/resolver", "AFKMud Resolver", ip, NULL );
       /*
        * Still here --> hmm. An error. 
        */
@@ -424,7 +429,7 @@ void resolve_dns( DESCRIPTOR_DATA * d, long ip )
    }
 }
 
-void do_cache( CHAR_DATA * ch, const char *argument )
+void do_cache( CHAR_DATA* ch, const char* argument )
 {
    DNS_DATA *cache;
    int ip = 0;
