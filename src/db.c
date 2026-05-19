@@ -1957,7 +1957,7 @@ void load_specials( FILE * fp )
                pMobIndex->spec_2 = spec_lookup( temp );
                if( pMobIndex->spec_2 == NULL )
                {
-                  bug( "__func__: 'M': vnum %d.", __func__, pMobIndex->vnum );
+                  bug( "%s: 'M': vnum %d.", __func__, pMobIndex->vnum );
                   pMobIndex->spec_funname2 = NULL;
                }
                else
