@@ -29,9 +29,6 @@ ifneq ($(UNAME_S), Darwin)
     EXPORT_SYMBOLS = -export-dynamic
 endif
 
-#Uncomment the line below if you are getting warnings about undefined math functions
-NEED_MATH = -lm
-
 #GCC 4.8+ memory checking option. https://github.com/google/sanitizers Does not work in Cygwin.
 #These should only be enabled for testing environments. Disable for a live environment.
 ifndef IS_CYGWIN
@@ -45,7 +42,7 @@ HARDENING_FLAGS = -fstack-protector-strong -D_FORTIFY_SOURCE=2
 W_FLAGS = -std=c++20 -Wall -Wshadow -Wformat-security -Winline -Wpointer-arith -Wcast-align -Wredundant-decls
 
 C_FLAGS = -g2 $(W_FLAGS) $(M_FLAGS) $(HARDENING_FLAGS) $(EXPORT_SYMBOLS)
-L_FLAGS = $(M_FLAGS) $(HARDENING_FLAGS) $(NEED_MATH) -lz $(NEED_DL)
+L_FLAGS = $(M_FLAGS) $(HARDENING_FLAGS) -lz $(NEED_DL)
 
 #D_FLAGS : For the DNS Slave process. No need in linking all the extra libs for this.
 D_FLAGS = -g2 -O $(M_FLAGS) $(HARDENING_FLAGS)
