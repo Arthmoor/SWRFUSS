@@ -35,32 +35,54 @@ const char *const skill_tname[] = { "unknown", "Spell", "Skill", "Weapon", "Tong
 
 SPELL_FUN *spell_function( const char *name )
 {
-   SPELL_FUN *funHandle = 0;
-   const char *error = 0;
-   *(void**)( &funHandle ) = dlsym( sysdata.dlHandle, name );
+   void *funHandle;
+   const char *error;
 
-   if( ( error = dlerror() ) != NULL )
+   // Perform the symbol lookup
+   funHandle = dlsym( sysdata.dlHandle, name );
+
+   // Check the returned error if this came back NULL
+   if( funHandle == NULL )
    {
-      bug( "%s: Error locating %s in symbol table. %s", __func__, name, error );
+      // Grab the error message and report it.
+      if( ( error = dlerror() ) != NULL )
+      {
+         bug( "%s: Error locating %s in symbol table. %s", __func__, name, error );
+         return spell_notfound;
+      }
+
+      // Edge case. Apparently a symbol can be valid but point to a NULL. This catches those.
+      bug( "%s: Symbol %s found as NULL pointer.", __func__, name );
       return spell_notfound;
    }
 
-   return funHandle;
+   return ( SPELL_FUN * ) funHandle;
 }
 
 DO_FUN *skill_function( const char *name )
 {
-   const char *error = 0;
-   DO_FUN *funHandle = 0;
-   *(void**)( &funHandle ) = dlsym( sysdata.dlHandle, name );
+   void *funHandle;
+   const char *error;
 
-   if( ( error = dlerror() ) != NULL )
+   // Perform the symbol lookup
+   funHandle = dlsym( sysdata.dlHandle, name );
+
+   // Check the returned error if this came back NULL
+   if( funHandle == NULL )
    {
-      bug( "%s: Error locating %s in symbol table. %s", __func__, name, error );
+      // Grab the error message and report it.
+      if( ( error = dlerror() ) != NULL )
+      {
+         bug( "%s: Error locating %s in symbol table. %s", __func__, name, error );
+         return skill_notfound;
+      }
+
+      // Edge case. Apparently a symbol can be valid but point to a NULL. This catches those.
+      bug( "%s: Symbol %s found as NULL pointer.", __func__, name );
       return skill_notfound;
    }
 
-   return funHandle;
+   return ( DO_FUN * ) funHandle;
 }
 
 /*
