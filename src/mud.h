@@ -26,7 +26,7 @@
 using namespace std;
 
 #define CODENAME "SWRFUSS"
-#define CODEVERSION "1.4.3"
+#define CODEVERSION "1.4.4"
 
 // Backward compatibility for snippets and such.
 #define mudstrlcpy strlcpy
