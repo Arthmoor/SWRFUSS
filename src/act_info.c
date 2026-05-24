@@ -2280,13 +2280,19 @@ void do_who( CHAR_DATA * ch, const char *argument )
       else
          invis_str[0] = '\0';
 
-      snprintf( buf, MAX_STRING_LENGTH+1, "%s %s%s%s%s %s%s%s\r\n",
-               race,
-               invis_str,
-               IS_SET( wch->act, PLR_AFK ) ? "[AFK] " : "",
-               char_name,
-               wch->pcdata->title,
-               extra_title, clan_name, IS_SET( wch->act, PLR_KILLER ) ? "&R [Wanted for Murder]&W" : "&W" );
+      int written = snprintf( buf, MAX_STRING_LENGTH, "%s %s%s%s%s %s%s%s\r\n",
+                             race, invis_str,
+                             IS_SET(wch->act, PLR_AFK) ? "[AFK] " : "",
+                             char_name,
+                             wch->pcdata->title,
+                             extra_title,
+                             clan_name,
+                             IS_SET(wch->act, PLR_KILLER) ? "&R [Wanted for Murder]&W" : "&W" );
+
+      if( written >= MAX_STRING_LENGTH )
+      {
+         buf[MAX_STRING_LENGTH] = '\0';
+      }
 
       /*
        * This is where the old code would display the found player to the ch.

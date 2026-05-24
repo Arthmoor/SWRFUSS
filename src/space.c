@@ -2418,7 +2418,6 @@ void fread_ship( SHIP_DATA * ship, FILE * fp )
 {
    const char *word;
    bool fMatch;
-   int dummy_number;
 
    for( ;; )
    {
@@ -2552,7 +2551,15 @@ void fread_ship( SHIP_DATA * ship, FILE * fp )
 
          case 'O':
             KEY( "Owner", ship->owner, fread_string( fp ) );
-            KEY( "Objectnum", dummy_number, fread_number( fp ) );
+
+            // This Objectnum field is no longer part of any code that's being used anywhere.
+            // Changing it to this type of read silences a compiler warning -- Samson 5/24/2026
+            if( !str_cmp( word, "Objectnum" ) )
+            {
+               fread_number( fp );
+               fMatch = TRUE;
+               break;
+            }
             break;
 
          case 'P':

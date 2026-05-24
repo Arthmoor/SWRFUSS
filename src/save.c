@@ -901,7 +901,7 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
    bool fMatch;
    int max_colors = 0;  /* Color code */
    time_t lastplayed = 0;
-   int sn, extra;
+   int sn;
 
    file_ver = 0;
    killcnt = 0;
@@ -1292,7 +1292,16 @@ void fread_char( CHAR_DATA * ch, FILE * fp, bool preload, bool copyover )
             KEY( "PKills", ch->pcdata->pkills, fread_number( fp ) );
             KEY( "Played", ch->played, fread_number( fp ) );
             KEY( "Position", ch->position, fread_number( fp ) );
-            KEY( "Practice", extra, fread_number( fp ) );
+
+            // This Practice field is no longer part of any code that's being used anywhere.
+            // Changing it to this type of read silences a compiler warning -- Samson 5/24/2026
+            if( !str_cmp( word, "Practice") )
+            {
+               fread_number( fp );
+               fMatch = TRUE;
+               break;
+            }
+
             KEY( "Prompt", ch->pcdata->prompt, fread_string( fp ) );
             if( !str_cmp( word, "PTimer" ) )
             {
