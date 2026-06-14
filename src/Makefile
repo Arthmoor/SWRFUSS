@@ -90,6 +90,7 @@ swreality: $(O_FILES)
 	@$(CC) -MM $(C_FLAGS) $(C_FILES) > dependencies.d
 	@perl -pi -e 's.^([a-z]).o/$$1.g' dependencies.d
 	@echo -e "Done compiling mud.";
+	rm -f a.out
 	chmod g+w swreality
 	chmod a+x swreality
 	chmod g+w $(O_FILES)
@@ -102,6 +103,7 @@ dns: resolver.o
 	rm -f resolver
 	$(CC) $(D_FLAGS) -o resolver resolver.o
 	@echo -e "Done compiling DNS resolver.";
+	rm -f a.out
 	chmod g+w resolver
 	chmod a+x resolver
 	chmod g+w resolver.o
